@@ -9,7 +9,11 @@ const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from 'public' folder
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "boundary\public")));
+// Serve login.html at root path
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "boundary/public/login.html"));
+});
 
 // Login route
 app.post("/login", (req, res) => {
