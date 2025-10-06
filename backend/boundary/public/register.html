@@ -172,9 +172,16 @@
         try {
           const created = await Auth.api("/auth/register", { method:"POST", body: JSON.stringify(body) });
           out.textContent = JSON.stringify(created, null, 2);
-          // Automatically log in as the new user
-          await Auth.login(body.username, body.password);
-          location.href = "/dashboard.html";
+          // Only auto-login if not admin
+          const token = Auth.getToken();
+          if (token && token === "mock-jwt-token-admin") {
+            // Stay as admin, redirect to dashboard
+            location.href = "/dashboard.html";
+          } else {
+            // For self-registration, auto-login as new user
+            await Auth.login(body.username, body.password);
+            location.href = "/dashboard.html";
+          }
         } catch (e) {
           out.textContent = JSON.stringify(e.data || e, null, 2);
           err.textContent = e?.data?.error || "Create user failed";
