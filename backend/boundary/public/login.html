@@ -1,45 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login Page</title>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input {
-      display: block;
-      margin: 10px 0;
-      padding: 10px;
-      width: 250px;
-    }
-    button {
-      padding: 10px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+    :root { --bg:#f6f7fb; --card:#fff; --text:#111; --muted:#666; --primary:#2563eb; --danger:#e11d48; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text);
+           display:grid; place-items:center; min-height:100vh; }
+    .card { width:100%; max-width:420px; background:var(--card); border-radius:14px; padding:22px;
+            box-shadow:0 10px 25px rgba(0,0,0,.08); }
+    h1 { margin:0 0 12px; }
+    p { color:var(--muted); margin:0 0 16px; }
+    label { display:block; font-size:14px; margin:10px 0 6px; }
+    input { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e5e7eb; outline:none; }
+    input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+    button { width:100%; margin-top:16px; padding:12px 14px; border:0; border-radius:10px;
+             background:var(--primary); color:#fff; font-weight:600; cursor:pointer; }
+    .error { color:var(--danger); margin-top:10px; }
+    .footer { margin-top:14px; font-size:14px; color:var(--muted); text-align:center; }
+    a { color:var(--primary); text-decoration:none; }
   </style>
 </head>
 <body>
-  <form action="/login" method="POST">
-    <h2>Login</h2>
-    <input type="text" name="username" placeholder="Username" required />
-    <input type="password" name="password" placeholder="Password" required />
-    <button type="submit">Login</button>
-  </form>
+  <main class="card">
+    <h1>Sign in</h1>
+    <p>Test users: <code>admin1</code>, <code>pm1</code>, <code>csr1</code>, <code>pin1</code> &nbsp; Password: <code>1234</code></p>
+
+    <form id="login-form">
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" placeholder="e.g. admin1" required />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••" required />
+
+      <button type="submit">Log in</button>
+      <div id="login-error" class="error" role="alert" aria-live="polite"></div>
+    </form>
+
+    <div class="footer">
+      Admin can <a href="/register.html">create accounts</a>.
+    </div>
+  </main>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    // Attach login handler
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("login-form");
+      const err = document.getElementById("login-error");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.textContent = "";
+        const username = form.username.value.trim();
+        const password = form.password.value;
+        try {
+          await Auth.login(username, password);
+          location.href = "/dashboard.html";
+        } catch (e) {
+          err.textContent = e?.message || e?.data?.error || "Login failed";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
