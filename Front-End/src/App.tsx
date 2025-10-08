@@ -10,7 +10,6 @@ function App() {
 
   const handleRegistration = async() => {
     try {
-      console.log("User, pwd: ", username, password)
       const res = await fetch('http://localhost:3000/api/person-in-need', {
         method: "POST", 
         headers: { 'Content-Type': 'application/json' },

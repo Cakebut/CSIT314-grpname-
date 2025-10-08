@@ -5,6 +5,7 @@ import express from 'express'
 import { personInNeedTable } from './db/schema/personInNeed';
 import cors from 'cors'
 import connectPgSimple from 'connect-pg-simple';
+import { userAdminRouter } from './api/userAdmin';
 
 export const app = express();
 const port = 3000;
@@ -60,6 +61,8 @@ app.post("/api/person-in-need", async (req, res) => {
     }
     res.send(200)
 })
+
+app.use("/", userAdminRouter)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
