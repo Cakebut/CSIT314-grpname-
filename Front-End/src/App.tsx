@@ -5,10 +5,52 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [username, setUsername] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+
+  const handleRegistration = async() => {
+    try {
+      console.log("User, pwd: ", username, password)
+      const res = await fetch('http://localhost:3000/api/person-in-need', {
+        method: "POST", 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      })
+      if (!res.ok) {
+        console.error("Error: ", res)
+      }
+      console.log("Res: ", res)
+    } catch (err) {
+      console.error("Error: ", err)
+    }
+  }  
 
   return (
     <>
       <div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}>
+        <input 
+          style={{
+            padding: 3,
+            border: 1,  
+          }}
+          name="username-input" value={username} onChange={e => setUsername(e.target.value)} 
+        />
+        <input 
+          name="password-input" value={password} onChange={e => setPassword(e.target.value)} 
+        />
+        <button onClick={handleRegistration}>
+          Register Shitty User
+        </button>
+        </div>
+        
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
