@@ -11,6 +11,7 @@
     "drizzle-kit": "^0.31.5",
     "eslint": "^9.37.0",
     "express": "^5.1.0",
+    "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
@@ -39,7 +40,6 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "express-session": "^1.18.2",
-    "nodemon": "^3.1.10",
     "pg": "^8.16.3"
   }
 }
