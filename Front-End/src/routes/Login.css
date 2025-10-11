@@ -1,0 +1,50 @@
+.login-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: auto;
+}
+
+.login-card h2 {
+  text-align: center;
+  color: #333;
+}
+
+.login-card input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.login-button {
+  padding: 0.75rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #005fa3;
+}
+
+
+.login-status {
+  margin-top: 1rem;
+  color: #333;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.login-status.error {
+  color: red;
+}

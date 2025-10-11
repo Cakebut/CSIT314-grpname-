@@ -1,0 +1,17 @@
+.pin-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+}
+
+.pin-container h1 {
+  color: #222;
+}
+
+.pin-container p {
+  color: #555;
+}

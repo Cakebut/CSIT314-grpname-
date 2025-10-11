@@ -1,122 +1,27 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './routes/Login';
+import UserAdmin from './routes/UserAdmin/useradmin';
+import PIN from './routes/PIN';
+import UserList from './routes/UserAdmin/userlist';
+import CreateUser from './routes/UserAdmin/createuser';
+import ViewRoles from './routes/UserAdmin/viewroles';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [username, setUsername] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
-  const [status, setStatus] = useState<string>("")
-
-  const handleRegistration = async () => {
-    try {
-      const res = await fetch('http://localhost:3000/api/person-in-need', {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      })
-      if (res.ok) {
-        setStatus("Registration successful!")
-      } else {
-        setStatus("Registration failed.")
-      }
-    } catch (err) {
-      setStatus("Registration error.")
-      console.error("Error: ", err)
-    }
-  }
-
-  const handleLogin = async () => {
-    try {
-      const res = await fetch('http://localhost:3000/api/login', {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include' // Important for session cookies
-      })
-      if (res.ok) {
-        setStatus("Login successful!")
-      } else {
-        setStatus("Login failed.")
-      }
-    } catch (err) {
-      setStatus("Login error.")
-      console.error("Error: ", err)
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      const res = await fetch('http://localhost:3000/api/logout', {
-        method: "POST",
-        credentials: 'include'
-      })
-      if (res.ok) {
-        setStatus("Logged out.")
-      } else {
-        setStatus("Logout failed.")
-      }
-    } catch (err) {
-      setStatus("Logout error.")
-      console.error("Error: ", err)
-    }
-  }
-
   return (
-    <>
-      <div>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}>
-          <input
-            style={{ padding: 3, border: 1 }}
-            name="username-input"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-          />
-          <input
-            name="password-input"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
-          <button onClick={handleRegistration}>
-            Register UserAdmin
-          </button>
-          <button onClick={handleLogin}>
-            Login UserAdmin
-          </button>
-          <button onClick={handleLogout}>
-            Logout UserAdmin
-          </button>
-          <div>{status}</div>
-        </div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="app-wrapper">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/useradmin" element={<UserAdmin />} />
+          <Route path="/pin" element={<PIN />} />
+          <Route path="/useradmin/users" element={<UserList />} />
+          <Route path="/useradmin/create" element={<CreateUser />} />
+          <Route path="/useradmin/roles" element={<ViewRoles />} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more and change again
-      </p>
-    </>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;
