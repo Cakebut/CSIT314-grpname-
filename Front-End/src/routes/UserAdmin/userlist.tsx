@@ -14,15 +14,25 @@ function UserList() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const dummyUsers: User[] = [
-    { id: '001', username: 'Jennie_Nienow95', profile: 'Homeowner', status: 'Active' },
-    { id: '002', username: 'Percy60', profile: 'Homeowner', status: 'Suspended' },
-    { id: '003', username: 'Leff_Beahan', profile: 'Homeowner', status: 'Active' },
-    { id: '004', username: 'Amie39', profile: 'Homeowner', status: 'Suspended' },
-    { id: '005', username: 'Queenie70', profile: 'Homeowner', status: 'Active' },
-    { id: '006', username: 'Serenity_Gerlach', profile: 'Homeowner', status: 'Active' },
-    { id: '007', username: 'Ona_Rippin', profile: 'Homeowner', status: 'Active' },
-  ];
+  const generateDummyUsers = (): User[] => {
+  const profiles = ['User admin', 'CSR Rep', 'Person-In-Need', 'Platform Manager'];
+  const statuses: User['status'][] = ['Active', 'Suspended'];
+  const users: User[] = [];
+
+  for (let i = 1; i <= 100; i++) {
+    users.push({
+      id: i.toString().padStart(3, '0'),
+      username: `user${i}_${Math.random().toString(36).substring(7)}`,
+      profile: profiles[Math.floor(Math.random() * profiles.length)],
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+    });
+  }
+
+  return users;
+};
+
+const dummyUsers: User[] = generateDummyUsers();
+
 
   const handleEdit = (user: User) => {
     setSelectedUser(user);
