@@ -29,6 +29,24 @@ function Login() {
     }
   };
 
+  const handleRegister = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/person-in-need', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      if (res.ok) {
+        setStatus('Account created!');
+      } else {
+        setStatus('Account creation failed.');
+      }
+    } catch (err) {
+      setStatus('Registration error.');
+      console.error('Error:', err);
+    }
+  };
+
   return (
     <div className="login-card">
       <h2>Login</h2>
@@ -46,6 +64,9 @@ function Login() {
       />
       <button className="login-button" onClick={handleLogin}>
         Login
+      </button>
+      <button className="register-button" onClick={handleRegister}>
+        Create Account
       </button>
       {status && <div className="login-status">{status}</div>}
     </div>

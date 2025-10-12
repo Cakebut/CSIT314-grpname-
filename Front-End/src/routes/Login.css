@@ -38,6 +38,21 @@
   background-color: #005fa3;
 }
 
+.register-button {
+  padding: 0.75rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.register-button:hover {
+  background-color: #218838;
+}
+
 
 .login-status {
   margin-top: 1rem;

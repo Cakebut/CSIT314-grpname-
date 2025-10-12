@@ -1,7 +1,8 @@
 import { Router } from 'express'
 import { db } from "../index"
 import { personInNeedTable } from "../db/schema/personInNeed"
-import { eq, and } from "drizzle-orm" // Import Drizzle operators
+import { sql } from "drizzle-orm" // Add this import
+
 
 export const userAdminRouter = Router()
 
@@ -28,20 +29,17 @@ userAdminRouter.post("/api/person-in-need", async (req, res) => {
 userAdminRouter.post("/api/login", async (req, res) => {
     const { username, password } = req.body
     try {
-        // Use Drizzle ORM's eq and and operators for filtering
+        // Use SQL template for case-insensitive username comparison
         const user = await db.select().from(personInNeedTable)
             .where(
-                and(
-                    eq(personInNeedTable.username, username),
-                    eq(personInNeedTable.password, password)
-                )
+                sql`LOWER(${personInNeedTable.username}) = LOWER(${username}) AND ${personInNeedTable.password} = ${password}`
             )
             .limit(1)
 
         if (user.length === 0) {
             return res.status(401).json({ error: "Invalid credentials" })
         }
-        (req.session as any).username = username // Quick fix for session typing
+        (req.session as any).username = username
         return res.json({ message: "Logged in" })
     } catch (err) {
         console.error("Login error: ", err)
