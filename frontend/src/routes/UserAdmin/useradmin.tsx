@@ -14,10 +14,10 @@ function UserAdmin() {
     <div className="admin-container">
       <h1>Admin Dashboard</h1>
       <div className="bubble-options">
-        <div className="bubble" onClick={() => navigate('/useradmin/users')}>
+        <div className="bubble" onClick={() => navigate('/useradmin/userlist')}>
           View User Dashboard
         </div>
-        <div className="bubble" onClick={() => navigate('/useradmin/roles')}>
+        <div className="bubble" onClick={() => navigate('/useradmin/viewroles')}>
           View Roles Dashboard
         </div>
         <div className="bubble logout-bubble" onClick={handleLogout}> {/* need to change to this () => navigate('/') */}

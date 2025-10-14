@@ -20,6 +20,7 @@ function Login() {
       if (res.ok) {
         setStatus('Login successful!');
         navigate('/useradmin');
+        console.log("Login successful, navigating to /useradmin");
       } else {
         setStatus('Login failed.');
       }
@@ -29,23 +30,23 @@ function Login() {
     }
   };
 
-  const handleRegister = async () => {
-    try {
-      const res = await fetch('http://localhost:3000/api/person-in-need', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      if (res.ok) {
-        setStatus('Account created!');
-      } else {
-        setStatus('Account creation failed.');
-      }
-    } catch (err) {
-      setStatus('Registration error.');
-      console.error('Error:', err);
-    }
-  };
+  // const handleRegister = async () => {
+  //   try {
+  //     const res = await fetch('http://localhost:3000/api/person-in-need', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ username, password }),
+  //     });
+  //     if (res.ok) {
+  //       setStatus('Account created!');
+  //     } else {
+  //       setStatus('Account creation failed.');
+  //     }
+  //   } catch (err) {
+  //     setStatus('Registration error.');
+  //     console.error('Error:', err);
+  //   }
+  // };
 
   return (
     // <div className="login-card">
@@ -134,6 +135,7 @@ function Login() {
                 <div className="sign-up-link">
                     <p>Don't have an account? <Link className="login-text" to="/signup">Sign Up</Link></p>
                 </div>
+                  {status && <div className="login-status">{status}</div>}
             </form>
         </section>
         </>
