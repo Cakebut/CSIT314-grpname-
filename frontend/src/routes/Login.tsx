@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
@@ -48,28 +48,95 @@ function Login() {
   };
 
   return (
-    <div className="login-card">
-      <h2>Login</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={e => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-      <button className="login-button" onClick={handleLogin}>
-        Login
-      </button>
-      <button className="register-button" onClick={handleRegister}>
-        Create Account
-      </button>
-      {status && <div className="login-status">{status}</div>}
-    </div>
+    // <div className="login-card">
+    //   <h2>Login</h2>
+    //   <input
+    //     type="text"
+    //     placeholder="Username"
+    //     value={username}
+    //     onChange={e => setUsername(e.target.value)}
+    //   />
+    //   <input
+    //     type="password"
+    //     placeholder="Password"
+    //     value={password}
+    //     onChange={e => setPassword(e.target.value)}
+    //   />
+    //   <button className="login-button" onClick={handleLogin}>
+    //     Login
+    //   </button>
+    //   <button className="register-button" onClick={handleRegister}>
+    //     Create Account
+    //   </button>
+    //   {status && <div className="login-status">{status}</div>}
+    // </div>
+
+    <>
+        {/* <header class="header container">
+            <img class="header-logo" src="assets/logo.png" />
+
+            <div class="header-items">
+                <ul class="header-menu">
+                    <li>
+                        <Link class="header-link back" to="/home">Back to Home</Link>
+                    </li>
+                </ul>
+            </div>
+        </header> */}
+
+        <section className="login-main login-section">
+            <form id="loginForm" className="login-box">
+                <div className="login-header">
+                    <header>Login</header>
+                </div>
+
+                <div className="dropdown">
+                  
+                </div>
+
+                <div className="input-box">
+                  <input type="text" 
+                    id="username" 
+                    className="input-field" 
+                    placeholder="Username"
+                    value={username} 
+                    onChange={e => setUsername(e.target.value)} 
+                    autoComplete="off" 
+                    required />
+                </div>
+
+                <div className="input-box">
+                    <input type="password" 
+                      id="password" 
+                      className="input-field" 
+                      placeholder="Password" 
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      autoComplete="off" 
+                      required />
+                </div>
+
+                <div className="forgot">
+                    <section>
+                        <input type="checkbox" id="check" />
+                        <label htmlFor="check">Remember me</label>
+                    </section>
+                    <section>
+                        <a className="login-text" href="#">Forgot Password</a>
+                    </section>
+                </div>
+
+                <div className="input-submit">
+                <button type="submit" className="submit-btn btn" id="submit" onClick={handleLogin}></button>
+                <label htmlFor="submit">Sign In</label>
+                </div>
+
+                <div className="sign-up-link">
+                    <p>Don't have an account? <Link className="login-text" to="/signup">Sign Up</Link></p>
+                </div>
+            </form>
+        </section>
+        </>
   );
 }
 
