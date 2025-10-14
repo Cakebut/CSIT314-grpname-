@@ -8,6 +8,13 @@ function Login() {
   const [password, setPassword] = useState<string>('');
   const [status, setStatus] = useState<string>('');
 
+  // dropdown
+  const options = ['User Admin', 'Person-in-Need', 'CSR Representative', 'Platform Manager'];
+  const [SelectedOption, setSelectedOption] = useState<string>('');
+  const handleSelectedOption = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedOption(event.target.value);
+  };
+
   const handleLogin = async () => {
     try {
       const res = await fetch('http://localhost:3000/api/login', {
@@ -18,14 +25,14 @@ function Login() {
       });
 
       if (res.ok) {
-        setStatus('Login successful!');
+        setStatus('Login succesful!');
         navigate('/useradmin');
         console.log("Login successful, navigating to /useradmin");
       } else {
-        setStatus('Login failed.');
+        setStatus('Login attempt failed.');
       }
     } catch (err) {
-      setStatus('Login error.');
+      setStatus('Unable to Login.');
       console.error('Error:', err);
     }
   };
@@ -88,14 +95,22 @@ function Login() {
         <section className="login-main login-section">
             <form id="loginForm" className="login-box">
                 <div className="login-header">
-                    <header>Login</header>
+                    <header>Welcome Back</header>
                 </div>
 
-                <div className="dropdown">
-                  
+                <div className="dropdown-box">
+                  <label htmlFor="dropdown" className="dropdown-label">Log in as :</label>
+                    <select id="dropdown" value={SelectedOption} onChange={handleSelectedOption} required >
+                      <option value="/"></option>
+                      
+                      {options.map((option, index) => (
+                        <option key={index} value={option}>{option}</option>
+                      ))}
+
+                    </select>
                 </div>
 
-                <div className="input-box">
+                <div>
                   <input type="text" 
                     id="username" 
                     className="input-field" 
@@ -107,34 +122,36 @@ function Login() {
                 </div>
 
                 <div className="input-box">
-                    <input type="password" 
-                      id="password" 
-                      className="input-field" 
-                      placeholder="Password" 
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      autoComplete="off" 
-                      required />
+                  <input type="password" 
+                    id="password" 
+                    className="input-field" 
+                    placeholder="Password" 
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    autoComplete="off" 
+                    required />
                 </div>
 
                 <div className="forgot">
-                    <section>
-                        <input type="checkbox" id="check" />
-                        <label htmlFor="check">Remember me</label>
-                    </section>
-                    <section>
-                        <a className="login-text" href="#">Forgot Password</a>
-                    </section>
+                  <section>
+                    <input type="checkbox" id="check" />
+                    <label htmlFor="check">Remember me</label>
+                  </section>
+                  <section>
+                    <a className="login-text" href="#">Forgot Password</a>
+                  </section>
                 </div>
 
                 <div className="input-submit">
-                <button type="submit" className="submit-btn btn" id="submit" onClick={handleLogin}></button>
-                <label htmlFor="submit">Sign In</label>
+                  <button type="submit" className="submit-btn btn" id="submit" onClick={handleLogin}></button>
+                  <label htmlFor="submit">Sign In</label>
                 </div>
 
-                <div className="sign-up-link">
+                {/* <div className="sign-up-link">
                     <p>Don't have an account? <Link className="login-text" to="/signup">Sign Up</Link></p>
-                </div>
+                </div> */}
+
+                  {/* Make this a modal pop up because I don't like it if it appears at the bottom as text, THANKS FUTURE ME */}
                   {status && <div className="login-status">{status}</div>}
             </form>
         </section>
