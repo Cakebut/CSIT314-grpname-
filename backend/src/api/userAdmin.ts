@@ -1,55 +1,60 @@
-import { Router } from 'express'
-import { db } from "../index"
-import { personInNeedTable } from "../db/schema/personInNeed"
-import { sql } from "drizzle-orm" // Add this import
+import { Router } from "express";
+import { db } from "../index";
+import { personInNeedTable } from "../db/schema/personInNeed";
+import { sql, eq, and } from "drizzle-orm"; // Add this import
 
-
-export const userAdminRouter = Router()
+export const userAdminRouter = Router();
 
 // Create Account (Register)
 // userAdminRouter.post("/api/person-in-need", async (req, res) => {
-    // const usernameToUse = req.body.username
-    // const passwordToUse = req.body.password
+// const usernameToUse = req.body.username
+// const passwordToUse = req.body.password
 
-    // try {
-        // await db.insert(personInNeedTable).values({
-            // username: usernameToUse,
-            // password: passwordToUse
-        // })
-        // return res.status(201).json({ message: "Account created" })
-    // }
-    // catch (err) {
-        // console.error("Error: ", err)
-        // return res.status(500).json({ error: "Account creation failed" })
-    // }
+// try {
+// await db.insert(personInNeedTable).values({
+// username: usernameToUse,
+// password: passwordToUse
 // })
-
+// return res.status(201).json({ message: "Account created" })
+// }
+// catch (err) {
+// console.error("Error: ", err)
+// return res.status(500).json({ error: "Account creation failed" })
+// }
+// })
 
 // Login
 userAdminRouter.post("/api/login", async (req, res) => {
-  const { username, password, role } = req.body;
+  const { username, password } = req.body;
   try {
-    const user = await db.select().from(personInNeedTable)
-      .where(
-        sql`LOWER(${personInNeedTable.username}) = LOWER(${username}) AND ${personInNeedTable.password} = ${password} AND ${personInNeedTable.role} = ${role}`
-      )
+    const user = await db
+      .select()
+      .from(personInNeedTable)
+      .where(eq(personInNeedTable.username, username))
       .limit(1);
 
     if (user.length === 0) {
-      return res.status(401).json({ error: "Invalid credentials or role" });
+      return res.status(401).json({ error: "User does not exist" });
     }
+
+    if (user[0].password !== password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
     (req.session as any).username = username;
-    return res.json({ message: "Logged in" });
+    return res.json({ 
+      message: "Logged in" ,
+      role: user[0].role
+    });
   } catch (err) {
     console.error("Login error: ", err);
     return res.status(500).json({ error: "Login failed" });
   }
 });
 
-
 // Logout
 userAdminRouter.post("/api/logout", (req, res) => {
-    req.session.destroy(() => {
-        res.json({ message: "Logged out" })
-    })
-})
+  req.session.destroy(() => {
+    res.json({ message: "Logged out" });
+  });
+});
