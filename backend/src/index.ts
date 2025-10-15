@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import session from 'express-session'
 import { sql } from 'drizzle-orm';
 import express from 'express'
-import { personInNeedTable } from './db/schema/personInNeed';
+ 
 import cors from 'cors'
 import connectPgSimple from 'connect-pg-simple';
 import { userAdminRouter } from './api/userAdmin';
@@ -51,31 +51,31 @@ app.get("/", async (req, res) => {
   res.send("Hello World!");
 });
 
-userAdminRouter.post("/api/person-in-need", async (req, res) => {
-    // Check if logged-in user is User Admin
-    if (!req.session.username) {
-        return res.status(401).json({ error: "Not logged in" });
-    }
-    const adminUser = await db.select().from(personInNeedTable)
-        .where(sql`LOWER(${personInNeedTable.username}) = LOWER(${req.session.username}) AND ${personInNeedTable.role} = 'User Admin'`)
-        .limit(1);
-    if (adminUser.length === 0) {
-        return res.status(403).json({ error: "Only User Admin can create accounts" });
-    }
+// userAdminRouter.post("/api/person-in-need", async (req, res) => {
+//     // Check if logged-in user is User Admin
+//     if (!req.session.username) {
+//         return res.status(401).json({ error: "Not logged in" });
+//     }
+//     const adminUser = await db.select().from(personInNeedTable)
+//         .where(sql`LOWER(${personInNeedTable.username}) = LOWER(${req.session.username}) AND ${personInNeedTable.role} = 'User Admin'`)
+//         .limit(1);
+//     if (adminUser.length === 0) {
+//         return res.status(403).json({ error: "Only User Admin can create accounts" });
+//     }
 
-    const { username, password, role } = req.body;
-    try {
-        await db.insert(personInNeedTable).values({
-            username,
-            password,
-            role,
-        });
-        return res.status(201).json({ message: "Account created" });
-    } catch (err) {
-        console.error("Error: ", err);
-        return res.status(500).json({ error: "Account creation failed" });
-    }
-});
+//     const { username, password, role } = req.body;
+//     try {
+//         await db.insert(personInNeedTable).values({
+//             username,
+//             password,
+//             role,
+//         });
+//         return res.status(201).json({ message: "Account created" });
+//     } catch (err) {
+//         console.error("Error: ", err);
+//         return res.status(500).json({ error: "Account creation failed" });
+//     }
+// });
 
 app.use("/", userAdminRouter)
 

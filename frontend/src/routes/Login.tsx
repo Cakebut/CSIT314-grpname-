@@ -27,6 +27,8 @@ function Login() {
         }
         else if (data.role === "PIN") {
           navigate("/pin");
+
+        
         }
       } else {
         setStatus("Login attempt failed.");

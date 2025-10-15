@@ -1,4 +1,4 @@
-import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text } from 'drizzle-orm/pg-core'
+import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const users = pgTable(
     'users',
@@ -38,6 +38,8 @@ export const csr_requests = pgTable(
 
         categoryID: integer().notNull().references(() => service_cateogry.id),
         message: text().notNull(),
+        requestedAt: timestamp().notNull().defaultNow(),
+        status: varchar({ length: 32 }).notNull().default('Pending'), // e.g., Pending, In Progress, Completed
     },
     // table => [ uniqueIndex().on(table.label) ]
 )
