@@ -6,7 +6,7 @@ export const personInNeedTable = pgTable(
         id: serial().primaryKey(),
         username: varchar({ length: 64 }).notNull().unique(),
         password: varchar({ length: 64 }).notNull(),
-        // isSuspended: boolean().notNull().default(false)
+        role: varchar ({ length:64 }).notNull(), // Add this line
     },
     // table => [ uniqueIndex().on(table.label) ]
 )

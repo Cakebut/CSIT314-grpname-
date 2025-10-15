@@ -15,19 +15,19 @@ function Login() {
     setSelectedOption(event.target.value);
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission reload
     try {
       const res = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include', // for session cookies
+        body: JSON.stringify({ username, password, role: SelectedOption }),
+        credentials: 'include',
       });
 
       if (res.ok) {
-        setStatus('Login succesful!');
+        setStatus('Login successful!');
         navigate('/useradmin');
-        console.log("Login successful, navigating to /useradmin");
       } else {
         setStatus('Login attempt failed.');
       }

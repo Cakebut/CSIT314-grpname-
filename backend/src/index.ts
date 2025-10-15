@@ -7,6 +7,12 @@ import cors from 'cors'
 import connectPgSimple from 'connect-pg-simple';
 import { userAdminRouter } from './api/userAdmin';
 
+declare module 'express-session' {
+  interface SessionData {
+    username?: string;
+  }
+}
+
 export const app = express();
 const port = 3000;
 export const DATABASE_URL =
@@ -45,22 +51,31 @@ app.get("/", async (req, res) => {
   res.send("Hello World!");
 });
 
-app.post("/api/person-in-need", async (req, res) => {
-    console.log("Request body: ", req.body)
-
-    const usernameToUse = req.body.username
-    const passwordToUse = req.body.password
-
-    try {
-      await db.insert(personInNeedTable).values({
-        username: usernameToUse,
-        password: passwordToUse
-      }) 
-    } catch (err) {
-      console.error("Error: ", err)
+userAdminRouter.post("/api/person-in-need", async (req, res) => {
+    // Check if logged-in user is User Admin
+    if (!req.session.username) {
+        return res.status(401).json({ error: "Not logged in" });
     }
-    res.send(200)
-})
+    const adminUser = await db.select().from(personInNeedTable)
+        .where(sql`LOWER(${personInNeedTable.username}) = LOWER(${req.session.username}) AND ${personInNeedTable.role} = 'User Admin'`)
+        .limit(1);
+    if (adminUser.length === 0) {
+        return res.status(403).json({ error: "Only User Admin can create accounts" });
+    }
+
+    const { username, password, role } = req.body;
+    try {
+        await db.insert(personInNeedTable).values({
+            username,
+            password,
+            role,
+        });
+        return res.status(201).json({ message: "Account created" });
+    } catch (err) {
+        console.error("Error: ", err);
+        return res.status(500).json({ error: "Account creation failed" });
+    }
+});
 
 app.use("/", userAdminRouter)
 
