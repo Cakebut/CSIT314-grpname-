@@ -3,21 +3,21 @@ import { useEffect } from 'react';
 
 // Component
 // import Navbar from './components/Navbar';
+// import Video from './components/Video';
 
 // LOGIN PAGE
 import Login from './routes/LoginPage';
 
 
 // USER ADMIN PAGE
-import AdminDashboard from './routes/UserAdmin/AdminDashboard';
-import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
-import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
-import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
-
-
+import UserAdmin from './routes/UserAdmin/AdminDashboard';
+import UserList from './routes/UserAdmin/ViewUserAccountPage';
+import ViewRoles from './routes/UserAdmin/ViewUserRolesPage';
+import CreateUser from './routes/UserAdmin/CreateNewUserAccountPage';
 
 //Person In Need
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
+
 // CSS
 import './App.css';
 
@@ -29,18 +29,19 @@ function App() {
   return (
     <Router>
       <div className="app-wrapper">
+        {/* <Video /> */}
         <Routes>
           <Route path="/" element={<Login />} />
-      
-      //User Admin
-            <Route path="/useradmin" element={<AdminDashboard />} />
-              <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
-                <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
-                  <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
+           
+            // User Admin
+            <Route path="/useradmin" element={<UserAdmin />} />
+              <Route path="/useradmin/userlist" element={<UserList />} />
+                <Route path="/useradmin/viewroles" element={<ViewRoles />} />
+                  <Route path="/useradmin/createuser" element={<CreateUser />} />
 
-
-      //Person In Need
+            // Person In Need
             <Route path="/PIN" element={<PersonInNeedDashboard />} />
+
         </Routes>
       </div>
     </Router>

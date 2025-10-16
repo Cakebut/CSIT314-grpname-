@@ -36,34 +36,12 @@ function Login() {
     }
   };
 
-  // const handleRegister = async () => {
-  //   try {
-  //     const res = await fetch('http://localhost:3000/api/person-in-need', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ username, password }),
-  //     });
-  //     if (res.ok) {
-  //       setStatus('Account created!');
-  //     } else {
-  //       setStatus('Account creation failed.');
-  //     }
-  //   } catch (err) {
-  //     setStatus('Registration error.');
-  //     console.error('Error:', err);
-  //   }
-  // };
-
   return (
-  
-
     <>
-     
-
       <section className="login-main login-section">
         <form id="loginForm" className="login-box">
           <div className="login-header">
-            <header>Welcome Back</header>
+            <header>Welcome</header>
           </div>
 
           <div>
@@ -95,11 +73,11 @@ function Login() {
           <div className="forgot">
             <section>
               <input type="checkbox" id="check" />
-              <label htmlFor="check">Remember me</label>
+              <label htmlFor="check">Remember Me</label>
             </section>
             <section>
-              <a className="login-text" href="#">
-                Forgot Password
+              <a className="forgot-text" href="#">
+                Forgot Password?
               </a>
             </section>
           </div>
@@ -111,14 +89,9 @@ function Login() {
               id="submit"
               onClick={handleLogin}
             ></button>
-            <label htmlFor="submit">Sign In</label>
+            <label htmlFor="submit">SIGN IN</label>
           </div>
 
-          {/* <div className="sign-up-link">
-                    <p>Don't have an account? <Link className="login-text" to="/signup">Sign Up</Link></p>
-                </div> */}
-
-          {/* Make this a modal pop up because I don't like it if it appears at the bottom as text, THANKS FUTURE ME */}
           {status && <div className="login-status">{status}</div>}
         </form>
       </section>
