@@ -7,6 +7,7 @@ export const users = pgTable(
         username: varchar({ length: 64 }).notNull().unique(),
         password: varchar({ length: 64 }).notNull(),
         roleid: integer().notNull().references(() => role.id), // Add this line
+        issuspended: boolean().notNull().default(false),
     },
     // table => [ uniqueIndex().on(table.label) ]
 )

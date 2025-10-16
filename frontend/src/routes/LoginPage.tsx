@@ -21,6 +21,7 @@ function Login() {
       if (res.ok) {
         setStatus("Login successful!");
         const data = await res.json();
+        
         console.log(data.role);
         if (data.role === "User Admin") {
           navigate("/useradmin");

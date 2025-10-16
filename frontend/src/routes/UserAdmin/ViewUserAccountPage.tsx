@@ -14,6 +14,8 @@ function UserList() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  
   const [dummyUsers, setDummyUsers] = useState<User[]>([]); // Store users in state
 
   // Generate dummy users only once when component mounts
