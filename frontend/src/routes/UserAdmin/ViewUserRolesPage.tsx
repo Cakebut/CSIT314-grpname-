@@ -1,6 +1,6 @@
-import './ViewRoles.css';
+import './ViewUserRolesPage.css';
 
-function ViewRoles() {
+function ViewUserRoles() {
   return (
     <div className="roles-container">
       <h2>Roles Dashboard</h2>
@@ -9,4 +9,4 @@ function ViewRoles() {
   );
 }
 
-export default ViewRoles;
+export default ViewUserRoles;

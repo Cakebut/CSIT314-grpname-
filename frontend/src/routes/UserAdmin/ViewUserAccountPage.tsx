@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './UserList.css';
+import './ViewUserAccountPage.css';
 
 type User = {
   id: string;

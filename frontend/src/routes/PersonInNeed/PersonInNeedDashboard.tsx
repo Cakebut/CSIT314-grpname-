@@ -1,6 +1,6 @@
-import './PIN.css';
+import './PersonInNeedDashboard.css';
 
-function PIN() {
+function PersonInNeedDashboard() {
   return (
     <div className="pin-container">
       <h1>PIN Dashboard</h1>
@@ -9,4 +9,4 @@ function PIN() {
   );
 }
 
-export default PIN;
+export default PersonInNeedDashboard;

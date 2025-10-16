@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
+import "./LoginPage.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent form submission reload
     try {
-      const res = await fetch("http://localhost:3000/api/login", {
+      const res = await fetch("http://localhost:3000/api/userAdmin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -24,11 +24,8 @@ function Login() {
         console.log(data.role);
         if (data.role === "User Admin") {
           navigate("/useradmin");
-        }
-        else if (data.role === "PIN") {
+        } else if (data.role === "PIN") {
           navigate("/pin");
-
-        
         }
       } else {
         setStatus("Login attempt failed.");
@@ -58,41 +55,10 @@ function Login() {
   // };
 
   return (
-    // <div className="login-card">
-    //   <h2>Login</h2>
-    //   <input
-    //     type="text"
-    //     placeholder="Username"
-    //     value={username}
-    //     onChange={e => setUsername(e.target.value)}
-    //   />
-    //   <input
-    //     type="password"
-    //     placeholder="Password"
-    //     value={password}
-    //     onChange={e => setPassword(e.target.value)}
-    //   />
-    //   <button className="login-button" onClick={handleLogin}>
-    //     Login
-    //   </button>
-    //   <button className="register-button" onClick={handleRegister}>
-    //     Create Account
-    //   </button>
-    //   {status && <div className="login-status">{status}</div>}
-    // </div>
+  
 
     <>
-      {/* <header class="header container">
-            <img class="header-logo" src="assets/logo.png" />
-
-            <div class="header-items">
-                <ul class="header-menu">
-                    <li>
-                        <Link class="header-link back" to="/home">Back to Home</Link>
-                    </li>
-                </ul>
-            </div>
-        </header> */}
+     
 
       <section className="login-main login-section">
         <form id="loginForm" className="login-box">

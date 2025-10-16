@@ -5,16 +5,19 @@ import { useEffect } from 'react';
 // import Navbar from './components/Navbar';
 
 // LOGIN PAGE
-import Login from './routes/Login';
+import Login from './routes/LoginPage';
 
 
 // USER ADMIN PAGE
-import Useradmin from './routes/UserAdmin/useradmin';
-import Userlist from './routes/UserAdmin/userlist';
-import Viewroles from './routes/UserAdmin/viewroles';
-import Createuser from './routes/UserAdmin/createuser';
+import AdminDashboard from './routes/UserAdmin/AdminDashboard';
+import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
+import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
+import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
 
 
+
+//Person In Need
+import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
 // CSS
 import './App.css';
 
@@ -28,12 +31,16 @@ function App() {
       <div className="app-wrapper">
         <Routes>
           <Route path="/" element={<Login />} />
-           
-            <Route path="/useradmin" element={<Useradmin />} />
-              <Route path="/useradmin/userlist" element={<Userlist />} />
-                <Route path="/useradmin/viewroles" element={<Viewroles />} />
-                  <Route path="/useradmin/createuser" element={<Createuser />} />
+      
+      //User Admin
+            <Route path="/useradmin" element={<AdminDashboard />} />
+              <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
+                <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
+                  <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
 
+
+      //Person In Need
+            <Route path="/PIN" element={<PersonInNeedDashboard />} />
         </Routes>
       </div>
     </Router>

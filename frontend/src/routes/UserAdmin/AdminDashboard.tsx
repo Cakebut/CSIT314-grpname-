@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import './UserAdmin.css';
+import './AdminDashboard.css';
 
-function UserAdmin() {
+function AdminDashboard() {
   const navigate = useNavigate();
 
   // Add a logout handler
@@ -14,10 +14,10 @@ function UserAdmin() {
     <div className="admin-container">
       <h1>Admin Dashboard</h1>
       <div className="bubble-options">
-        <div className="bubble" onClick={() => navigate('/useradmin/userlist')}>
+        <div className="bubble" onClick={() => navigate('/useradmin/ViewUserList')}>
           View User Dashboard
         </div>
-        <div className="bubble" onClick={() => navigate('/useradmin/viewroles')}>
+        <div className="bubble" onClick={() => navigate('/useradmin/ViewUserRoles')}>
           View Roles Dashboard
         </div>
         <div className="bubble logout-bubble" onClick={handleLogout}> {/* need to change to this () => navigate('/') */}
@@ -28,4 +28,4 @@ function UserAdmin() {
   );
 }
 
-export default UserAdmin;
+export default AdminDashboard;

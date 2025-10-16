@@ -6,7 +6,7 @@ export const users = pgTable(
         id: serial().primaryKey(),
         username: varchar({ length: 64 }).notNull().unique(),
         password: varchar({ length: 64 }).notNull(),
-        roleID: integer().notNull().references(() => role.id), // Add this line
+        roleid: integer().notNull().references(() => role.id), // Add this line
     },
     // table => [ uniqueIndex().on(table.label) ]
 )
@@ -21,10 +21,10 @@ export const role = pgTable(
 )
 
 
-export const service_cateogry = pgTable(
-    'roles',
+export const service_type = pgTable(
+    'service_type',
     {
-        id: serial().primaryKey(),
+        id: serial().primaryKey(), //Medical , transport ,household assistants
         name: varchar({ length: 64 }).notNull().unique(),
     },
     // table => [ uniqueIndex().on(table.label) ]
@@ -36,7 +36,7 @@ export const csr_requests = pgTable(
         pin_id: integer().notNull().references(() => users.id),
         csr_id: integer().notNull().references(() => users.id),
 
-        categoryID: integer().notNull().references(() => service_cateogry.id),
+        categoryID: integer().notNull().references(() => service_type.id),
         message: text().notNull(),
         requestedAt: timestamp().notNull().defaultNow(),
         status: varchar({ length: 32 }).notNull().default('Pending'), // e.g., Pending, In Progress, Completed
