@@ -1,20 +1,37 @@
 import { Router } from "express";
 import { db } from "../index";
-import { users,role,service_type,csr_requests } from "../db/schema/aiodb";
+import { usersTable,roleTable,service_typeTable,csr_requestsTable } from "../db/schema/aiodb";
 import { sql, eq, and } from "drizzle-orm"; // Add this import
 
-export const userAdminRouter = Router();
+import {  CreateUserController } from "../controller/sharedControllers";
 
- 
+export const router = Router();
+
+router.post("/users/", async(req, res) => {
+  const { username, password, roleid } = req.body
+
+
+
+  try { 
+    const controller = new CreateUserController()
+    const obj = await controller.createUserfuunc1(username, password, roleid)
+    res.status(200).json({
+      success: obj
+    })
+  } catch (err) {
+    res.status(404)
+  }
+  res.status(201)
+})
 
 // Login
-userAdminRouter.post("/login", async (req, res) => {
+router.post("/userAdmin/login", async (req, res) => {
   const { username, password } = req.body;
   try {
     const user = await db
       .select()
-      .from(users)
-      .where(eq(users.username, username))
+      .from(usersTable)
+      .where(eq(usersTable.username, username))
       .limit(1);
 
     if (user.length === 0) {
@@ -38,9 +55,25 @@ userAdminRouter.post("/login", async (req, res) => {
 
 
 
+// userAdminRouter.post("/login", async (req, res) => {
+//   const { username, password } = req.body;
+
+//   const userAccount = new LoginController().login(username, password);
+//   const user = await userAccount.login(username, password);
+
+//   if (!user) {
+//     return res.status(401).json({ message: "Invalid credentials" });
+//   }
+
+//   return res.status(200).json({ user });
+// });
+
 // Logout
-userAdminRouter.post("/logout", (req, res) => {
+router.post("/userAdmin/logout", (req, res) => {
   req.session.destroy(() => {
     res.json({ message: "Logged out" });
   });
 });
+
+
+
