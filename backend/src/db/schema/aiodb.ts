@@ -17,6 +17,7 @@ export const roleTable = pgTable(
     {
         id: serial().primaryKey(),
         name: varchar({ length: 64 }).notNull().unique(),
+        issuspended: boolean().notNull().default(false),
     },
     // table => [ uniqueIndex().on(table.label) ]
 )
