@@ -25,4 +25,8 @@ export class CreateUserController {
     const obj = await this.userEntity.createUserfunc2(username, password, roleid)
     return obj
   }
+
+  public async getAllUsers() {
+    return await this.userEntity.getAllUsers();
+  }
 }

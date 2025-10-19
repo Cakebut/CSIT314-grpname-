@@ -37,7 +37,7 @@ function App() {
               <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
                 <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
                   <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
-
+                    <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
 
       //Person In Need
             <Route path="/PIN" element={<PersonInNeedDashboard />} />

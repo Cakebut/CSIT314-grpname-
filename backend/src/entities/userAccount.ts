@@ -18,7 +18,15 @@ export class UserEntity {
       return true
     } catch (err) {
       console.error(err)
-      return true;
+      return false;
+    }
+  }
+  public async getAllUsers() {
+    try {
+      return await db.select().from(usersTable);
+    } catch (err) {
+      console.error(err);
+      return [];
     }
   }
 }

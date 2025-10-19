@@ -5,24 +5,36 @@ import { sql, eq, and } from "drizzle-orm"; // Add this import
 
 import {  CreateUserController } from "../controller/sharedControllers";
 
-export const router = Router();
+const router = Router();
+const createUserController = new CreateUserController();
+
 
 router.post("/users/", async(req, res) => {
   const { username, password, roleid } = req.body
 
-
-
   try { 
-    const controller = new CreateUserController()
-    const obj = await controller.createUserfuunc1(username, password, roleid)
-    res.status(200).json({
-      success: obj
-    })
-  } catch (err) {
-    res.status(404)
+    const obj = await createUserController.createUserfuunc1(username, password, roleid)
+    if (obj) {
+      return res.status(201).json({success: obj})
+    } else {
+      return res.status(500).json({ success: false, error: "Account creation failed" });
+    }
+  }  
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, error: "Server error" });
   }
-  res.status(201)
-})
+});
+
+
+router.get('/roles', async (req, res) => {
+  try {
+    const roles = await db.select().from(roleTable);
+    res.json(roles);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch roles' });
+  }
+});
 
 // Login
 router.post("/userAdmin/login", async (req, res) => {
@@ -53,6 +65,16 @@ router.post("/userAdmin/login", async (req, res) => {
   }
 });
 
+// Get the users from database
+router.get('/users', async (req, res) => {
+  try {
+    const users = await createUserController.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
 
 
 // userAdminRouter.post("/login", async (req, res) => {
@@ -75,5 +97,7 @@ router.post("/userAdmin/logout", (req, res) => {
   });
 });
 
+
+export { router };
 
 
