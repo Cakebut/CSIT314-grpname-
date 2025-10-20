@@ -1,24 +1,24 @@
-export type usersTable = {
+
+export type useraccountData = {
     id: number;
-    username: string;
-    password: string;
-    roleid: number;
-    issuspended: boolean;
+    username:string;
+    userProfile: string;
+    isSuspended: boolean;
 }
 
 
-export type roleTable = {
-    id: number;
-    name: string;
-    issuspended?: boolean;
-}
-
-export type  service_typeTable = {
+export type roleData = {
     id: number;
     name: string;
+    isSuspended?: boolean;
 }
 
-export type csr_requestsTable = {
+export type  service_typeData = {
+    id: number;
+    name: string;
+}
+
+export type csr_requestsData = {
     pin_id: number;
     csr_id: number;
     categoryID: number;

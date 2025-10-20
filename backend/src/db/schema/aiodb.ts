@@ -1,6 +1,6 @@
 import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core'
 
-export const usersTable = pgTable(
+export const useraccountTable = pgTable(
     'users',
     {
         id: serial().primaryKey(),
@@ -16,7 +16,7 @@ export const roleTable = pgTable(
     'roles',
     {
         id: serial().primaryKey(),
-        name: varchar({ length: 64 }).notNull().unique(),
+        label: varchar({ length: 64 }).notNull().unique(),
         issuspended: boolean().notNull().default(false),
     },
     // table => [ uniqueIndex().on(table.label) ]
@@ -35,8 +35,8 @@ export const service_typeTable = pgTable(
 export const csr_requestsTable = pgTable(
     'csr_requests',
     {
-        pin_id: integer().notNull().references(() => usersTable.id),
-        csr_id: integer().notNull().references(() => usersTable.id),
+        pin_id: integer().notNull().references(() => useraccountTable.id),
+        csr_id: integer().notNull().references(() => useraccountTable.id),
 
         categoryID: integer().notNull().references(() => service_typeTable.id),
         message: text().notNull(),

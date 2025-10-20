@@ -25,8 +25,15 @@ function Login() {
         console.log(data.role);
         if (data.role === "User Admin") {
           navigate("/useradmin");
-        } else if (data.role === "PIN") {
+        } 
+        else if (data.role === "Person In Need") {
           navigate("/pin");
+        }
+        else if (data.role === "CSR Rep") {
+          navigate("/csr");
+        }
+        else if (data.role === "Platform Manager") {
+          navigate("/platform");
         }
       } else {
         setStatus("Login attempt failed.");
@@ -40,23 +47,6 @@ function Login() {
 
 
 
-  // const handleRegister = async () => {
-  //   try {
-  //     const res = await fetch('http://localhost:3000/api/person-in-need', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ username, password }),
-  //     });
-  //     if (res.ok) {
-  //       setStatus('Account created!');
-  //     } else {
-  //       setStatus('Account creation failed.');
-  //     }
-  //   } catch (err) {
-  //     setStatus('Registration error.');
-  //     console.error('Error:', err);
-  //   }
-  // };
 
   return (
   
