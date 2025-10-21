@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
+import Navbar from "../components/Navbar";
 
 function Login() {
   const navigate = useNavigate();
@@ -38,6 +39,8 @@ function Login() {
 
   return (
     <>
+      <Navbar />
+      
       <section className="login-main login-section">
         <form id="loginForm" className="login-box">
           <div className="login-header">

@@ -73,28 +73,3 @@ html {
   /* border: 1px solid red;  */
   /* Just for me to check sizing */
 }
-
-/* Video ---------------------------------------------------------------------------------------------- */
-
-.video {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: -1;
-}
-
-/* Video Transitions */
-
-.video {
-  position: absolute;
-  width: 100%;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-
-.video.active {
-  opacity: 1;
-}
