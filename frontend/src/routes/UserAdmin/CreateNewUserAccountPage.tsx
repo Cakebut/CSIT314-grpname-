@@ -1,4 +1,4 @@
-import './CreateNewUserAccountPage.css';
+import "./CreateNewUserAccountPage.css";
 
 function CreateUser() {
   return (
