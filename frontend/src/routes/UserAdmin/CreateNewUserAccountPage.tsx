@@ -1,6 +1,6 @@
 import './CreateNewUserAccountPage.css';
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function CreateNewUserAccountPage() {
   const navigate = useNavigate();
@@ -10,12 +10,15 @@ function CreateNewUserAccountPage() {
   const [status, setStatus] = useState('Active'); // I set active as default
   const [result, setResult] = useState('');
 
-  const roleOptions = [
-    { id: 1, label: 'User Admin' },
-    { id: 2, label: 'PIN' },
-    { id: 3, label: 'CSR Rep' },
-    { id: 4, label: 'Platform Manager' }
-  ];
+
+  // Dynamically fetched roles
+  const [roles, setRoles] = useState<{id: number, label: string}[]>([]);
+  useEffect(() => {
+    fetch('http://localhost:3000/api/roles')
+      .then(res => res.json())
+      .then(data => setRoles(data))
+      .catch(() => setRoles([]));
+  }, []);
 
     
     const statusOptions = ['Active', 'Suspend'];
@@ -61,8 +64,8 @@ function CreateNewUserAccountPage() {
         />
         <select value={roleid} onChange={e => setRoleid(Number(e.target.value))} required>
           <option value="">Select Role</option>
-          {roleOptions.map(option => (
-            <option key={option.id} value={option.id}>{option.label}</option>
+          {roles.map((role) => (
+            <option key={role.id} value={role.id}>{role.label}</option>
           ))}
         </select>
         <select value={status} onChange={e => setStatus(e.target.value)} required>

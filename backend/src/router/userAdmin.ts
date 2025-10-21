@@ -4,15 +4,33 @@ import { useraccountTable,roleTable,service_typeTable,csr_requestsTable } from "
 import { sql, eq, and } from "drizzle-orm"; // Add this import
 
 //Controllers
-import {  CreateUserController, LoginController } from "../controller/sharedControllers";
-import { ViewUserAccountController } from "../controller/UserAdminControllers";
+import {  CreateUserController, LoginController  } from "../controller/sharedControllers";
+import { ViewUserAccountController, UpdateUserController } from "../controller/UserAdminControllers";
 
 
 const router = Router();
 const createUserController = new CreateUserController();
 const viewUserAccountController = new ViewUserAccountController();
-
-
+const updateUserController = new UpdateUserController();
+// Update user info
+router.post("/users/:id", async (req, res) => {
+  const { username, roleid, issuspended } = req.body;
+  const id = Number(req.params.id);
+  if (!id || !username || !roleid) {
+    return res.status(400).json({ success: false, error: "Missing required fields" });
+  }
+  try {
+    const result = await updateUserController.updateUserInfo(id, username, roleid, issuspended);
+    if (result) {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(500).json({ success: false, error: "Update failed" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 
 
 router.post("/users/", async(req, res) => {

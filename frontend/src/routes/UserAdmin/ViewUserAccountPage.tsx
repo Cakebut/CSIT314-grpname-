@@ -18,6 +18,9 @@ function ViewUserAccountPage() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
+  const [editUsername, setEditUsername] = useState("");
+  const [editRole, setEditRole] = useState("");
+  const [editSuspended, setEditSuspended] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [users, setUsers] = useState<UserAccount[]>([]); // Store users from backend
@@ -89,6 +92,9 @@ function ViewUserAccountPage() {
 
   const handleEdit = (user: UserAccount) => {
     setSelectedUser(user);
+    setEditUsername(user.username);
+    setEditRole(user.userProfile);
+    setEditSuspended(user.issuspended);
     setShowModal(true);
   };
 
@@ -97,10 +103,35 @@ function ViewUserAccountPage() {
     setSelectedUser(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Save logic here
-    closeModal();
+    if (!selectedUser) return;
+    // Find the selected role id from label
+    const selectedRole = roles.find(r => r.label === editRole);
+    const roleid = selectedRole ? selectedRole.id : null;
+    if (!roleid) {
+      alert("Please select a valid role.");
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:3000/api/users/${selectedUser.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: editUsername,
+          roleid: roleid,
+          issuspended: editSuspended
+        })
+      });
+      if (res.ok) {
+        await fetchUsers();
+        closeModal();
+      } else {
+        alert("Failed to update user.");
+      }
+    } catch (err) {
+      alert("Error updating user.");
+    }
   };
 
   return (
@@ -165,35 +196,33 @@ function ViewUserAccountPage() {
           <div className="modal-content">
             <h3>Edit User</h3>
             <form onSubmit={handleSubmit}>
-              
-                <label>Role</label>
-                <select defaultValue={selectedUser. userProfile}>
-                  <option value="">Select Role</option>
-                  {roles.map((role: UserProfile) => (
-                    <option key={role.id} value={role.label}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-
-
-
-
-              {/* User ID Field */}
+              <label>Role</label>
+              <select value={editRole} onChange={e => setEditRole(e.target.value)} required>
+                <option value="">Select Role</option>
+                {roles.map((role: UserProfile) => (
+                  <option key={role.id} value={role.label}>{role.label}</option>
+                ))}
+              </select>
               <label>UserID</label>
               <input
                 type="text"
-                defaultValue={selectedUser.id}
+                value={selectedUser.id}
                 placeholder="User ID"
+                disabled
               />
               <label>Username:</label>
               <input
                 type="text"
-                defaultValue={selectedUser.username}
+                value={editUsername}
+                onChange={e => setEditUsername(e.target.value)}
                 placeholder="Username"
+                required
               />
-          
-              {/* Profile and status fields removed since they do not exist in User type */}
+              <label>Status:</label>
+              <select value={editSuspended ? "Suspended" : "Active"} onChange={e => setEditSuspended(e.target.value === "Suspended")}> 
+                <option value="Active">Active</option>
+                <option value="Suspended">Suspended</option>
+              </select>
               <div className="modal-actions">
                 <button type="button" onClick={closeModal}>
                   Cancel

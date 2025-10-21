@@ -1,3 +1,4 @@
+
 import { useraccountTable, roleTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
@@ -6,6 +7,23 @@ import { useraccountData } from "../shared/dataClasses";
 
 export class UserEntity {
 
+// Update user info by id
+public async updateUser(
+  id: number,
+  username: string,
+  roleid: number,
+  issuspended: boolean
+): Promise<boolean> {
+  try {
+    await db.update(useraccountTable)
+      .set({ username, roleid, issuspended })
+      .where(eq(useraccountTable.id, id));
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
 
 // LOGIN FUNCTION
 public async login(
