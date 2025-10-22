@@ -23,6 +23,8 @@ function CreateNewUserAccountPage() {
     
     const statusOptions = ['Active', 'Suspend'];
 
+
+    // Handle form submission
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
