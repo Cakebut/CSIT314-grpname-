@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ViewUserAccountPage.css";
@@ -17,6 +18,7 @@ type UserProfile = {
 
 function ViewUserAccountPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [editUsername, setEditUsername] = useState("");
@@ -49,6 +51,13 @@ function ViewUserAccountPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.accountCreated) {
+      toast.success('Account has been created');
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   //fetch roles from backend
   const fetchRoles = async () => {
@@ -111,7 +120,7 @@ function ViewUserAccountPage() {
         })
       });
       if (res.ok) {
-        toast.success(`${selectedUser.id} account details have been updated`);
+        toast.success(`Account ID: ${selectedUser.id}  ,account details have been updated`);
         await fetchUsers();
         closeModal();
       } else {

@@ -1,5 +1,6 @@
 import './CreateNewUserAccountPage.css';
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 import { useState, useEffect } from "react";
 
 function CreateNewUserAccountPage() {
@@ -8,7 +9,6 @@ function CreateNewUserAccountPage() {
   const [password, setPassword] = useState('');
   const [roleid, setRoleid] = useState<number | undefined>(undefined);
   const [status, setStatus] = useState('Active'); // I set active as default
-  const [result, setResult] = useState('');
 
 
   // Dynamically fetched roles
@@ -33,14 +33,14 @@ function CreateNewUserAccountPage() {
         credentials: 'include',
       });
       if (res.ok) {
-        setResult('Account created!');
+  navigate('/useradmin/ViewUserList', { state: { accountCreated: true } });
       } else {
-        setResult('Account creation failed.');
+        toast.error('Account creation failed.');
       }
     } catch (err) {
-      setResult('Error creating account.');
+      toast.error('Error creating account.');
       console.error('Error:', err);
-      navigate('/useradmin');
+      navigate('/useradmin/ViewUserList');
     }
   };
 
@@ -75,7 +75,7 @@ function CreateNewUserAccountPage() {
           ))}
         </select>
         <button type="submit">Submit</button>
-        {result && <div className="result-message">{result}</div>}
+      
       </form>
     </div>
   );
