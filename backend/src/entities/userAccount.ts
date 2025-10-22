@@ -7,23 +7,7 @@ import { useraccountData } from "../shared/dataClasses";
 
 export class UserEntity {
 
-// Update user info by id
-public async updateUser(
-  id: number,
-  username: string,
-  roleid: number,
-  issuspended: boolean
-): Promise<boolean> {
-  try {
-    await db.update(useraccountTable)
-      .set({ username, roleid, issuspended })
-      .where(eq(useraccountTable.id, id));
-    return true;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
-}
+ 
 
 // LOGIN FUNCTION
 public async login(
@@ -68,7 +52,7 @@ public async login(
 
 
 
-
+//Create User Account
 public async createUserfunc2(
     username: string,
     password: string,
@@ -86,6 +70,8 @@ public async createUserfunc2(
       return false;
     }
   }
+
+  //Get all user accounts
 public async getAllUserAccounts(): Promise<useraccountData[]> {
   try{
     const users = await db
@@ -109,6 +95,30 @@ public async getAllUserAccounts(): Promise<useraccountData[]> {
     return [];
   }
 }
+
+
+
+// Update user info by id
+public async updateUser(
+  id: number,
+  username: string,
+  roleid: number,
+  issuspended: boolean
+): Promise<boolean> {
+  try {
+    await db.update(useraccountTable)
+      .set({ username, roleid, issuspended })
+      .where(eq(useraccountTable.id, id));
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+
+
+
 }
 
  

@@ -129,7 +129,7 @@ function ViewUserAccountPage() {
       } else {
         alert("Failed to update user.");
       }
-    } catch (err) {
+    } catch {
       alert("Error updating user.");
     }
   };
