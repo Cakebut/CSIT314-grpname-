@@ -9,9 +9,9 @@ const pool = new Pool({
 });
 const db = drizzle(pool);
 
-async function deleteAllUsers() {
+async function deleteAllUsers(count?: number) {
   await db.delete(useraccountTable);
-  console.log('🗑️ All users deleted!');
+  console.log(`🗑️ All ${count} users deleted!`);
 }
 
 deleteAllUsers()
