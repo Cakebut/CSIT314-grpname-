@@ -21,7 +21,7 @@
   "build": "tsc",
   "start": "node dist/index.js",
   "dev": "nodemon",
-  "db:seed": "ts-node src/db/Seeding/seed.ts",
+  "db:seed": "ts-node src/db/Seeding/seedUsers.ts",
   "db:delete": "ts-node src/db/Seeding/deleteUsers.ts"
   
   },
