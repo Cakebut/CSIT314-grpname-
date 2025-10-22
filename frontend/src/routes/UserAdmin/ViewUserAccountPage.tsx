@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ViewUserAccountPage.css";
@@ -28,18 +29,7 @@ function ViewUserAccountPage() {
 
   const [roles, setRoles] = useState<UserProfile[]>([]); // Store roles from backend
 
-  //   // Fetch users from backend only once when component mounts
-  //   useEffect(() => {
-  //   fetch('http://localhost:3000/api/users')
-  //     .then(res => res.json())
-  //     .then(data => setUsers(data))
-  //     .catch(() => setUsers([]));
-  //   // fetch('http://localhost:3000/api/roles')
-  //   //   .then(res => res.json())
-  //   //   .then(data => setRoles(data))
-  //   //   .catch(() => setRoles([]));
-  // }, []);
-
+ 
   // Fetch users from backend
   const fetchUsers = async () => {
     try {
@@ -85,10 +75,7 @@ function ViewUserAccountPage() {
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // const roleMap = roles.reduce((acc, role) => {
-  //   acc[role.id] = role.name;
-  //   return acc;
-  // }, {} as Record<number, string>);
+ 
 
   const handleEdit = (user: UserAccount) => {
     setSelectedUser(user);
@@ -110,8 +97,8 @@ function ViewUserAccountPage() {
     const selectedRole = roles.find(r => r.label === editRole);
     const roleid = selectedRole ? selectedRole.id : null;
     if (!roleid) {
-      alert("Please select a valid role.");
-      return;
+  toast.error("Please select a valid role.");
+  return;
     }
     try {
       const res = await fetch(`http://localhost:3000/api/users/${selectedUser.id}`, {
@@ -124,13 +111,14 @@ function ViewUserAccountPage() {
         })
       });
       if (res.ok) {
+        toast.success(`${selectedUser.id} account details have been updated`);
         await fetchUsers();
         closeModal();
       } else {
-        alert("Failed to update user.");
+        toast.error("Failed to update user.");
       }
     } catch {
-      alert("Error updating user.");
+      toast.error("Error updating user.");
     }
   };
 
