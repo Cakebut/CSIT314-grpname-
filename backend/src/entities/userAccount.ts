@@ -130,6 +130,35 @@ public async deleteUser(id: number): Promise<boolean> {
 }
 
 
+  async createRole(label: string): Promise<boolean> {
+    try {
+      await db.insert(roleTable).values({ label });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async deleteRole(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(roleTable).where(eq(roleTable.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async setRoleSuspended(id: number, issuspended: boolean): Promise<boolean> {
+    try {
+      await db.update(roleTable).set({ issuspended }).where(eq(roleTable.id, id));
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
 }
 
  

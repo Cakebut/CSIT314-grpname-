@@ -1,5 +1,6 @@
-
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import './ViewUserRolesPage.css';
 
 type Role = {
@@ -9,8 +10,12 @@ type Role = {
 };
 
 function ViewUserRoles() {
+  const navigate = useNavigate();
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newRoleLabel, setNewRoleLabel] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -31,12 +36,105 @@ function ViewUserRoles() {
     fetchRoles();
   }, []);
 
+  // Create new role
+  const handleCreateRole = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRoleLabel.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: newRoleLabel })
+      });
+      if (res.ok) {
+        setNewRoleLabel("");
+        setShowCreateModal(false);
+        toast.success('Role created successfully');
+        // Refresh roles
+        const updated = await fetch('http://localhost:3000/api/roles');
+        setRoles(updated.ok ? await updated.json() : []);
+      } else {
+        toast.error('Failed to create role');
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // Delete role
+  const handleDeleteRole = async (id: number) => {
+    if (!window.confirm('Delete this role?')) return;
+    const res = await fetch(`http://localhost:3000/api/roles/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      toast.success('Role deleted successfully');
+    } else {
+      toast.error('Failed to delete role');
+    }
+    // Refresh roles
+    const updated = await fetch('http://localhost:3000/api/roles');
+    setRoles(updated.ok ? await updated.json() : []);
+  };
+
+  // Suspend/Unsuspend role
+  const handleSuspendRole = async (role: Role) => {
+    const action = role.issuspended ? 'unsuspend' : 'suspend';
+    if (!window.confirm(`Are you sure you want to ${action} this role?`)) return;
+    const res = await fetch(`http://localhost:3000/api/roles/${role.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ issuspended: !role.issuspended })
+    });
+    if (res.ok) {
+      toast.success(role.issuspended ? 'Role enabled' : 'Role disabled');
+    } else {
+      toast.error('Failed to update role status');
+    }
+    // Refresh roles
+    const updated = await fetch('http://localhost:3000/api/roles');
+    setRoles(updated.ok ? await updated.json() : []);
+  };
+
   return (
-    <div className="roles-container">
-      <h2>Roles Dashboard</h2>
-      <table className="roles-table">
+    <div className="roles-container" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #e3e6f3 100%)', minHeight: '100vh' }}>
+      <button className="back-btn" onClick={() => navigate('/useradmin')}>
+        ← Back to Dashboard
+      </button>
+      <div className="roles-header">
+        <h2 style={{ fontWeight: 700, fontSize: '2rem', color: '#2d3a4a', marginBottom: '0.5rem' }}>Roles Dashboard</h2>
+        <button className="create-role-btn" onClick={() => setShowCreateModal(true)}>
+          ＋ Create Role
+        </button>
+      </div>
+      {showCreateModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 style={{ color: '#2d3a4a' }}>Create New Role</h3>
+            <form onSubmit={handleCreateRole}>
+              <input
+                type="text"
+                placeholder="Role label"
+                value={newRoleLabel}
+                onChange={e => setNewRoleLabel(e.target.value)}
+                disabled={creating}
+                required
+                style={{ marginBottom: '1rem', width: '100%' }}
+              />
+              <div className="modal-actions">
+                <button type="button" onClick={() => setShowCreateModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={creating || !newRoleLabel.trim()}>
+                  {creating ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <table className="roles-table" style={{ boxShadow: '0 4px 16px rgba(44,62,80,0.08)', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
         <thead>
-          <tr>
+          <tr style={{ background: '#e3e6f3' }}>
             <th>Role ID</th>
             <th>Role</th>
             <th>Status</th>
@@ -50,16 +148,21 @@ function ViewUserRoles() {
             <tr><td colSpan={4}>No roles found.</td></tr>
           ) : (
             roles.map(role => (
-              <tr key={role.id}>
+              <tr key={role.id} style={{ background: role.issuspended ? '#fff8e1' : 'white' }}>
                 <td>{role.id}</td>
-                <td>{role.label}</td>
+                <td style={{ fontWeight: 600 }}>{role.label}</td>
                 <td>
-                  <span className={role.issuspended ? 'status-suspended' : 'status-active'}>
-                    {role.issuspended ? 'Suspended' : 'Active'}
+                  <span className={role.issuspended ? 'status-suspended' : 'status-active'} style={{ padding: '0.3rem 0.8rem', borderRadius: '8px', fontWeight: 600, fontSize: '1rem', background: role.issuspended ? '#ffe082' : '#e0f7fa', color: role.issuspended ? '#d84315' : '#00796b' }}>
+                    {role.issuspended ? 'Disabled' : 'Active'}
                   </span>
                 </td>
                 <td>
-                  {/* Future actions (edit/delete) */}
+                  <button onClick={() => handleSuspendRole(role)} style={{ marginRight: '0.5rem', background: role.issuspended ? '#43a047' : '#ffd600', color: '#222', border: 'none', borderRadius: '6px', padding: '0.4rem 1rem', fontWeight: 500, cursor: 'pointer' }}>
+                    {role.issuspended ? 'Enable' : 'Disable'}
+                  </button>
+                  <button onClick={() => handleDeleteRole(role.id)} style={{ marginRight: '0.5rem', background: '#f44336', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 1rem', fontWeight: 500, cursor: 'pointer' }}>
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))

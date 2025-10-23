@@ -2,10 +2,16 @@
 .status-active {
   color: #43a047;
   font-weight: 600;
+  background: #e0f7fa;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
 }
 .status-suspended {
-  color: #ff9800;
+  color: #d84315;
   font-weight: 600;
+  background: #ffe082;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
 }
 /* Status bar styles */
 .status-bar {
@@ -31,24 +37,26 @@
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
 }
 .reactivate-btn {
   background-color: green;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
 }
 .user-list-container {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  max-width: 1000px;
-  width: 95%;
+  background: #f8fafc;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(44,62,80,0.10);
+  max-width: 1100px;
+  width: 98%;
   margin: 2rem auto;
 }
 
@@ -57,11 +65,13 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .user-list-header h2 {
-  color: #222;
+  color: #2d3748;
+  font-size: 2rem;
+  font-weight: 700;
   margin: 0;
 }
 
@@ -72,21 +82,23 @@
 }
 
 .user-list-actions input {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #bfc8d6;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: #fff;
 }
 
 .user-list-actions button {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   background-color: #0077cc;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: background 0.3s ease;
+  font-weight: 600;
 }
 
 .user-list-actions button:hover {
@@ -96,17 +108,23 @@
 table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.08);
+  overflow: hidden;
 }
 
 th, td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #ccc;
+  padding: 1rem;
+  border-bottom: 1px solid #e3e6f3;
   text-align: left;
+  font-size: 1.05rem;
 }
 
 th {
-  background-color: #f0f0f0;
+  background-color: #e3e6f3;
   color: #333;
+  font-weight: 700;
 }
 
 td {
@@ -129,15 +147,16 @@ td {
 
 .edit-btn, .delete-btn {
   margin-right: 0.5rem;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .edit-btn {
-  background-color: #4caf50;
+  background-color: #0077cc;
   color: white;
 }
 
@@ -147,7 +166,7 @@ td {
 }
 
 .edit-btn:hover {
-  background-color: #388e3c;
+  background-color: #005fa3;
 }
 
 .delete-btn:hover {
@@ -224,15 +243,15 @@ td {
 }
 
 .back-btn {
-  margin-bottom: 1rem;
   background-color: #eee;
   color: #333;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: background 0.3s ease;
+  margin-bottom: 1rem;
 }
 
 .back-btn:hover {

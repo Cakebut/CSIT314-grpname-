@@ -18,18 +18,4 @@ export class UpdateUserController {
   }
 }
 
-
-export class CreateUserController {
-  private userEntity = new UserEntity()
-
-  public async createUserfuunc1(
-    username: string,
-    password: string,
-    roleid: number
-  ) {
-    const obj = await this.userEntity.createUserfunc2(username, password, roleid)
-    return obj
-  }
-
  
-}

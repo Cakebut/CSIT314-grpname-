@@ -1,45 +1,77 @@
+.admin-bg {
+  background: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .admin-container {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  width: 90%;
+  padding: 2.5rem 2rem;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(44,62,80,0.12);
+  max-width: 480px;
+  width: 95%;
   text-align: center;
   margin: auto;
+  position: relative;
+}
+
+.admin-logo {
+  margin-bottom: 1.2rem;
+  display: flex;
+  justify-content: center;
 }
 
 .admin-container h1 {
-  color: #222;
+  color: #2d3748;
+  margin-bottom: 1.2rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.welcome-message {
   margin-bottom: 2rem;
+  font-size: 1.15rem;
+  color: #333;
+  font-weight: 500;
+  background: #f3f6fb;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.06);
 }
 
 .bubble-options {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: center;
 }
 
 .bubble {
-  background-color: #0077cc;
+  background: linear-gradient(90deg, #6C63FF 0%, #43a047 100%);
   color: white;
-  padding: 1rem 2rem;
+  padding: 1rem 2.2rem;
   border-radius: 50px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.10);
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .bubble:hover {
-  background-color: #005fa3;
+  background: linear-gradient(90deg, #43a047 0%, #6C63FF 100%);
+  transform: translateY(-2px) scale(1.04);
 }
 
 .logout-bubble {
-  background-color: #f44336;
+  background: #f44336;
+  color: white;
 }
 
 .logout-bubble:hover {
-  background-color: #d32f2f;
+  background: #d32f2f;
 }

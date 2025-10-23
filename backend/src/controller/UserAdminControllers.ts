@@ -1,6 +1,5 @@
 import { UserEntity } from "../entities/userAccount";
 
-
 export class ViewUserAccountController {
     private userAccount : UserEntity;
 
@@ -22,3 +21,41 @@ export class UpdateUserController {
     return await this.userEntity.deleteUser(id);
   }
 }
+
+
+
+//Create Accounts
+export class CreateUserController {
+  private userEntity = new UserEntity()
+
+  public async createUserfuunc1(
+    username: string,
+    password: string,
+    roleid: number
+  ) {
+    const obj = await this.userEntity.createUserfunc2(username, password, roleid)
+    return obj
+  }
+
+ 
+}
+
+
+// ROLES
+export class RoleController {
+  private roleEntity = new UserEntity();
+
+  async createRole(label: string) {
+    return await this.roleEntity.createRole(label);
+  }
+
+  async deleteRole(id: number) {
+    return await this.roleEntity.deleteRole(id);
+  }
+
+  async setRoleSuspended(id: number, issuspended: boolean) {
+    return await this.roleEntity.setRoleSuspended(id, issuspended);
+  }
+}
+
+
