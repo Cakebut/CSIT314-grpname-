@@ -7,6 +7,7 @@ function Login() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [status, setStatus] = useState<string>("");
+  const [showSuspendedModal, setShowSuspendedModal] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent form submission reload
@@ -22,22 +23,29 @@ function Login() {
         setStatus("Login successful!");
         const data = await res.json();
         // Store username and role for dashboard
-        localStorage.setItem('currentUsername', username);
-        localStorage.setItem('currentRole', data.role);
+        localStorage.setItem("currentUsername", username);
+        localStorage.setItem("currentRole", data.role);
         if (data.role === "User Admin") {
           navigate("/useradmin");
-        } 
-        else if (data.role === "Person In Need") {
+        } else if (data.role === "Person In Need") {
           navigate("/pin");
-        }
-        else if (data.role === "CSR Rep") {
+        } else if (data.role === "CSR Rep") {
           navigate("/csr");
-        }
-        else if (data.role === "Platform Manager") {
+        } else if (data.role === "Platform Manager") {
           navigate("/platform");
         }
       } else {
-        setStatus("Login attempt failed.");
+        let errorMsg = "Login attempt failed.";
+        try {
+          const errorData = await res.json();
+          if (errorData && errorData.error) errorMsg = errorData.error;
+        } catch {
+          errorMsg = "Login attempt failed.";
+        }
+        setStatus(errorMsg);
+        if (errorMsg === "Account is currently suspended") {
+          setShowSuspendedModal(true);
+        }
       }
     } catch (err) {
       setStatus("Unable to Login.");
@@ -45,17 +53,23 @@ function Login() {
     }
   };
 
-
-
-
-
   return (
-  
-
     <>
-     
-
       <section className="login-main login-section">
+        {showSuspendedModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>Account Suspended</h3>
+              <p>Your account is currently suspended.</p>
+              <button
+                onClick={() => setShowSuspendedModal(false)}
+                className="submit-btn btn"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
         <form id="loginForm" className="login-box">
           <div className="login-header">
             <header>Welcome Back</header>
