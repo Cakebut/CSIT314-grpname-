@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
-import Navbar from "../components/Navbar";
 
 function Login() {
   const navigate = useNavigate();
@@ -22,6 +21,9 @@ function Login() {
       if (res.ok) {
         setStatus("Login successful!");
         const data = await res.json();
+
+        // Store the role that logged in in localStorage
+        localStorage.setItem('userRole', data.role);
 
         console.log(data.role);
         if (data.role === "User Admin") {
@@ -47,8 +49,6 @@ function Login() {
 
   return (
     <>
-      <Navbar />
-      
       <section className="login-main login-section">
         <form id="loginForm" className="login-box">
           <div className="login-header">

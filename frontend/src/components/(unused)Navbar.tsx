@@ -5,9 +5,6 @@ function Navbar() {
   return (
     <>
       <header className="header container">
-        {/* <Link to="/main">
-          <img className="header-logo" src="../assets/images/logo.png" alt="Logo" />
-        </Link> */}
 
         <div className="header-items">
           <ul className="header-menu">
