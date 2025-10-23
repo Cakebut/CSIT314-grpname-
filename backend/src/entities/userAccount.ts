@@ -54,7 +54,7 @@ public async login(
 
 
 //Create User Account
-public async createUserfunc2(
+public async createUserFunc(
     username: string,
     password: string,
     roleid: number

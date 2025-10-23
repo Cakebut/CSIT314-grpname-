@@ -40,7 +40,7 @@ router.post("/users/:id", async (req, res) => {
 router.post("/users/", async(req, res) => {
   const { username, password, roleid } = req.body
   try { 
-    const obj = await createUserController.createUserfuunc1(username, password, roleid)
+    const obj = await createUserController.createUserFunc(username, password, roleid)
     if (obj) {
       return res.status(201).json({success: obj})
     } else {
