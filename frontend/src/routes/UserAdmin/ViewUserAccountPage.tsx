@@ -189,7 +189,6 @@ function ViewUserAccountPage() {
               <td>{user.id}</td>
               <td>{user.username}</td>
               <td>{user.userProfile}</td>
-              {/* <td>{roleMap[user.userProfile] || user.userProfile}</td> */}
               <td>
                 <span className={user.isSuspended ? 'status-suspended' : 'status-active'}>
                   {user.isSuspended ? 'Suspended' : 'Active'}
