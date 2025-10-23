@@ -8,7 +8,7 @@ import connectPgSimple from 'connect-pg-simple';
 import { sql } from 'drizzle-orm';
 
 //Routers
-import { userAdminRouter } from './router/userAdmin';
+import { router } from './router/userAdmin';
 
 declare module 'express-session' {
   interface SessionData {
@@ -56,7 +56,7 @@ app.get("/", async (req, res) => {
 
 
 
-app.use("/api/userAdmin", userAdminRouter)
+app.use("/api/", router)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
