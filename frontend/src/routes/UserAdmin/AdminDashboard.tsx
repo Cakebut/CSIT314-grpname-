@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
+import Navbar from '../../components/Navbar';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function AdminDashboard() {
 
   return (
     <div className="admin-container">
+      <Navbar />
       <h1>Admin Dashboard</h1>
       <div className="bubble-options">
         <div className="bubble" onClick={() => navigate('/useradmin/ViewUserList')}>

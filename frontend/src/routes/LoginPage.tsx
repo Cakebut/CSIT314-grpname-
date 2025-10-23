@@ -22,11 +22,19 @@ function Login() {
       if (res.ok) {
         setStatus("Login successful!");
         const data = await res.json();
+
         console.log(data.role);
         if (data.role === "User Admin") {
           navigate("/useradmin");
-        } else if (data.role === "PIN") {
+        } 
+        else if (data.role === "Person In Need") {
           navigate("/pin");
+        }
+        else if (data.role === "CSR Rep") {
+          navigate("/csr");
+        }
+        else if (data.role === "Platform Manager") {
+          navigate("/platform");
         }
       } else {
         setStatus("Login attempt failed.");
