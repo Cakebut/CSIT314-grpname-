@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 
+
 function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [status, setStatus] = useState<string>("");
+  const [showSuspendedModal, setShowSuspendedModal] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent form submission reload
@@ -21,8 +23,6 @@ function Login() {
       if (res.ok) {
         setStatus("Login successful!");
         const data = await res.json();
-
-        console.log(data.role);
         if (data.role === "User Admin") {
           navigate("/useradmin");
         } 
@@ -36,7 +36,15 @@ function Login() {
           navigate("/platform");
         }
       } else {
-        setStatus("Login attempt failed.");
+        let errorMsg = "Login attempt failed.";
+        try {
+          const errorData = await res.json();
+          if (errorData && errorData.error) errorMsg = errorData.error;
+        } catch {}
+        setStatus(errorMsg);
+        if (errorMsg === "Account is currently suspended") {
+          setShowSuspendedModal(true);
+        }
       }
     } catch (err) {
       setStatus("Unable to Login.");
@@ -55,6 +63,15 @@ function Login() {
      
 
       <section className="login-main login-section">
+        {showSuspendedModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>Account Suspended</h3>
+              <p>Your account is currently suspended.</p>
+              <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn">Close</button>
+            </div>
+          </div>
+        )}
         <form id="loginForm" className="login-box">
           <div className="login-header">
             <header>Welcome Back</header>

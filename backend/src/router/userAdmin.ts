@@ -72,11 +72,32 @@ router.get('/roles', async (req, res) => {
   }
 });
 
+router.delete("/users/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!id) {
+    return res.status(400).json({ success: false, error: "Missing user id" });
+  }
+  try {
+    const result = await updateUserController.deleteUserById(id);
+    if (result) {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
 //Login
+
 router.post("/userAdmin/login", async(req,res)=>{
   const {username, password} = req.body;
   const userAccRes = await new LoginController().login(username, password);
- 
+  if(userAccRes === 'suspended') {
+    return res.status(403).json({ error: "Account is currently suspended" });
+  }
   if(userAccRes){
     (req.session as any).username = username;
     return res.json({ 
@@ -84,9 +105,9 @@ router.post("/userAdmin/login", async(req,res)=>{
       role: userAccRes.userProfile
     });
   } else {
-    return  res.status(401).json({ error: "Invalid credentials or account suspended" });
+    return  res.status(401).json({ error: "Invalid credentials" });
   }
-}) 
+})
 
 
 // Logout

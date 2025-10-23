@@ -1,3 +1,47 @@
+/* User status colors in table */
+.status-active {
+  color: #43a047;
+  font-weight: 600;
+}
+.status-suspended {
+  color: #ff9800;
+  font-weight: 600;
+}
+/* Status bar styles */
+.status-bar {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.5rem 0;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+.status-bar.suspended {
+  background-color: #e53935;
+  color: #fff;
+}
+.status-bar.active {
+  background-color: #43a047;
+  color: #fff;
+}
+/* Suspend/Reactivate button styles */
+.suspend-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.reactivate-btn {
+  background-color: green;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
 .user-list-container {
   background: white;
   padding: 2rem;

@@ -1,4 +1,5 @@
 
+
 import { useraccountTable, roleTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
@@ -13,7 +14,7 @@ export class UserEntity {
 public async login(
     username: string,
     password: string
-  ):Promise<useraccountData | null > {
+  ): Promise<useraccountData | "suspended" | null> {
     try {
       const [retrievedUser] = await db
       .select({
@@ -31,7 +32,7 @@ public async login(
         return null;
       }
       if(retrievedUser.issuspended) { // Account is suspended
-        return null;
+        return 'suspended' as any;
       }
       return{
         id:retrievedUser.id,
@@ -117,6 +118,16 @@ public async updateUser(
 }
 
 
+// Delete user by id
+public async deleteUser(id: number): Promise<boolean> {
+  try {
+    const result = await db.delete(useraccountTable).where(eq(useraccountTable.id, id));
+  return (result.rowCount ?? 0) > 0;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
 
 
 }

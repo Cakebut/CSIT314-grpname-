@@ -18,4 +18,7 @@ export class UpdateUserController {
   public async updateUserInfo(id: number, username: string, roleid: number, issuspended: boolean) {
     return await this.userEntity.updateUser(id, username, roleid, issuspended);
   }
+  public async deleteUserById(id: number) {
+    return await this.userEntity.deleteUser(id);
+  }
 }
