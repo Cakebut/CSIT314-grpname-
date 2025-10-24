@@ -5,7 +5,7 @@ import { sql, eq, and } from "drizzle-orm"; // Add this import
 
 //Controllers
 import { LoginController  } from "../controller/sharedControllers";
-import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController} from "../controller/UserAdminControllers";
+import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController } from "../controller/UserAdminControllers";
 
 
 //ROUTERS
@@ -14,7 +14,7 @@ const createUserController = new CreateUserController();
 const viewUserAccountController = new ViewUserAccountController();
 const updateUserController = new UpdateUserController();
 const roleController = new RoleController();
-
+const searchUserController = new SearchUserController();
 
 // Update user info
 router.post("/users/:id", async (req, res) => {
@@ -176,6 +176,30 @@ router.post('/roles/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, error: 'Failed to update role status' });
+  }
+});
+
+// Search roles by label
+router.get('/roles/search', async (req, res) => {
+  const keyword = req.query.q as string || '';
+  try {
+    const roles = await roleController.searchRoles(keyword);
+    res.json(roles);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to search roles' });
+  }
+});
+
+// Search and filter users by username, role, and status
+router.get('/users/search', async (req, res) => {
+  const keyword = req.query.q as string || '';
+  const role = req.query.role as string || '';
+  const status = req.query.status as string || '';
+  try {
+    const users = await searchUserController.searchAndFilterUsers({ keyword, role, status });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to search users' });
   }
 });
 
