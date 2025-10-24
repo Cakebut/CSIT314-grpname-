@@ -37,7 +37,7 @@ function ViewUserAccountPage() {
   // Fetch users from backend
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/users");
+      const res = await fetch("/api/users");
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
@@ -64,7 +64,7 @@ function ViewUserAccountPage() {
   //fetch roles from backend
   const fetchRoles = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/roles");
+      const res = await fetch("/api/roles");
       if (res.ok) {
         const data = await res.json();
         setRoles(data);
@@ -101,7 +101,7 @@ function ViewUserAccountPage() {
   const handleDelete = async (userId: number) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -131,7 +131,7 @@ function ViewUserAccountPage() {
   return;
     }
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${selectedUser.id}`, {
+      const res = await fetch(`/api/users/${selectedUser.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

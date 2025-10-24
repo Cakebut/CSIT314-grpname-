@@ -1,8 +1,18 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vite.dev/config/
+const codespaceUrl = process.env.VITE_API_URL_CODESPACE;
+const localUrl = 'http://localhost:3000';
+
 export default defineConfig({
   plugins: [react()],
-  base: "",
-})
+  server: {
+    proxy: {
+      '/api': {
+        target: codespaceUrl || localUrl,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+});

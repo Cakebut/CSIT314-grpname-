@@ -22,7 +22,7 @@ function ViewUserRoles() {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/roles');
+        const res = await fetch('/api/roles');
         if (res.ok) {
           const data = await res.json();
           setRoles(data);
@@ -44,7 +44,7 @@ function ViewUserRoles() {
     if (!newRoleLabel.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch('http://localhost:3000/api/roles', {
+      const res = await fetch('/api/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ label: newRoleLabel })
@@ -54,7 +54,7 @@ function ViewUserRoles() {
         setShowCreateModal(false);
         toast.success('Role created successfully');
         // Refresh roles
-        const updated = await fetch('http://localhost:3000/api/roles');
+        const updated = await fetch('/api/roles');
         setRoles(updated.ok ? await updated.json() : []);
       } else {
         toast.error('Failed to create role');
@@ -67,14 +67,14 @@ function ViewUserRoles() {
   // Delete role
   const handleDeleteRole = async (id: number) => {
     if (!window.confirm('Delete this role?')) return;
-    const res = await fetch(`http://localhost:3000/api/roles/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/roles/${id}`, { method: 'DELETE' });
     if (res.ok) {
       toast.success('Role deleted successfully');
     } else {
       toast.error('Failed to delete role');
     }
     // Refresh roles
-    const updated = await fetch('http://localhost:3000/api/roles');
+    const updated = await fetch('/api/roles');
     setRoles(updated.ok ? await updated.json() : []);
   };
 
@@ -82,7 +82,7 @@ function ViewUserRoles() {
   const handleSuspendRole = async (role: Role) => {
     const action = role.issuspended ? 'unsuspend' : 'suspend';
     if (!window.confirm(`Are you sure you want to ${action} this role?`)) return;
-    const res = await fetch(`http://localhost:3000/api/roles/${role.id}`, {
+    const res = await fetch(`/api/roles/${role.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ issuspended: !role.issuspended })
@@ -93,7 +93,7 @@ function ViewUserRoles() {
       toast.error('Failed to update role status');
     }
     // Refresh roles
-    const updated = await fetch('http://localhost:3000/api/roles');
+    const updated = await fetch('/api/roles');
     setRoles(updated.ok ? await updated.json() : []);
   };
 
@@ -103,7 +103,7 @@ function ViewUserRoles() {
     setSearch(value);
     setSearching(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/roles/search?q=${encodeURIComponent(value)}`);
+      const res = await fetch(`/api/roles/search?q=${encodeURIComponent(value)}`);
       if (res.ok) {
         setRoles(await res.json());
       } else {

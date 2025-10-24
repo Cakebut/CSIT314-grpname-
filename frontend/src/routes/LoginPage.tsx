@@ -13,7 +13,7 @@ function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent form submission reload
     try {
-      const res = await fetch("http://localhost:3000/api/userAdmin/login", {
+      const res = await fetch("/api/userAdmin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

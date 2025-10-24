@@ -14,7 +14,7 @@ function CreateNewUserAccountPage() {
   // Dynamically fetched roles
   const [roles, setRoles] = useState<{id: number, label: string, issuspended?: boolean}[]>([]);
   useEffect(() => {
-    fetch('http://localhost:3000/api/roles')
+    fetch('/api/roles')
       .then(res => res.json())
       .then(data => setRoles(data))
       .catch(() => setRoles([]));
@@ -28,7 +28,7 @@ function CreateNewUserAccountPage() {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:3000/api/users', {
+      const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, roleid, status }),
