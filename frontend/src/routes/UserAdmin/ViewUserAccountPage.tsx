@@ -1,4 +1,3 @@
-
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from "react";
@@ -32,7 +31,9 @@ function ViewUserAccountPage() {
 
   const [roles, setRoles] = useState<UserProfile[]>([]); // Store roles from backend
 
- 
+  const [filterRole, setFilterRole] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
   // Fetch users from backend
   const fetchUsers = async () => {
     try {
@@ -80,12 +81,13 @@ function ViewUserAccountPage() {
     fetchRoles();
   }, []);
 
-  // Filter users by search term
-  const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
- 
+  // Filter users by search term, role, and status
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole ? user.userProfile === filterRole : true;
+    const matchesStatus = filterStatus ? (filterStatus === 'Active' ? !user.isSuspended : user.isSuspended) : true;
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   const handleEdit = (user: UserAccount) => {
     setSelectedUser(user);
@@ -160,15 +162,30 @@ function ViewUserAccountPage() {
 
       <div className="user-list-header">
         <h2>User Accounts</h2>
-        <div className="user-list-actions">
-          <input
-            type="text"
-            placeholder="Search by username"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button onClick={() => navigate("/useradmin/create")}>
-            Create Account
+        <div className="user-list-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.2rem' }}>
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="text"
+              placeholder="🔍 Search by username..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', width: '170px' }}
+            />
+            <select value={filterRole} onChange={e => setFilterRole(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', minWidth: '110px' }}>
+              <option value="">All Roles</option>
+              {roles.map(role => (
+                <option key={role.id} value={role.label}>{role.label}</option>
+              ))}
+            </select>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', minWidth: '110px' }}>
+              <option value="">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+          <button onClick={() => navigate("/useradmin/create")}
+            style={{ background: '#0077cc', color: 'white', border: 'none', borderRadius: '8px', padding: '0.6rem 1.3rem', fontWeight: 700, fontSize: '1rem', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', cursor: 'pointer', letterSpacing: '0.01em', transition: 'background 0.2s', marginTop: '0.5rem', alignSelf: 'flex-end', display: 'block' }}>
+            ＋ Create Account
           </button>
         </div>
       </div>

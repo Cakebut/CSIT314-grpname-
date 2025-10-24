@@ -16,6 +16,8 @@ function ViewUserRoles() {
   const [newRoleLabel, setNewRoleLabel] = useState("");
   const [creating, setCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -95,6 +97,25 @@ function ViewUserRoles() {
     setRoles(updated.ok ? await updated.json() : []);
   };
 
+  // Search roles
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    setSearching(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/roles/search?q=${encodeURIComponent(value)}`);
+      if (res.ok) {
+        setRoles(await res.json());
+      } else {
+        setRoles([]);
+      }
+    } catch {
+      setRoles([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
   return (
     <div className="roles-container" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #e3e6f3 100%)', minHeight: '100vh' }}>
       <button className="back-btn" onClick={() => navigate('/useradmin')}>
@@ -102,9 +123,18 @@ function ViewUserRoles() {
       </button>
       <div className="roles-header">
         <h2 style={{ fontWeight: 700, fontSize: '2rem', color: '#2d3a4a', marginBottom: '0.5rem' }}>Roles Dashboard</h2>
-        <button className="create-role-btn" onClick={() => setShowCreateModal(true)}>
-          ＋ Create Role
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Search roles..."
+            value={search}
+            onChange={handleSearch}
+            style={{ padding: '0.7rem 1.2rem', borderRadius: '10px', border: '1.5px solid #bfc8d6', fontSize: '1.05rem', background: '#f3f6fb', width: '220px', marginRight: '0.5rem' }}
+          />
+          <button className="create-role-btn" onClick={() => setShowCreateModal(true)}>
+            ＋ Create Role
+          </button>
+        </div>
       </div>
       {showCreateModal && (
         <div className="modal-overlay">
@@ -142,7 +172,7 @@ function ViewUserRoles() {
           </tr>
         </thead>
         <tbody>
-          {loading ? (
+          {loading || searching ? (
             <tr><td colSpan={4}>Loading...</td></tr>
           ) : roles.length === 0 ? (
             <tr><td colSpan={4}>No roles found.</td></tr>

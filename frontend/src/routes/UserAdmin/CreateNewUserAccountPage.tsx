@@ -48,6 +48,12 @@ function CreateNewUserAccountPage() {
 
   return (
     <div className="create-user-container" style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <button
+        onClick={() => navigate('/useradmin/ViewUserList')}
+        style={{ position: 'absolute', top: '2rem', left: '2rem', background: '#0077cc', color: 'white', border: 'none', borderRadius: '8px', padding: '0.6rem 1.3rem', fontWeight: 700, fontSize: '1rem', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', cursor: 'pointer', letterSpacing: '0.01em', transition: 'background 0.2s' }}
+      >
+        ← Return to User List
+      </button>
       <form onSubmit={handleCreateAccount} className="create-user-form" style={{ background: 'white', borderRadius: '24px', boxShadow: '0 12px 32px rgba(44,62,80,0.12)', padding: '2.5rem 2rem', maxWidth: '400px', width: '100%' }}>
         <h2 style={{ textAlign: 'center', fontWeight: 700, fontSize: '2rem', color: '#2d3748', marginBottom: '2rem', letterSpacing: '0.02em' }}>Create New User</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem', marginBottom: '1.1rem' }}>

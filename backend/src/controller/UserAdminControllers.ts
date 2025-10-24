@@ -56,6 +56,23 @@ export class RoleController {
   async setRoleSuspended(id: number, issuspended: boolean) {
     return await this.roleEntity.setRoleSuspended(id, issuspended);
   }
+
+  // Search roles by label
+  async searchRoles(keyword: string) {
+    return await this.roleEntity.searchRoles(keyword);
+  }
+}
+
+export class SearchUserController {
+  private userAccount = new UserEntity();
+
+  public async searchUsers(keyword: string) {
+    return await this.userAccount.searchUsers(keyword);
+  }
+
+  public async searchAndFilterUsers(params: { keyword?: string, role?: string, status?: string }) {
+    return await this.userAccount.searchAndFilterUsers(params);
+  }
 }
 
 

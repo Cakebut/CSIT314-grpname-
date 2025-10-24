@@ -1,5 +1,3 @@
-
-
 import { useraccountTable, roleTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
@@ -159,6 +157,85 @@ public async deleteUser(id: number): Promise<boolean> {
       return false;
     }
   }
+
+  // Search roles by label (case-insensitive, partial match)
+  async searchRoles(keyword: string): Promise<{ id: number, label: string, issuspended: boolean }[]> {
+    try {
+      const roles = await db
+        .select({ id: roleTable.id, label: roleTable.label, issuspended: roleTable.issuspended })
+        .from(roleTable)
+        .where(ilike(roleTable.label, `%${keyword}%`));
+      return roles;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  // Search users by username (case-insensitive, partial match)
+  async searchUsers(keyword: string): Promise<{ id: number, username: string, userProfile: string, isSuspended: boolean }[]> {
+    try {
+      const users = await db
+        .select({
+          id: useraccountTable.id,
+          username: useraccountTable.username,
+          userProfile: roleTable.label,
+          isSuspended: useraccountTable.issuspended
+        })
+        .from(useraccountTable)
+        .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id))
+        .where(ilike(useraccountTable.username, `%${keyword}%`));
+      return users.map(user => ({
+        id: user.id,
+        username: user.username,
+        userProfile: user.userProfile ?? "",
+        isSuspended: user.isSuspended
+      }));
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  // Search and filter users by username, role, and status
+  async searchAndFilterUsers({ keyword = '', role = '', status = '' }: { keyword?: string, role?: string, status?: string }): Promise<{ id: number, username: string, userProfile: string, isSuspended: boolean }[]> {
+    try {
+      let query = db
+        .select({
+          id: useraccountTable.id,
+          username: useraccountTable.username,
+          userProfile: roleTable.label,
+          isSuspended: useraccountTable.issuspended
+        })
+        .from(useraccountTable)
+        .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id));
+
+      const conditions = [];
+      if (keyword) {
+        conditions.push(ilike(useraccountTable.username, `%${keyword}%`));
+      }
+      if (role) {
+        conditions.push(ilike(roleTable.label, `%${role}%`));
+      }
+      if (status) {
+        if (status === 'Active') conditions.push(eq(useraccountTable.issuspended, false));
+        if (status === 'Suspended') conditions.push(eq(useraccountTable.issuspended, true));
+      }
+      if (conditions.length > 0) {
+        // @ts-ignore
+        query = query.where(and(...conditions));
+      }
+      const users = await query;
+      return users.map(user => ({
+        id: user.id,
+        username: user.username,
+        userProfile: user.userProfile ?? "",
+        isSuspended: user.isSuspended
+      }));
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
 }
 
- 
