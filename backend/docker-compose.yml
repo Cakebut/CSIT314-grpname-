@@ -1,0 +1,18 @@
+name: crashout_backend
+
+services:
+    postgres:
+        container_name: crashout_postgres_container
+        image: postgres:16.8-alpine
+        restart: always
+        environment:
+            POSTGRES_DB: crashout_db
+            POSTGRES_USER: crashout_user
+            POSTGRES_PASSWORD: crashout_password
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - '5433:5432'
+
+volumes:
+    postgres_data:

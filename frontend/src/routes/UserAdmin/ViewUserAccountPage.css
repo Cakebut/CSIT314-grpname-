@@ -1,0 +1,262 @@
+/* User status colors in table */
+.status-active {
+  color: #43a047;
+  font-weight: 600;
+  background: #e0f7fa;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+}
+.status-suspended {
+  color: #d84315;
+  font-weight: 600;
+  background: #ffe082;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+}
+/* Status bar styles */
+.status-bar {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.5rem 0;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+.status-bar.suspended {
+  background-color: #e53935;
+  color: #fff;
+}
+.status-bar.active {
+  background-color: #43a047;
+  color: #fff;
+}
+/* Suspend/Reactivate button styles */
+.suspend-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.reactivate-btn {
+  background-color: green;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.user-list-container {
+  background: #f8fafc;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(44,62,80,0.10);
+  max-width: 1100px;
+  width: 98%;
+  margin: 2rem auto;
+}
+
+.user-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.user-list-header h2 {
+  color: #2d3748;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.user-list-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.user-list-actions input {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #bfc8d6;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: #fff;
+}
+
+.user-list-actions button {
+  padding: 0.6rem 1.2rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-weight: 600;
+}
+
+.user-list-actions button:hover {
+  background-color: #005fa3;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.08);
+  overflow: hidden;
+}
+
+th, td {
+  padding: 1rem;
+  border-bottom: 1px solid #e3e6f3;
+  text-align: left;
+  font-size: 1.05rem;
+}
+
+th {
+  background-color: #e3e6f3;
+  color: #333;
+  font-weight: 700;
+}
+
+td {
+  color: #555;
+}
+
+.status {
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.status.active {
+  color: green;
+}
+
+.status.suspended {
+  color: orange;
+}
+
+.edit-btn, .delete-btn {
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.edit-btn {
+  background-color: #0077cc;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #005fa3;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+  color: #222;
+  text-align: center;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-content input,
+.modal-content select {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.modal-actions button[type="submit"] {
+  background-color: #0077cc;
+  color: white;
+}
+
+.modal-actions button[type="button"] {
+  background-color: #ccc;
+  color: #333;
+}
+
+.modal-actions button:hover {
+  opacity: 0.9;
+}
+
+.back-btn {
+  background-color: #eee;
+  color: #333;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.back-btn:hover {
+  background-color: #ddd;
+}
+.back-btn:active {
+  background-color: #d80606;
+}
