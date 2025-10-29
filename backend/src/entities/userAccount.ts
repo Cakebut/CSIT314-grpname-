@@ -1,3 +1,5 @@
+
+
 import { useraccountTable, roleTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
@@ -6,12 +8,13 @@ import { useraccountData } from "../shared/dataClasses";
 
 export class UserEntity {
 
+ 
 
 // LOGIN FUNCTION
 public async login(
     username: string,
     password: string
-  ):Promise<useraccountData | null > {
+  ): Promise<useraccountData | "suspended" | null> {
     try {
       const [retrievedUser] = await db
       .select({
@@ -29,7 +32,7 @@ public async login(
         return null;
       }
       if(retrievedUser.issuspended) { // Account is suspended
-        return null;
+        return 'suspended' as any;
       }
       return{
         id:retrievedUser.id,
@@ -50,8 +53,8 @@ public async login(
 
 
 
-
-public async createUserfunc2(
+//Create User Account
+public async createUserFunc(
     username: string,
     password: string,
     roleid: number
@@ -68,6 +71,8 @@ public async createUserfunc2(
       return false;
     }
   }
+
+  //Get all user accounts
 public async getAllUserAccounts(): Promise<useraccountData[]> {
   try{
     const users = await db
@@ -91,6 +96,69 @@ public async getAllUserAccounts(): Promise<useraccountData[]> {
     return [];
   }
 }
+
+
+
+// Update user info by id
+public async updateUser(
+  id: number,
+  username: string,
+  roleid: number,
+  issuspended: boolean
+): Promise<boolean> {
+  try {
+    await db.update(useraccountTable)
+      .set({ username, roleid, issuspended })
+      .where(eq(useraccountTable.id, id));
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+
+// Delete user by id
+public async deleteUser(id: number): Promise<boolean> {
+  try {
+    const result = await db.delete(useraccountTable).where(eq(useraccountTable.id, id));
+  return (result.rowCount ?? 0) > 0;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+
+  async createRole(label: string): Promise<boolean> {
+    try {
+      await db.insert(roleTable).values({ label });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async deleteRole(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(roleTable).where(eq(roleTable.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async setRoleSuspended(id: number, issuspended: boolean): Promise<boolean> {
+    try {
+      await db.update(roleTable).set({ issuspended }).where(eq(roleTable.id, id));
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
 }
 
  

@@ -1,6 +1,6 @@
 {
   "name": "my-csit314-app",
-  "homepage": "https://Cakebut.github.io/CSIT314-grpname-/",
+  "homepage": "https://cakebut.github.io/CSIT314Crashout/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -18,7 +18,9 @@
     "nodemon": "^3.1.10",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4"
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.9.4",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

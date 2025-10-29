@@ -19,7 +19,9 @@ import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPag
 //Person In Need
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
 // CSS
-import './App.css';
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   useEffect (() => {
@@ -31,17 +33,16 @@ function App() {
       <div className="app-wrapper">
         <Routes>
           <Route path="/" element={<Login />} />
-      
-      //User Admin
-            <Route path="/useradmin" element={<AdminDashboard />} />
-              <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
-                <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
-                  <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
-                    <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
-
-      //Person In Need
-            <Route path="/PIN" element={<PersonInNeedDashboard />} />
+          {/* User Admin */}
+          <Route path="/useradmin" element={<AdminDashboard />} />
+          <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
+          <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
+          <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
+          <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
+          {/* Person In Need */}
+          <Route path="/PIN" element={<PersonInNeedDashboard />} />
         </Routes>
+        <ToastContainer />
       </div>
     </Router>
   );
