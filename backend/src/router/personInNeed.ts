@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
 import { db } from "../index";
-import { urgency_levelTable, locationTable } from "../db/schema/aiodb";
+import { urgency_levelTable, locationTable ,service_typeTable} from "../db/schema/aiodb";
 
 
 const router = Router();
@@ -128,4 +128,15 @@ router.get('/locations', async (req, res) => {
   }
 });
 
+
+
+// Get all service types (for dropdowns etc)
+router.get('/service-types', async (req, res) => {
+  try {
+    const types = await db.select().from(service_typeTable);
+    res.json({ data: types });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch service types' });
+  }
+});
 export default router;

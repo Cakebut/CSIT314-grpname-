@@ -4,11 +4,14 @@ import { auditLogTable } from "../db/schema/aiodb";
 
 import { Router } from "express";
 import { db } from "../index";
-import { useraccountTable,roleTable,service_typeTable,csr_requestsTable } from "../db/schema/aiodb";
+import { useraccountTable,roleTable } from "../db/schema/aiodb";
 import { sql, eq, and } from "drizzle-orm"; // Add this import
 //Controllers
 import { LoginController  } from "../controller/sharedControllers";
 import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController } from "../controller/UserAdminControllers";
+import { AuditLogController } from "../controller/AuditLogController";
+ 
+
 
 //ROUTERS
 const router = Router();
@@ -17,41 +20,11 @@ const viewUserAccountController = new ViewUserAccountController();
 const updateUserController = new UpdateUserController();
 const roleController = new RoleController();
 const searchUserController = new SearchUserController();
+const auditLogController = new AuditLogController();
 
 
 
-
-// Get audit log entries
-router.get("/userAdmin/audit-log", async (req, res) => {
-  try {
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
-  const logs = await getAuditLogs(limit);
-    res.json(logs);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch audit logs" });
-  }
-});
-
-// Clear all audit logs
-router.delete("/userAdmin/audit-log", async (req, res) => {
-  try {
-    await db.delete(auditLogTable);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to clear audit logs" });
-  }
-});
-
-// Get all service types (for dropdowns etc)
-router.get('/service-types', async (req, res) => {
-  try {
-    const types = await db.select().from(service_typeTable);
-    res.json({ data: types });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch service types' });
-  }
-});
-
+ 
 // Update user info
 router.post("/users/:id", async (req, res) => {
   const { username, roleid, issuspended } = req.body;
@@ -73,8 +46,8 @@ router.post("/users/:id", async (req, res) => {
   }
 });
 
-
-router.post("/users/", async(req, res) => {
+//CREATE USER
+router.post("/userAdmin/createUser", async(req, res) => {
   const { username, password, roleid } = req.body
   try { 
     const actor = req.session?.username || "unknown";
@@ -134,7 +107,6 @@ router.delete("/users/:id", async (req, res) => {
 });
 
 //Login
-
 router.post("/userAdmin/login", async(req,res)=>{
   const {username, password} = req.body;
   const userAccRes = await new LoginController().login(username, password);
@@ -143,14 +115,13 @@ router.post("/userAdmin/login", async(req,res)=>{
   }
   if(userAccRes){
     (req.session as any).username = username;
-    // Log login action
-    const { addAuditLog } = await import("../entities/auditLog");
-    await addAuditLog({
-      actor: username,
-      action: "login",
-      target: username,
-      details: `User logged in.`
-    });
+    // Log login action via controller
+    await auditLogController.createAuditLog(
+      username,
+      "login",
+      username,
+      "User logged in."
+    );
     return res.json({ 
       message: "Logged in" ,
       role: userAccRes.userProfile,
@@ -167,14 +138,13 @@ router.post("/userAdmin/login", async(req,res)=>{
 router.post("/userAdmin/logout", (req, res) => {
   const actor = req.session?.username || "unknown";
   req.session.destroy(async () => {
-    // Log logout action
-    const { addAuditLog } = await import("../entities/auditLog");
-    await addAuditLog({
+    // Log logout action via controller
+    await auditLogController.createAuditLog(
       actor,
-      action: "logout",
-      target: actor,
-      details: `User logged out.`
-    });
+      "logout",
+      actor,
+      "User logged out."
+    );
     res.json({ message: "Logged out" });
   });
 });
@@ -259,19 +229,51 @@ router.get('/users/search', async (req, res) => {
   try {
     const actor = req.session?.username || "unknown";
     const users = await searchUserController.searchAndFilterUsers({ keyword, role, status });
-    // Log search/filter action
-    const { addAuditLog } = await import("../entities/auditLog");
-    await addAuditLog({
+    // Log search/filter action via controller
+    await auditLogController.createAuditLog(
       actor,
-      action: "search/filter users",
-      target: actor,
-      details: `keyword: ${keyword}, role: ${role}, status: ${status}`,
-    });
+      "search/filter users",
+      actor,
+      `keyword: ${keyword}, role: ${role}, status: ${status}`
+    );
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to search users' });
   }
 });
+
+
+
+
+
+//AUDIT LOG
+
+// Get audit log entries
+router.get("/userAdmin/audit-log", async (req, res) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+  const logs = await auditLogController.fetchAuditLogs(limit);
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch audit logs" });
+  }
+});
+
+// Clear all audit logs (BCE pattern)
+router.delete("/userAdmin/audit-log", async (req, res) => {
+  try {
+    if (typeof auditLogController.clearAuditLogs === "function") {
+      await auditLogController.clearAuditLogs();
+      res.json({ success: true });
+    } else {
+      // fallback if not implemented
+      res.status(501).json({ error: "AuditLogController.clearAuditLogs not implemented" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Failed to clear audit logs" });
+  }
+});
+ 
 
 
 export { router };

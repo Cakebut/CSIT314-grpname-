@@ -28,7 +28,7 @@ function CreateNewUserAccountPage() {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/users/', {
+      const res = await fetch('/api/userAdmin/createUser/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, roleid, status }),

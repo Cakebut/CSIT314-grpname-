@@ -1,5 +1,6 @@
 import { UserEntity } from "../entities/userAccount";
-import { addAuditLog } from "../entities/auditLog";
+import { AuditLogController } from "./AuditLogController";
+const auditLogController = new AuditLogController();
 
 export class ViewUserAccountController {
     private userAccount : UserEntity;
@@ -26,12 +27,12 @@ export class UpdateUserController {
       if (typeof prevSuspended === "boolean" && prevSuspended !== issuspended) {
         action = issuspended ? "suspend user" : "activate user";
       }
-      await addAuditLog({
+      await auditLogController.createAuditLog(
         actor,
         action,
-        target: username,
-        details: `roleid: ${roleid}, issuspended: ${issuspended}`,
-      });
+        username,
+        `roleid: ${roleid}, issuspended: ${issuspended}`
+      );
     }
     return result;
   }
@@ -42,12 +43,12 @@ export class UpdateUserController {
     const username = user ? user.username : `id:${id}`;
     const result = await this.userEntity.deleteUser(id);
     if (result) {
-      await addAuditLog({
+      await auditLogController.createAuditLog(
         actor,
-        action: "delete user",
-        target: username,
-        details: `id: ${id}`,
-      });
+        "delete user",
+        username,
+        `id: ${id}`
+      );
     }
     return result;
   }
@@ -67,12 +68,12 @@ export class CreateUserController {
   ) {
     const result = await this.userEntity.createUserFunc(username, password, roleid);
     if (result) {
-      await addAuditLog({
+      await auditLogController.createAuditLog(
         actor,
-        action: "create user",
-        target: username,
-        details: `roleid: ${roleid}`,
-      });
+        "create user",
+        username,
+        `roleid: ${roleid}`
+      );
     }
     return result;
   }
@@ -88,12 +89,12 @@ export class RoleController {
   async createRole(label: string, actor: string) {
     const result = await this.roleEntity.createRole(label);
     if (result) {
-      await addAuditLog({
+      await auditLogController.createAuditLog(
         actor,
-        action: "create role",
-        target: label,
-        details: `Role created.`,
-      });
+        "create role",
+        label,
+        `Role created.`
+      );
     }
     return result;
   }
@@ -105,12 +106,12 @@ export class RoleController {
     const roleLabel = role ? role.label : `id:${id}`;
     const result = await this.roleEntity.deleteRole(id);
     if (result) {
-      await addAuditLog({
+      await auditLogController.createAuditLog(
         actor,
-        action: "delete role",
-        target: roleLabel,
-        details: `Role deleted.`,
-      });
+        "delete role",
+        roleLabel,
+        `Role deleted.`
+      );
     }
     return result;
   }
@@ -122,12 +123,12 @@ export class RoleController {
       const roles = await this.roleEntity.searchRoles("");
       const role = roles.find(r => r.id === id);
       const roleLabel = role ? role.label : `id:${id}`;
-      await addAuditLog({
+      await auditLogController.createAuditLog(
         actor,
-        action: issuspended ? "suspend role" : "activate role",
-        target: roleLabel,
-        details: `id: ${id}, issuspended: ${issuspended}`,
-      });
+        issuspended ? "suspend role" : "activate role",
+        roleLabel,
+        `id: ${id}, issuspended: ${issuspended}`
+      );
     }
     return result;
   }

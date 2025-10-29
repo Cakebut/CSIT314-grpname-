@@ -25,3 +25,7 @@ export async function getAuditLogs(limit?: number) {
   }
   return await query;
 }
+
+export async function clearAuditLogs() {
+  await db.delete(auditLogTable);
+}
