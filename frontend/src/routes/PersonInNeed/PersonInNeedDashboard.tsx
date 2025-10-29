@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import "./PersonInNeedDashboard.css";
 
@@ -131,7 +133,7 @@ const PersonInNeedDashboard: React.FC = () => {
       body: JSON.stringify({ pin_id: userId, title, categoryID: Number(categoryID), message, locationID: Number(locationID), urgencyLevelID: Number(urgencyLevelID) }),
     });
     if (res.ok) {
-      setStatusMsg("Request submitted!");
+      toast.success("Request created successfully!");
       setTitle("");
       setCategoryID("");
       setMessage("");
@@ -141,7 +143,7 @@ const PersonInNeedDashboard: React.FC = () => {
       fetchAllRequests(); // Refresh all requests table after create
       setShowCreate(false);
     } else {
-      setStatusMsg("Failed to submit request.");
+      toast.error("Failed to create request.");
     }
   };
 
@@ -149,6 +151,7 @@ const PersonInNeedDashboard: React.FC = () => {
 
   return (
     <div className="container">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
       <div className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <h2>All Person-In-Need Requests</h2>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -431,12 +434,12 @@ const PersonInNeedDashboard: React.FC = () => {
                 }),
               });
               if (res.ok) {
-                setEditStatusMsg("Request updated!");
+                toast.success("Request updated successfully!");
                 setEditRequest(null);
                 openMyRequests();
                 fetchAllRequests(); // Refresh all requests table
               } else {
-                setEditStatusMsg("Failed to update request.");
+                toast.error("Failed to update request.");
               }
             }}>
               <div>
@@ -519,10 +522,11 @@ const PersonInNeedDashboard: React.FC = () => {
                             if (window.confirm('Are you sure you want to delete this request?')) {
                               const res = await fetch(`${API_BASE}/api/pin/requests/${r.id}`, { method: 'DELETE' });
                               if (res.ok) {
+                                toast.error("Request deleted.");
                                 openMyRequests();
                                 fetchAllRequests(); // Refresh all requests table
                               } else {
-                                alert('Failed to delete request.');
+                                toast.error('Failed to delete request.');
                               }
                             }
                           }}

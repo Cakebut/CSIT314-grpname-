@@ -105,7 +105,7 @@ function ViewUserAccountPage() {
         method: 'DELETE',
       });
       if (res.ok) {
-        toast.success('User deleted successfully');
+        toast.error('User deleted successfully');
         await fetchUsers();
       } else {
         toast.error('Failed to delete user');
