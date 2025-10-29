@@ -23,9 +23,11 @@ function Login() {
       if (res.ok) {
         setStatus("Login successful!");
         const data = await res.json();
-        // Store username and role for dashboard
+        // Store username, role, userId, and username for dashboard features
         localStorage.setItem('currentUsername', username);
         localStorage.setItem('currentRole', data.role);
+        if (data.id) localStorage.setItem('userId', String(data.id));
+        if (data.username) localStorage.setItem('username', data.username);
         if (data.role === "User Admin") {
           navigate("/useradmin");
         } 

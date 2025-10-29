@@ -1,12 +1,11 @@
+
 import { Router } from "express";
 import { db } from "../index";
 import { useraccountTable,roleTable,service_typeTable,csr_requestsTable } from "../db/schema/aiodb";
 import { sql, eq, and } from "drizzle-orm"; // Add this import
-
 //Controllers
 import { LoginController  } from "../controller/sharedControllers";
 import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController } from "../controller/UserAdminControllers";
-
 
 //ROUTERS
 const router = Router();
@@ -15,6 +14,16 @@ const viewUserAccountController = new ViewUserAccountController();
 const updateUserController = new UpdateUserController();
 const roleController = new RoleController();
 const searchUserController = new SearchUserController();
+
+// Get all service types (for dropdowns etc)
+router.get('/service-types', async (req, res) => {
+  try {
+    const types = await db.select().from(service_typeTable);
+    res.json({ data: types });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch service types' });
+  }
+});
 
 // Update user info
 router.post("/users/:id", async (req, res) => {
@@ -106,7 +115,9 @@ router.post("/userAdmin/login", async(req,res)=>{
     (req.session as any).username = username;
     return res.json({ 
       message: "Logged in" ,
-      role: userAccRes.userProfile
+      role: userAccRes.userProfile,
+      id: userAccRes.id,
+      username: userAccRes.username
     });
   } else {
     return  res.status(401).json({ error: "Invalid credentials" });

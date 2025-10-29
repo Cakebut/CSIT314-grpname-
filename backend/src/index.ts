@@ -9,6 +9,7 @@ import { sql } from 'drizzle-orm';
 
 //Routers
 import { router } from './router/userAdmin';
+import pinRouter from './router/personInNeed';
 
 declare module 'express-session' {
   interface SessionData {
@@ -57,6 +58,7 @@ app.get("/", async (req, res) => {
 
 
 app.use("/api/", router)
+app.use('/api/pin', pinRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
