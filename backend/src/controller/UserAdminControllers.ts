@@ -1,4 +1,5 @@
 import { UserEntity } from "../entities/userAccount";
+import { addAuditLog } from "../entities/auditLog";
 
 export class ViewUserAccountController {
     private userAccount : UserEntity;
@@ -14,11 +15,41 @@ export class ViewUserAccountController {
 
 export class UpdateUserController {
   private userEntity = new UserEntity()
-  public async updateUserInfo(id: number, username: string, roleid: number, issuspended: boolean) {
-    return await this.userEntity.updateUser(id, username, roleid, issuspended);
+  public async updateUserInfo(id: number, username: string, roleid: number, issuspended: boolean, actor: string) {
+    // Get current user info to compare suspension status
+  const users = await this.userEntity.getAllUserAccounts();
+  const user = users.find(u => u.id === id);
+  const prevSuspended = user ? user.isSuspended : undefined;
+    const result = await this.userEntity.updateUser(id, username, roleid, issuspended);
+    if (result) {
+      let action = "update user";
+      if (typeof prevSuspended === "boolean" && prevSuspended !== issuspended) {
+        action = issuspended ? "suspend user" : "activate user";
+      }
+      await addAuditLog({
+        actor,
+        action,
+        target: username,
+        details: `roleid: ${roleid}, issuspended: ${issuspended}`,
+      });
+    }
+    return result;
   }
-  public async deleteUserById(id: number) {
-    return await this.userEntity.deleteUser(id);
+  public async deleteUserById(id: number, actor: string) {
+    // Get username for logging
+    const users = await this.userEntity.getAllUserAccounts();
+    const user = users.find(u => u.id === id);
+    const username = user ? user.username : `id:${id}`;
+    const result = await this.userEntity.deleteUser(id);
+    if (result) {
+      await addAuditLog({
+        actor,
+        action: "delete user",
+        target: username,
+        details: `id: ${id}`,
+      });
+    }
+    return result;
   }
 }
 
@@ -31,10 +62,19 @@ export class CreateUserController {
   public async createUserFunc(
     username: string,
     password: string,
-    roleid: number
+    roleid: number,
+    actor: string
   ) {
-    const obj = await this.userEntity.createUserFunc(username, password, roleid)
-    return obj
+    const result = await this.userEntity.createUserFunc(username, password, roleid);
+    if (result) {
+      await addAuditLog({
+        actor,
+        action: "create user",
+        target: username,
+        details: `roleid: ${roleid}`,
+      });
+    }
+    return result;
   }
 
  
@@ -45,16 +85,51 @@ export class CreateUserController {
 export class RoleController {
   private roleEntity = new UserEntity();
 
-  async createRole(label: string) {
-    return await this.roleEntity.createRole(label);
+  async createRole(label: string, actor: string) {
+    const result = await this.roleEntity.createRole(label);
+    if (result) {
+      await addAuditLog({
+        actor,
+        action: "create role",
+        target: label,
+        details: `Role created.`,
+      });
+    }
+    return result;
   }
 
-  async deleteRole(id: number) {
-    return await this.roleEntity.deleteRole(id);
+  async deleteRole(id: number, actor: string) {
+    // Get role label for logging
+    const roles = await this.roleEntity.searchRoles("");
+    const role = roles.find(r => r.id === id);
+    const roleLabel = role ? role.label : `id:${id}`;
+    const result = await this.roleEntity.deleteRole(id);
+    if (result) {
+      await addAuditLog({
+        actor,
+        action: "delete role",
+        target: roleLabel,
+        details: `Role deleted.`,
+      });
+    }
+    return result;
   }
 
-  async setRoleSuspended(id: number, issuspended: boolean) {
-    return await this.roleEntity.setRoleSuspended(id, issuspended);
+  async setRoleSuspended(id: number, issuspended: boolean, actor: string) {
+    const result = await this.roleEntity.setRoleSuspended(id, issuspended);
+    if (result) {
+      // Get role label for logging
+      const roles = await this.roleEntity.searchRoles("");
+      const role = roles.find(r => r.id === id);
+      const roleLabel = role ? role.label : `id:${id}`;
+      await addAuditLog({
+        actor,
+        action: issuspended ? "suspend role" : "activate role",
+        target: roleLabel,
+        details: `id: ${id}, issuspended: ${issuspended}`,
+      });
+    }
+    return result;
   }
 
   // Search roles by label

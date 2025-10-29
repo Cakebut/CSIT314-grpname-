@@ -1,4 +1,4 @@
-
+ 
 import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const useraccountTable = pgTable(
@@ -82,5 +82,19 @@ export const locationTable = pgTable(
     {
         id: serial().primaryKey(),
         name: varchar({ length: 64 }).notNull().unique(), // e.g., North, South, East, West
+    }
+);
+
+
+// Audit Log Table
+export const auditLogTable = pgTable(
+    'audit_log',
+    {
+        id: serial().primaryKey(),
+        actor: varchar({ length: 64 }).notNull(), // e.g. useradmin145
+        action: varchar({ length: 64 }).notNull(), // e.g. create user
+        target: varchar({ length: 64 }).notNull(), // e.g. User455
+        timestamp: timestamp().notNull().defaultNow(),
+        details: text(),
     }
 );

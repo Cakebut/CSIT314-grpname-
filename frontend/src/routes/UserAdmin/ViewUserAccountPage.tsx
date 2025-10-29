@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from "react";
+import { FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import "./ViewUserAccountPage.css";
 
@@ -9,6 +10,8 @@ type UserAccount = {
   username: string;
   userProfile: string;
   isSuspended: boolean;
+  updatedAt?: string; // last updated timestamp
+  lastAction?: string; // audit log action
 };
 type UserProfile = {
   id: number;
@@ -27,6 +30,7 @@ function ViewUserAccountPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [users, setUsers] = useState<UserAccount[]>([]); // Store users from backend
+  const [loadingUserId, setLoadingUserId] = useState<number | null>(null); // For spinner
  
 
   const [roles, setRoles] = useState<UserProfile[]>([]); // Store roles from backend
@@ -190,7 +194,7 @@ function ViewUserAccountPage() {
         </div>
       </div>
 
-      <table>
+  <table>
         <thead>
           <tr>
             <th>ID</th>
@@ -202,20 +206,85 @@ function ViewUserAccountPage() {
         </thead>
         <tbody>
           {filteredUsers.map((user: UserAccount) => (
-            <tr key={user.id}>
+            <tr key={user.id} style={user.isSuspended ? { background: '#ffeaea', borderLeft: '6px solid #d32f2f', opacity: 0.85 } : {}}>
               <td>{user.id}</td>
               <td>{user.username}</td>
               <td>{user.userProfile}</td>
               <td>
-                <span className={user.isSuspended ? 'status-suspended' : 'status-active'}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '0.3em 0.9em',
+                    borderRadius: '1em',
+                    fontWeight: 600,
+                    color: 'white',
+                    background: user.isSuspended ? '#d32f2f' : '#388e3c',
+                    fontSize: '0.95em',
+                  }}
+                  title={user.isSuspended ? 'This user is currently suspended.' : 'This user is active.'}
+                >
+                  {user.isSuspended ? <FaExclamationCircle style={{ marginRight: 4 }} /> : null}
                   {user.isSuspended ? 'Suspended' : 'Active'}
                 </span>
               </td>
               <td>
-                <button className="edit-btn" onClick={() => handleEdit(user)}>
+                <button
+                  style={{
+                    background: user.isSuspended ? '#388e3c' : '#d32f2f',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.4em 1.2em',
+                    fontWeight: 700,
+                    fontSize: '1em',
+                    marginRight: '0.5em',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 4px rgba(44,62,80,0.10)',
+                    letterSpacing: '0.01em',
+                    transition: 'background 0.2s',
+                  }}
+                  title={user.isSuspended ? 'Reactivate this user' : 'Suspend this user'}
+                  onClick={async () => {
+                    if (!window.confirm(`Are you sure you want to ${user.isSuspended ? 'reactivate' : 'suspend'} this user?`)) return;
+                    setLoadingUserId(user.id);
+                    const selectedRole = roles.find(r => r.label === user.userProfile);
+                    const roleid = selectedRole ? selectedRole.id : null;
+                    if (!roleid) {
+                      toast.error("Please select a valid role.");
+                      setLoadingUserId(null);
+                      return;
+                    }
+                    try {
+                      const res = await fetch(`/api/users/${user.id}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          username: user.username,
+                          roleid: roleid,
+                          issuspended: !user.isSuspended
+                        })
+                      });
+                      if (res.ok) {
+                        toast.success(!user.isSuspended ? "User suspended." : "User reactivated.");
+                        await fetchUsers();
+                      } else {
+                        toast.error("Failed to update status.");
+                      }
+                    } catch {
+                      toast.error("Error updating status.");
+                    }
+                    setLoadingUserId(null);
+                  }}
+                >
+                  {loadingUserId === user.id ? (
+                    <span className="spinner" style={{ marginRight: 8 }} />
+                  ) : null}
+                  {user.isSuspended ? 'Reactivate' : 'Suspend'}
+                </button>
+                <button className="edit-btn" onClick={() => handleEdit(user)} title="Edit user details">
                   ✏️ Edit
                 </button>
-                <button className="delete-btn" onClick={() => handleDelete(user.id)}>🗑️</button>
+                <button className="delete-btn" onClick={() => handleDelete(user.id)} title="Delete user">🗑️</button>
               </td>
             </tr>
           ))}
@@ -254,46 +323,7 @@ function ViewUserAccountPage() {
                 placeholder="Username"
                 required
               />
-              <div style={{ marginBottom: '1rem', fontWeight: 500 }}>
-                Status: {editSuspended ? 'Suspended' : 'Active'}
-              </div>
-              <button
-                type="button"
-                className={editSuspended ? "reactivate-btn" : "suspend-btn"}
-                onClick={async () => {
-                  if (!selectedUser) return;
-                  const newSuspended = !editSuspended;
-                  setEditSuspended(newSuspended);
-                  try {
-                    const selectedRole = roles.find(r => r.label === editRole);
-                    const roleid = selectedRole ? selectedRole.id : null;
-                    if (!roleid) {
-                      toast.error("Please select a valid role.");
-                      return;
-                    }
-                    const res = await fetch(`http://localhost:3000/api/users/${selectedUser.id}`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        username: editUsername,
-                        roleid: roleid,
-                        issuspended: newSuspended
-                      })
-                    });
-                    if (res.ok) {
-                      toast.success(newSuspended ? "User suspended." : "User reactivated.");
-                      await fetchUsers();
-                      setEditSuspended(newSuspended);
-                    } else {
-                      toast.error("Failed to update status.");
-                    }
-                  } catch {
-                    toast.error("Error updating status.");
-                  }
-                }}
-              >
-                {editSuspended ? 'Reactivate' : 'Suspend'}
-              </button>
+              {/* Status toggle button removed from modal. Only available in user list table. */}
               <div className="modal-actions">
                 <button type="button" onClick={closeModal}>
                   Cancel

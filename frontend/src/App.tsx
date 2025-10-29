@@ -13,7 +13,7 @@ import AdminDashboard from './routes/UserAdmin/AdminDashboard';
 import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
 import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
 import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
-
+import UserAdminSystemLogPage from './routes/UserAdmin/UserAdminSystemLogPage';
 
 
 //Person In Need
@@ -39,6 +39,7 @@ function App() {
           <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
           <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
           <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
+          <Route path="/useradmin/SystemLog" element={<UserAdminSystemLogPage />} />
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
         </Routes>

@@ -7,7 +7,13 @@ function AdminDashboard() {
   const role = localStorage.getItem('currentRole');
 
   // Add a logout handler
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/userAdmin/logout', { method: 'POST', credentials: 'include' });
+      } catch {
+        console.error("Logout error:");
+        // Optionally handle error
+    }
     localStorage.removeItem('dummyUsers'); // Clear dummy users
     localStorage.removeItem('currentUsername');
     localStorage.removeItem('currentRole');
@@ -35,6 +41,9 @@ function AdminDashboard() {
           </div>
           <div className="bubble" onClick={() => navigate('/useradmin/ViewUserRoles')}>
             View Roles Dashboard
+          </div>
+          <div className="bubble" onClick={() => navigate('/useradmin/SystemLog')}>
+            View System Log
           </div>
           <div className="bubble logout-bubble" onClick={handleLogout}>
             Logout
