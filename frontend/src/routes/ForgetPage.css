@@ -24,7 +24,7 @@
   justify-content: center;
   flex-direction: column;
   width: 440px;
-  height: 600px; 
+  height: 680px; 
   padding: 30px;
   z-index: 888;
   box-shadow: 0px 5px 10px 4px rgba(0, 0, 0, 0.05);
@@ -32,16 +32,16 @@
 
 .forget-header {
   text-align: left;
-  margin: 20px 0 25px 0;
+  margin: 5px 0 20px 0;
   font-family: Hanuman, sans-serif;
   font-weight: 700; /* It no work why */
   letter-spacing: 0.1em;
 }
 
 .forget-header header {
-  font-size: var(--size-2xl);
+  font-size: var(--size-3xl);
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 3px;
 }
 
 .input-box header {
@@ -153,6 +153,41 @@
   text-align: center;
   color: black;
   font-weight: bold;
+}
+
+.validation-box {
+  margin-top: 5px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: #555;
+  background-color: #F9FAFB;
+  padding: 15px;
+  border-radius: 20px;
+}
+
+.validation-box p {
+  margin-bottom: 8px;
+}
+
+.validation-box ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.validation-box li {
+  margin-bottom: 4px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.input-wrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.input-wrapper .input-submit {
+  flex: 1;
 }
 
 /* Button CSS ---------------------------------------------------------------------------------------------- */

@@ -2,73 +2,37 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ForgetPage.css";
 
-function Forget() {
-  const navigate = useNavigate();
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [status, setStatus] = useState<string>("");
-  const [showSuspendedModal, setShowSuspendedModal] = useState(false);
+function Forget({ 
+  onCancel, 
+  onSubmit 
+}: {
+  onCancel? : () => void; 
+  onSubmit? : () => void
+}) {
+    
+  const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form submission reload
-    try {
-      const res = await fetch("/api/userAdmin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        credentials: "include",
-      });
+  // For any validation checks
+  const hasMinLength = newPassword.length >= 8;
+  const hasUppercase = /[A-Z]/.test(newPassword);
+  const hasNumber = /[0-9]/.test(newPassword);
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
+  const allValid = hasMinLength && hasUppercase && hasNumber && passwordsMatch && username.length > 0;
 
-      if (res.ok) {
-        setStatus("Login successful!");
-        const data = await res.json();
-        // Store username and role for dashboard
-        localStorage.setItem('currentUsername', username);
-        localStorage.setItem('currentRole', data.role);
-        if (data.role === "User Admin") {
-          navigate("/useradmin");
-        } 
-        else if (data.role === "Person In Need") {
-          navigate("/pin");
-        }
-        else if (data.role === "CSR Rep") {
-          navigate("/csr");
-        }
-        else if (data.role === "Platform Manager") {
-          navigate("/platform");
-        }
-      } else {
-          let errorMsg = "Login attempt failed.";
-        try {
-          const errorData = await res.json();
-          if (errorData && errorData.error) errorMsg = errorData.error;
-        } catch {errorMsg = "Login attempt failed.";}
-        setStatus(errorMsg);
-        if (errorMsg === "Account is currently suspended") {
-          setShowSuspendedModal(true);
-        }
-      }
-    } catch (err) {
-      setStatus("Unable to Login.");
-      console.error("Error:", err);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (allValid && onSubmit) {
+      onSubmit();
     }
   };
 
   return (
     <>
       <section className="forget-main forget-section">
-    
-        {showSuspendedModal && (
-          <div className="modal-overlay" style={{ background: 'rgba(44,62,80,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1000 }}>
-            <div className="modal-content" style={{ background: 'white', borderRadius: '18px', padding: '2rem 2.5rem', boxShadow: '0 8px 32px rgba(44,62,80,0.18)', textAlign: 'center' }}>
-              <h3 style={{ color: '#d7263d', fontWeight: 700, marginBottom: '0.5rem' }}>Account Suspended</h3>
-              <p style={{ color: '#2d3748', marginBottom: '1.2rem' }}>Your account is currently suspended.</p>
-              <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn" style={{ background: '#0077cc', color: 'white', borderRadius: '10px', padding: '0.7rem 2.2rem', fontWeight: 600, fontSize: '1rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)' }}>Close</button>
-            </div>
-          </div>
-        )}
 
-        <form id="loginForm" className="forget-box" onSubmit={handleLogin}>
+        <form id="loginForm" className="forget-box">
           <div className="forget-header">
             <header>Reset Password</header>
             <div>Create a new secure password</div>
@@ -95,8 +59,8 @@ function Forget() {
               id="password"
               className="input-field"
               placeholder="Enter new password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="off"
               required
             />
@@ -109,30 +73,54 @@ function Forget() {
               id="password"
               className="input-field"
               placeholder="Confirm new password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="off"
               required
             />
           </div>
 
-          <div className="forgot">
-            <section>
-              <a>Password must contain:</a>
-            </section>
+          <div className="validation-box">
+            <p>Password must contain:</p>
+            <ul>
+              <li style={{ color: hasMinLength ? "green" : "red" }}>
+                • At least 8 characters
+              </li>
+              <li style={{ color: hasUppercase ? "green" : "red" }}>
+                • One uppercase letter
+              </li>
+              <li style={{ color: hasNumber ? "green" : "red" }}>
+                • One number
+              </li>
+              <li style={{ color: passwordsMatch ? "green" : "red" }}>
+                • Passwords match
+              </li>
+            </ul>
           </div>
 
-          <div className="input-submit">
-            <button
-              type="submit"
-              className="submit-btn btn"
-              id="submit"
-              onClick={handleLogin}
-            ></button>
-            <label htmlFor="submit">CONFIRM</label>
+          <div className="input-wrapper">
+            <div className="input-submit">
+              <button
+                type="submit"
+                className="submit-btn btn"
+                id="cancel"
+                onClick={onCancel}
+              ></button>
+              <label htmlFor="cancel">Cancel</label>
+            </div>
+
+            <div className="input-submit">
+              <button
+                type="submit"
+                // disabled={!allValid} FIX PLEASE THANKS
+                className="submit-btn btn"
+                id="submit"
+                onClick={handleSubmit}
+              ></button>
+              <label htmlFor="submit">Confirm</label>
+            </div>
           </div>
 
-          {status && <div className="forget-status">{status}</div>}
         </form>
       </section>
     </>
