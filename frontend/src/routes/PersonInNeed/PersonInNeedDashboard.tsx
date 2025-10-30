@@ -66,7 +66,7 @@ const PersonInNeedDashboard: React.FC = () => {
 
 
   useEffect(() => {
-  fetch(`${API_BASE}/api/service-types`)
+  fetch(`${API_BASE}/api/pin/service-types`)
     .then(res => res.json())
     .then(data => setServiceTypes(data.data || []));
   }, []);
