@@ -38,7 +38,7 @@ function Login() {
           navigate("/csr");
         }
         else if (data.role === "Platform Manager") {
-          navigate("/platform");
+          navigate("/platform-manager");
         }
       } else {
           let errorMsg = "Login attempt failed.";
