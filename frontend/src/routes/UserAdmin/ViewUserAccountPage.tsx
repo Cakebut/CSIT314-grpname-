@@ -1,7 +1,7 @@
-
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from "react";
+import { FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import "./ViewUserAccountPage.css";
 
@@ -10,6 +10,8 @@ type UserAccount = {
   username: string;
   userProfile: string;
   isSuspended: boolean;
+  updatedAt?: string; // last updated timestamp
+  lastAction?: string; // audit log action
 };
 type UserProfile = {
   id: number;
@@ -28,15 +30,18 @@ function ViewUserAccountPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [users, setUsers] = useState<UserAccount[]>([]); // Store users from backend
+  const [loadingUserId, setLoadingUserId] = useState<number | null>(null); // For spinner
  
 
   const [roles, setRoles] = useState<UserProfile[]>([]); // Store roles from backend
 
- 
+  const [filterRole, setFilterRole] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
   // Fetch users from backend
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/users");
+      const res = await fetch("/api/users");
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
@@ -63,7 +68,7 @@ function ViewUserAccountPage() {
   //fetch roles from backend
   const fetchRoles = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/roles");
+      const res = await fetch("/api/roles");
       if (res.ok) {
         const data = await res.json();
         setRoles(data);
@@ -80,12 +85,13 @@ function ViewUserAccountPage() {
     fetchRoles();
   }, []);
 
-  // Filter users by search term
-  const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
- 
+  // Filter users by search term, role, and status
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole ? user.userProfile === filterRole : true;
+    const matchesStatus = filterStatus ? (filterStatus === 'Active' ? !user.isSuspended : user.isSuspended) : true;
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   const handleEdit = (user: UserAccount) => {
     setSelectedUser(user);
@@ -99,11 +105,11 @@ function ViewUserAccountPage() {
   const handleDelete = async (userId: number) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
-        toast.success('User deleted successfully');
+        toast.error('User deleted successfully');
         await fetchUsers();
       } else {
         toast.error('Failed to delete user');
@@ -129,7 +135,7 @@ function ViewUserAccountPage() {
   return;
     }
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${selectedUser.id}`, {
+      const res = await fetch(`/api/users/${selectedUser.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -160,20 +166,35 @@ function ViewUserAccountPage() {
 
       <div className="user-list-header">
         <h2>User Accounts</h2>
-        <div className="user-list-actions">
-          <input
-            type="text"
-            placeholder="Search by username"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button onClick={() => navigate("/useradmin/create")}>
-            Create Account
+        <div className="user-list-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.2rem' }}>
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="text"
+              placeholder="🔍 Search by username..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', width: '170px' }}
+            />
+            <select value={filterRole} onChange={e => setFilterRole(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', minWidth: '110px' }}>
+              <option value="">All Roles</option>
+              {roles.map(role => (
+                <option key={role.id} value={role.label}>{role.label}</option>
+              ))}
+            </select>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', minWidth: '110px' }}>
+              <option value="">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+          <button onClick={() => navigate("/useradmin/create")}
+            style={{ background: '#0077cc', color: 'white', border: 'none', borderRadius: '8px', padding: '0.6rem 1.3rem', fontWeight: 700, fontSize: '1rem', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', cursor: 'pointer', letterSpacing: '0.01em', transition: 'background 0.2s', marginTop: '0.5rem', alignSelf: 'flex-end', display: 'block' }}>
+            ＋ Create Account
           </button>
         </div>
       </div>
 
-      <table>
+  <table>
         <thead>
           <tr>
             <th>ID</th>
@@ -185,20 +206,85 @@ function ViewUserAccountPage() {
         </thead>
         <tbody>
           {filteredUsers.map((user: UserAccount) => (
-            <tr key={user.id}>
+            <tr key={user.id} style={user.isSuspended ? { background: '#ffeaea', borderLeft: '6px solid #d32f2f', opacity: 0.85 } : {}}>
               <td>{user.id}</td>
               <td>{user.username}</td>
               <td>{user.userProfile}</td>
               <td>
-                <span className={user.isSuspended ? 'status-suspended' : 'status-active'}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '0.3em 0.9em',
+                    borderRadius: '1em',
+                    fontWeight: 600,
+                    color: 'white',
+                    background: user.isSuspended ? '#d32f2f' : '#388e3c',
+                    fontSize: '0.95em',
+                  }}
+                  title={user.isSuspended ? 'This user is currently suspended.' : 'This user is active.'}
+                >
+                  {user.isSuspended ? <FaExclamationCircle style={{ marginRight: 4 }} /> : null}
                   {user.isSuspended ? 'Suspended' : 'Active'}
                 </span>
               </td>
               <td>
-                <button className="edit-btn" onClick={() => handleEdit(user)}>
+                <button
+                  style={{
+                    background: user.isSuspended ? '#388e3c' : '#d32f2f',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.4em 1.2em',
+                    fontWeight: 700,
+                    fontSize: '1em',
+                    marginRight: '0.5em',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 4px rgba(44,62,80,0.10)',
+                    letterSpacing: '0.01em',
+                    transition: 'background 0.2s',
+                  }}
+                  title={user.isSuspended ? 'Reactivate this user' : 'Suspend this user'}
+                  onClick={async () => {
+                    if (!window.confirm(`Are you sure you want to ${user.isSuspended ? 'reactivate' : 'suspend'} this user?`)) return;
+                    setLoadingUserId(user.id);
+                    const selectedRole = roles.find(r => r.label === user.userProfile);
+                    const roleid = selectedRole ? selectedRole.id : null;
+                    if (!roleid) {
+                      toast.error("Please select a valid role.");
+                      setLoadingUserId(null);
+                      return;
+                    }
+                    try {
+                      const res = await fetch(`/api/users/${user.id}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          username: user.username,
+                          roleid: roleid,
+                          issuspended: !user.isSuspended
+                        })
+                      });
+                      if (res.ok) {
+                        toast.success(!user.isSuspended ? "User suspended." : "User reactivated.");
+                        await fetchUsers();
+                      } else {
+                        toast.error("Failed to update status.");
+                      }
+                    } catch {
+                      toast.error("Error updating status.");
+                    }
+                    setLoadingUserId(null);
+                  }}
+                >
+                  {loadingUserId === user.id ? (
+                    <span className="spinner" style={{ marginRight: 8 }} />
+                  ) : null}
+                  {user.isSuspended ? 'Reactivate' : 'Suspend'}
+                </button>
+                <button className="edit-btn" onClick={() => handleEdit(user)} title="Edit user details">
                   ✏️ Edit
                 </button>
-                <button className="delete-btn" onClick={() => handleDelete(user.id)}>🗑️</button>
+                <button className="delete-btn" onClick={() => handleDelete(user.id)} title="Delete user">🗑️</button>
               </td>
             </tr>
           ))}
@@ -237,46 +323,7 @@ function ViewUserAccountPage() {
                 placeholder="Username"
                 required
               />
-              <div style={{ marginBottom: '1rem', fontWeight: 500 }}>
-                Status: {editSuspended ? 'Suspended' : 'Active'}
-              </div>
-              <button
-                type="button"
-                className={editSuspended ? "reactivate-btn" : "suspend-btn"}
-                onClick={async () => {
-                  if (!selectedUser) return;
-                  const newSuspended = !editSuspended;
-                  setEditSuspended(newSuspended);
-                  try {
-                    const selectedRole = roles.find(r => r.label === editRole);
-                    const roleid = selectedRole ? selectedRole.id : null;
-                    if (!roleid) {
-                      toast.error("Please select a valid role.");
-                      return;
-                    }
-                    const res = await fetch(`http://localhost:3000/api/users/${selectedUser.id}`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        username: editUsername,
-                        roleid: roleid,
-                        issuspended: newSuspended
-                      })
-                    });
-                    if (res.ok) {
-                      toast.success(newSuspended ? "User suspended." : "User reactivated.");
-                      await fetchUsers();
-                      setEditSuspended(newSuspended);
-                    } else {
-                      toast.error("Failed to update status.");
-                    }
-                  } catch {
-                    toast.error("Error updating status.");
-                  }
-                }}
-              >
-                {editSuspended ? 'Reactivate' : 'Suspend'}
-              </button>
+              {/* Status toggle button removed from modal. Only available in user list table. */}
               <div className="modal-actions">
                 <button type="button" onClick={closeModal}>
                   Cancel

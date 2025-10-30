@@ -1,0 +1,5 @@
+{
+  "name": "CSIT314Crashout Codespace",
+  "forwardPorts": [3000],
+  "postCreateCommand": "node backend/src/index.ts"
+}

@@ -1,3 +1,4 @@
+ 
 import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const useraccountTable = pgTable(
@@ -47,7 +48,55 @@ export const csr_requestsTable = pgTable(
 )
 
 
-// Ad-hoc volunteers linked to a PIN (not necessarily users)
-// volunteer name feature removed
+// PIN REQUESTS TABLE
+export const pin_requestsTable = pgTable(
+    'pin_requests',
+    {
+        id: serial().primaryKey(),
+        pin_id: integer().notNull().references(() => useraccountTable.id),
+        csr_id: integer().references(() => useraccountTable.id), // nullable, only one CSR can be assigned
+        title: varchar({ length: 128 }).notNull(),
+        categoryID: integer().notNull().references(() => service_typeTable.id),
+        requestType: varchar({ length: 64 }).notNull(),
+        message: text(),
+        locationID: integer().references(() => locationTable.id),
+        urgencyLevelID: integer().references(() => urgency_levelTable.id),
+        createdAt: timestamp().notNull().defaultNow(),
+        status: varchar({ length: 32 }).notNull().default('Available'),
+        view_count: integer().notNull().default(0),
+        shortlist_count: integer().notNull().default(0),
+    }
+);
 
 
+// Urgency Level Table
+export const urgency_levelTable = pgTable(
+    'urgency_level',
+    {
+        id: serial().primaryKey(),
+        label: varchar({ length: 16 }).notNull().unique(), // e.g., Low, Medium, Urgent
+    }
+);
+
+// Location Table (e.g., MRT lines)
+export const locationTable = pgTable(
+    'location',
+    {
+        id: serial().primaryKey(),
+        name: varchar({ length: 64 }).notNull().unique(), // e.g., North, South, East, West
+    }
+);
+
+
+// Audit Log Table
+export const auditLogTable = pgTable(
+    'audit_log',
+    {
+        id: serial().primaryKey(),
+        actor: varchar({ length: 64 }).notNull(), // e.g. useradmin145
+        action: varchar({ length: 64 }).notNull(), // e.g. create user
+        target: varchar({ length: 64 }).notNull(), // e.g. User455
+        timestamp: timestamp().notNull().defaultNow(),
+        details: text(),
+    }
+);

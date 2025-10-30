@@ -16,11 +16,13 @@ function ViewUserRoles() {
   const [newRoleLabel, setNewRoleLabel] = useState("");
   const [creating, setCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/roles');
+        const res = await fetch('/api/roles');
         if (res.ok) {
           const data = await res.json();
           setRoles(data);
@@ -42,7 +44,7 @@ function ViewUserRoles() {
     if (!newRoleLabel.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch('http://localhost:3000/api/roles', {
+      const res = await fetch('/api/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ label: newRoleLabel })
@@ -52,7 +54,7 @@ function ViewUserRoles() {
         setShowCreateModal(false);
         toast.success('Role created successfully');
         // Refresh roles
-        const updated = await fetch('http://localhost:3000/api/roles');
+        const updated = await fetch('/api/roles');
         setRoles(updated.ok ? await updated.json() : []);
       } else {
         toast.error('Failed to create role');
@@ -65,14 +67,14 @@ function ViewUserRoles() {
   // Delete role
   const handleDeleteRole = async (id: number) => {
     if (!window.confirm('Delete this role?')) return;
-    const res = await fetch(`http://localhost:3000/api/roles/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/roles/${id}`, { method: 'DELETE' });
     if (res.ok) {
       toast.success('Role deleted successfully');
     } else {
       toast.error('Failed to delete role');
     }
     // Refresh roles
-    const updated = await fetch('http://localhost:3000/api/roles');
+    const updated = await fetch('/api/roles');
     setRoles(updated.ok ? await updated.json() : []);
   };
 
@@ -80,7 +82,7 @@ function ViewUserRoles() {
   const handleSuspendRole = async (role: Role) => {
     const action = role.issuspended ? 'unsuspend' : 'suspend';
     if (!window.confirm(`Are you sure you want to ${action} this role?`)) return;
-    const res = await fetch(`http://localhost:3000/api/roles/${role.id}`, {
+    const res = await fetch(`/api/roles/${role.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ issuspended: !role.issuspended })
@@ -91,8 +93,27 @@ function ViewUserRoles() {
       toast.error('Failed to update role status');
     }
     // Refresh roles
-    const updated = await fetch('http://localhost:3000/api/roles');
+    const updated = await fetch('/api/roles');
     setRoles(updated.ok ? await updated.json() : []);
+  };
+
+  // Search roles
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    setSearching(true);
+    try {
+      const res = await fetch(`/api/roles/search?q=${encodeURIComponent(value)}`);
+      if (res.ok) {
+        setRoles(await res.json());
+      } else {
+        setRoles([]);
+      }
+    } catch {
+      setRoles([]);
+    } finally {
+      setSearching(false);
+    }
   };
 
   return (
@@ -102,9 +123,18 @@ function ViewUserRoles() {
       </button>
       <div className="roles-header">
         <h2 style={{ fontWeight: 700, fontSize: '2rem', color: '#2d3a4a', marginBottom: '0.5rem' }}>Roles Dashboard</h2>
-        <button className="create-role-btn" onClick={() => setShowCreateModal(true)}>
-          ＋ Create Role
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Search roles..."
+            value={search}
+            onChange={handleSearch}
+            style={{ padding: '0.7rem 1.2rem', borderRadius: '10px', border: '1.5px solid #bfc8d6', fontSize: '1.05rem', background: '#f3f6fb', width: '220px', marginRight: '0.5rem' }}
+          />
+          <button className="create-role-btn" onClick={() => setShowCreateModal(true)}>
+            ＋ Create Role
+          </button>
+        </div>
       </div>
       {showCreateModal && (
         <div className="modal-overlay">
@@ -142,7 +172,7 @@ function ViewUserRoles() {
           </tr>
         </thead>
         <tbody>
-          {loading ? (
+          {loading || searching ? (
             <tr><td colSpan={4}>Loading...</td></tr>
           ) : roles.length === 0 ? (
             <tr><td colSpan={4}>No roles found.</td></tr>

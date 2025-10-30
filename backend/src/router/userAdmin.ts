@@ -1,11 +1,16 @@
+import { getAuditLogs } from "../entities/auditLog";
+import { auditLogTable } from "../db/schema/aiodb";
+ 
+
 import { Router } from "express";
 import { db } from "../index";
-import { useraccountTable,roleTable,service_typeTable,csr_requestsTable } from "../db/schema/aiodb";
+import { useraccountTable,roleTable } from "../db/schema/aiodb";
 import { sql, eq, and } from "drizzle-orm"; // Add this import
-
 //Controllers
 import { LoginController  } from "../controller/sharedControllers";
-import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController} from "../controller/UserAdminControllers";
+import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController } from "../controller/UserAdminControllers";
+import { AuditLogController } from "../controller/AuditLogController";
+ 
 
 
 //ROUTERS
@@ -14,8 +19,12 @@ const createUserController = new CreateUserController();
 const viewUserAccountController = new ViewUserAccountController();
 const updateUserController = new UpdateUserController();
 const roleController = new RoleController();
+const searchUserController = new SearchUserController();
+const auditLogController = new AuditLogController();
 
 
+
+ 
 // Update user info
 router.post("/users/:id", async (req, res) => {
   const { username, roleid, issuspended } = req.body;
@@ -24,7 +33,8 @@ router.post("/users/:id", async (req, res) => {
     return res.status(400).json({ success: false, error: "Missing required fields" });
   }
   try {
-    const result = await updateUserController.updateUserInfo(id, username, roleid, issuspended);
+    const actor = req.session?.username || "unknown";
+    const result = await updateUserController.updateUserInfo(id, username, roleid, issuspended, actor);
     if (result) {
       return res.status(200).json({ success: true });
     } else {
@@ -36,11 +46,12 @@ router.post("/users/:id", async (req, res) => {
   }
 });
 
-
-router.post("/users/", async(req, res) => {
+//CREATE USER
+router.post("/userAdmin/createUser", async(req, res) => {
   const { username, password, roleid } = req.body
   try { 
-    const obj = await createUserController.createUserFunc(username, password, roleid)
+    const actor = req.session?.username || "unknown";
+    const obj = await createUserController.createUserFunc(username, password, roleid, actor);
     if (obj) {
       return res.status(201).json({success: obj})
     } else {
@@ -82,7 +93,8 @@ router.delete("/users/:id", async (req, res) => {
     return res.status(400).json({ success: false, error: "Missing user id" });
   }
   try {
-    const result = await updateUserController.deleteUserById(id);
+    const actor = req.session?.username || "unknown";
+    const result = await updateUserController.deleteUserById(id, actor);
     if (result) {
       return res.status(200).json({ success: true });
     } else {
@@ -95,7 +107,6 @@ router.delete("/users/:id", async (req, res) => {
 });
 
 //Login
-
 router.post("/userAdmin/login", async(req,res)=>{
   const {username, password} = req.body;
   const userAccRes = await new LoginController().login(username, password);
@@ -104,9 +115,18 @@ router.post("/userAdmin/login", async(req,res)=>{
   }
   if(userAccRes){
     (req.session as any).username = username;
+    // Log login action via controller
+    await auditLogController.createAuditLog(
+      username,
+      "login",
+      username,
+      "User logged in."
+    );
     return res.json({ 
       message: "Logged in" ,
-      role: userAccRes.userProfile
+      role: userAccRes.userProfile,
+      id: userAccRes.id,
+      username: userAccRes.username
     });
   } else {
     return  res.status(401).json({ error: "Invalid credentials" });
@@ -116,7 +136,15 @@ router.post("/userAdmin/login", async(req,res)=>{
 
 // Logout
 router.post("/userAdmin/logout", (req, res) => {
-  req.session.destroy(() => {
+  const actor = req.session?.username || "unknown";
+  req.session.destroy(async () => {
+    // Log logout action via controller
+    await auditLogController.createAuditLog(
+      actor,
+      "logout",
+      actor,
+      "User logged out."
+    );
     res.json({ message: "Logged out" });
   });
 });
@@ -128,7 +156,8 @@ router.post('/roles', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Role label required' });
   }
   try {
-    const result = await roleController.createRole(label);
+    const actor = req.session?.username || "unknown";
+    const result = await roleController.createRole(label, actor);
     if (result) {
       return res.status(201).json({ success: true });
     } else {
@@ -147,7 +176,8 @@ router.delete('/roles/:id', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Role id required' });
   }
   try {
-    const result = await roleController.deleteRole(id);
+    const actor = req.session?.username || "unknown";
+    const result = await roleController.deleteRole(id, actor);
     if (result) {
       return res.status(200).json({ success: true });
     } else {
@@ -167,7 +197,8 @@ router.post('/roles/:id', async (req, res) => {
     return res.status(400).json({ success: false, error: 'issuspended boolean required' });
   }
   try {
-    const result = await roleController.setRoleSuspended(id, issuspended);
+    const actor = req.session?.username || "unknown";
+    const result = await roleController.setRoleSuspended(id, issuspended, actor);
     if (result) {
       return res.status(200).json({ success: true });
     } else {
@@ -178,6 +209,71 @@ router.post('/roles/:id', async (req, res) => {
     return res.status(500).json({ success: false, error: 'Failed to update role status' });
   }
 });
+
+// Search roles by label
+router.get('/roles/search', async (req, res) => {
+  const keyword = req.query.q as string || '';
+  try {
+    const roles = await roleController.searchRoles(keyword);
+    res.json(roles);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to search roles' });
+  }
+});
+
+// Search and filter users by username, role, and status
+router.get('/users/search', async (req, res) => {
+  const keyword = req.query.q as string || '';
+  const role = req.query.role as string || '';
+  const status = req.query.status as string || '';
+  try {
+    const actor = req.session?.username || "unknown";
+    const users = await searchUserController.searchAndFilterUsers({ keyword, role, status });
+    // Log search/filter action via controller
+    await auditLogController.createAuditLog(
+      actor,
+      "search/filter users",
+      actor,
+      `keyword: ${keyword}, role: ${role}, status: ${status}`
+    );
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to search users' });
+  }
+});
+
+
+
+
+
+//AUDIT LOG
+
+// Get audit log entries
+router.get("/userAdmin/audit-log", async (req, res) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+  const logs = await auditLogController.fetchAuditLogs(limit);
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch audit logs" });
+  }
+});
+
+// Clear all audit logs (BCE pattern)
+router.delete("/userAdmin/audit-log", async (req, res) => {
+  try {
+    if (typeof auditLogController.clearAuditLogs === "function") {
+      await auditLogController.clearAuditLogs();
+      res.json({ success: true });
+    } else {
+      // fallback if not implemented
+      res.status(501).json({ error: "AuditLogController.clearAuditLogs not implemented" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Failed to clear audit logs" });
+  }
+});
+ 
 
 
 export { router };
