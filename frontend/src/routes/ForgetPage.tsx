@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./LoginPage.css";
+import "./ForgetPage.css";
 
-function Login() {
+function Forget() {
   const navigate = useNavigate();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -56,7 +56,7 @@ function Login() {
 
   return (
     <>
-      <section className="login-main login-section">
+      <section className="forget-main forget-section">
     
         {showSuspendedModal && (
           <div className="modal-overlay" style={{ background: 'rgba(44,62,80,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1000 }}>
@@ -68,10 +68,10 @@ function Login() {
           </div>
         )}
 
-        <form id="loginForm" className="login-box" onSubmit={handleLogin}>
-          <div className="login-header">
-            <header>Welcome</header>
-            <div>Sign in to your account</div>
+        <form id="loginForm" className="forget-box" onSubmit={handleLogin}>
+          <div className="forget-header">
+            <header>Reset Password</header>
+            <div>Create a new secure password</div>
           </div>
 
           <div className="input-box">
@@ -89,12 +89,26 @@ function Login() {
           </div>
 
           <div className="input-box">
-            <header>Password</header>
+            <header>New Password</header>
             <input
               type="password"
               id="password"
               className="input-field"
-              placeholder="Enter password"
+              placeholder="Enter new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="off"
+              required
+            />
+          </div>
+
+          <div className="input-box">
+            <header>Confirm Password</header>
+            <input
+              type="password"
+              id="password"
+              className="input-field"
+              placeholder="Confirm new password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="off"
@@ -104,13 +118,7 @@ function Login() {
 
           <div className="forgot">
             <section>
-              <input type="checkbox" id="check" />
-              <label htmlFor="check">Remember Me</label>
-            </section>
-            <section>
-              <a className="forgot-text" href="/forget">
-                Forgot Password?
-              </a>
+              <a>Password must contain:</a>
             </section>
           </div>
 
@@ -121,14 +129,14 @@ function Login() {
               id="submit"
               onClick={handleLogin}
             ></button>
-            <label htmlFor="submit">SIGN IN</label>
+            <label htmlFor="submit">CONFIRM</label>
           </div>
 
-          {status && <div className="login-status">{status}</div>}
+          {status && <div className="forget-status">{status}</div>}
         </form>
       </section>
     </>
   );
 }
 
-export default Login;
+export default Forget;
