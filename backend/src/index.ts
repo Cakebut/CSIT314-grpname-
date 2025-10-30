@@ -4,11 +4,13 @@ import cors from 'cors'
 
 // Drizzle ORM
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
 import connectPgSimple from 'connect-pg-simple';
 import { sql } from 'drizzle-orm';
 
 //Routers
 import { router } from './router/userAdmin';
+import { createPlatformRouter } from './router/platformManager';
 
 declare module 'express-session' {
   interface SessionData {
@@ -21,7 +23,9 @@ const port = 3000;
 export const DATABASE_URL =
   "postgresql://crashout_user:crashout_password@localhost:5433/crashout_db";
 
-export const db = drizzle(DATABASE_URL);
+// Initialize pg pool and pass to drizzle (required)
+const pool = new Pool({ connectionString: DATABASE_URL });
+export const db = drizzle(pool);
 
 app.use(express.json())
 app.use(
@@ -57,6 +61,7 @@ app.get("/", async (req, res) => {
 
 
 app.use("/api/", router)
+app.use("/api/", createPlatformRouter(db))
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

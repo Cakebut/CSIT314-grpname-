@@ -63,6 +63,7 @@ type SortOption = 'createdAt' | 'updatedAt' | 'title';
 
 export default function PINRequestsPage() {
   const [items, setItems] = useState<PINRequest[]>([]);
+  const [latestAnn, setLatestAnn] = useState<{ message: string; createdAt: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -76,6 +77,22 @@ export default function PINRequestsPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [view, setView] = useState<'table' | 'cards'>('table');
   const [claimingId, setClaimingId] = useState<string | null>(null);
+
+  // Minimal polling for latest announcement
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/announcements/latest');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (mounted) setLatestAnn(data?.latest ?? null);
+      } catch {}
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => { mounted = false; clearInterval(id); };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -137,6 +154,14 @@ export default function PINRequestsPage() {
 
   return (
   <div className="container">
+  {latestAnn && (
+    <div style={{ background:'#fff8e1', border:'1px solid #f0d38a', padding: '8px 12px', marginBottom: 12 }}>
+      <strong>Announcement:</strong> {latestAnn.message}
+      <span className="row-muted" style={{marginLeft:8}}>
+        {new Date(latestAnn.createdAt).toLocaleString()}
+      </span>
+    </div>
+  )}
   <div className="header">
         <div>
           <h3>PIN Requests</h3>

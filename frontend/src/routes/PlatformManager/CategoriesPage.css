@@ -1,0 +1,11 @@
+.pm-categories { margin: 12px 0; color: #111827; }
+.pm-categories .row { display:flex; gap:10px; margin-bottom:10px; }
+.pm-categories input { padding:8px 10px; border:1px solid #d0d5dd; border-radius:6px; }
+.pm-categories button { padding:8px 12px; border-radius:6px; border:1px solid #1d4ed8; background:#2563eb; color:#fff; cursor:pointer; }
+.pm-categories button:hover { background:#1d4ed8; }
+.pm-categories .error { color:#b42318; background:#fee4e2; border:1px solid #fecdca; padding:6px 8px; border-radius:6px; margin:8px 0; }
+.pm-categories .empty { color:#667085; padding:8px 0; }
+.pm-categories table.simple { width:100%; border-collapse: collapse; background:#fff; }
+.pm-categories table.simple th, .pm-categories table.simple td { border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; }
+.pm-categories table.simple thead th { background:#f8fafc; color:#334155; font-weight:600; }
+.pm-categories table.simple tbody tr:nth-child(odd) { background:#fcfcfd; }

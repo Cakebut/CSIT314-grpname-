@@ -14,10 +14,12 @@ import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
 import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
 import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
 
-
-
 //Person In Need
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
+
+// Platform Manager
+import PlatformManagerHome from './routes/PlatformManager';
+
 // CSS
 
 import { ToastContainer } from 'react-toastify';
@@ -41,6 +43,8 @@ function App() {
           <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
+          {/* Platform Manager */}
+          <Route path="/platform-manager" element={<PlatformManagerHome />} />
         </Routes>
         <ToastContainer />
       </div>

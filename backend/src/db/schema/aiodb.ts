@@ -47,3 +47,7 @@ export const csr_requestsTable = pgTable(
 )
 
 
+// Ad-hoc volunteers linked to a PIN (not necessarily users)
+// volunteer name feature removed
+
+
