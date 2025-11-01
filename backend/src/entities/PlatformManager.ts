@@ -7,7 +7,7 @@ type ReportQuery = { start?: string; end?: string; typeNames?: string[] };
 export class PlatformManagerEntity {
   constructor(private db: NodePgDatabase) {}
 
-  async listServiceTypes() {
+  async listActiveServiceTypes() {
     const rows = await this.db
       .select()
       .from(service_typeTable)
@@ -56,7 +56,7 @@ export class PlatformManagerEntity {
     }
   }
 
-  async deleteServiceType(id?: number) {
+  async softDeleteServiceType(id?: number) {
     if (!id || !Number.isFinite(id)) throw new Error("Invalid id");
     // Soft delete: mark as deleted
     await this.db.update(service_typeTable).set({ deleted: true }).where(eq(service_typeTable.id, id));
@@ -73,7 +73,7 @@ export class PlatformManagerEntity {
 
   // Soft-deactivate feature removed
 
-  async reassignServiceType(fromId?: number, toId?: number) {
+  async reassignRequestsToServiceType(fromId?: number, toId?: number) {
     if (!fromId || !Number.isFinite(fromId)) throw new Error("Invalid source id");
     if (!toId || !Number.isFinite(toId)) throw new Error("Invalid target id");
     if (fromId === toId) throw new Error("Source and target must differ");
@@ -96,7 +96,7 @@ export class PlatformManagerEntity {
     return { ok: true };
   }
 
-  async getActiveCounts() {
+  async countActiveUsersByRole() {
     const [{ pins }] = await this.db
       .select({ pins: count() })
       .from(useraccountTable)
@@ -110,7 +110,7 @@ export class PlatformManagerEntity {
     return { activePINs: Number(pins ?? 0), activeCSRs: Number(csrs ?? 0) };
   }
 
-  async getQuickStats() {
+  async getRequestStatusCountsByPeriod() {
     const rows = await this.db.execute(sql`
       WITH bounds AS (
         SELECT
@@ -162,16 +162,29 @@ export class PlatformManagerEntity {
     return quick;
   }
 
-  private parseDates(q: ReportQuery) {
+  private parseReportDateRange(q: ReportQuery) {
     if (!q.start || !q.end) throw new Error("Invalid date range");
-    const start = new Date(q.start + "T00:00:00Z");
-    const end = new Date(q.end + "T23:59:59Z");
+    // Interpret incoming dates as local calendar days (not UTC) to avoid off-by-one
+    const start = new Date(q.start + "T00:00:00");
+    const end = new Date(q.end + "T23:59:59.999");
     if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) throw new Error("Invalid date range");
     return { start, end };
   }
 
-  async getCustomReport(q: ReportQuery) {
-    const { start, end } = this.parseDates(q);
+  async getRequestsReportSummary(q: ReportQuery) {
+    const { start, end } = this.parseReportDateRange(q);
+    const toTS = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      const ms = String(d.getMilliseconds()).padStart(3, '0');
+      return `${y}-${m}-${day} ${hh}:${mm}:${ss}.${ms}`;
+    };
+    const startStr = toTS(start);
+    const endStr = toTS(end);
 
     let typeIds: number[] | null = null;
     if (q.typeNames && q.typeNames.length) {
@@ -180,27 +193,30 @@ export class PlatformManagerEntity {
         .from(service_typeTable)
         .where(inArray(service_typeTable.name, q.typeNames));
       typeIds = rows.map(r => r.id);
-      if (!typeIds.length) return this.emptySummary();
+      if (!typeIds.length) return this.buildEmptyRequestsReportSummary();
     }
 
-    const whereDate = between(csr_requestsTable.requestedAt, start, end);
-    const whereAll = typeIds ? and(whereDate, inArray(csr_requestsTable.categoryID, typeIds)) : whereDate;
+    const idFilterArr = typeIds && typeIds.length ? typeIds : null;
+    const totalRes = await this.db.execute(sql`
+      SELECT COUNT(*)::int AS total
+      FROM ${csr_requestsTable} cr
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
+      ${idFilterArr ? sql`AND cr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
+    `);
+    const total = Number(totalRes.rows?.[0]?.total ?? 0);
 
-    const [{ total }] = await this.db
-      .select({ total: count() })
-      .from(csr_requestsTable)
-      .where(whereAll);
+    if (!total) return this.buildEmptyRequestsReportSummary();
 
-    if (!total) return this.emptySummary();
-
-    const rowsByStatus = await this.db
-      .select({ status: csr_requestsTable.status, n: count() })
-      .from(csr_requestsTable)
-      .where(whereAll)
-      .groupBy(csr_requestsTable.status);
+    const rowsByStatusRes = await this.db.execute(sql`
+      SELECT cr.status AS status, COUNT(*)::int AS n
+      FROM ${csr_requestsTable} cr
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
+      ${idFilterArr ? sql`AND cr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
+      GROUP BY cr.status
+    `);
 
     const byStatus: Record<string, number> = {};
-    rowsByStatus.forEach(r => (byStatus[r.status] = Number(r.n)));
+    rowsByStatusRes.rows.forEach((r: any) => (byStatus[r.status] = Number(r.n)));
 
     const idFilter = typeIds && typeIds.length
       ? sql`AND cr."categoryID" IN (${sql.join(typeIds.map(id => sql`${id}`), sql`,`)})`
@@ -210,7 +226,7 @@ export class PlatformManagerEntity {
       SELECT st.name as name, COUNT(*)::int as n
       FROM ${csr_requestsTable} cr
       JOIN ${service_typeTable} st ON st.id = cr."categoryID"
-      WHERE cr."requestedAt" BETWEEN ${start} AND ${end}
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       GROUP BY st.name
       ORDER BY n DESC
@@ -221,7 +237,7 @@ export class PlatformManagerEntity {
     const uniqRes = await this.db.execute(sql`
       SELECT COUNT(DISTINCT cr.csr_id)::int AS uniq
       FROM ${csr_requestsTable} cr
-      WHERE cr."requestedAt" BETWEEN ${start} AND ${end}
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
     `);
     const uniq = Number(uniqRes.rows?.[0]?.uniq ?? 0);
@@ -237,7 +253,7 @@ export class PlatformManagerEntity {
              SUM((cr.status='Completed')::int)::int AS "Completed",
              SUM((cr.status='Cancelled')::int)::int AS "Cancelled"
       FROM ${csr_requestsTable} cr
-      WHERE cr."requestedAt" BETWEEN ${start} AND ${end}
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       GROUP BY d
       ORDER BY d
@@ -266,8 +282,20 @@ export class PlatformManagerEntity {
     };
   }
 
-  async getCustomReportRaw(q: ReportQuery) {
-    const { start, end } = this.parseDates(q);
+  async getRequestsReportRows(q: ReportQuery) {
+    const { start, end } = this.parseReportDateRange(q);
+    const toTS = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      const ms = String(d.getMilliseconds()).padStart(3, '0');
+      return `${y}-${m}-${day} ${hh}:${mm}:${ss}.${ms}`;
+    };
+    const startStr = toTS(start);
+    const endStr = toTS(end);
 
     let typeIds: number[] | null = null;
     if (q.typeNames && q.typeNames.length) {
@@ -292,7 +320,7 @@ export class PlatformManagerEntity {
              cr.message       AS message
       FROM ${csr_requestsTable} cr
       JOIN ${service_typeTable} st ON st.id = cr."categoryID"
-      WHERE cr."requestedAt" BETWEEN ${start} AND ${end}
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       ORDER BY cr."requestedAt" ASC
     `);
@@ -307,7 +335,7 @@ export class PlatformManagerEntity {
     }>;
   }
 
-  private emptySummary() {
+  private buildEmptyRequestsReportSummary() {
     return {
       totalRequests: 0,
       byStatus: {},

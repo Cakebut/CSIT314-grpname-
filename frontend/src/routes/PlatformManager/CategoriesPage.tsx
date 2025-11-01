@@ -4,6 +4,7 @@ import "./CategoriesPage.css";
 type Item = { id: number; name: string; deleted?: boolean };
 
 export default function CategoriesPage() {
+  
   const [q, setQ] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [name, setName] = useState("");

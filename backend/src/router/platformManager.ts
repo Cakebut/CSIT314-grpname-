@@ -2,14 +2,14 @@ import { Router } from "express";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { PlatformManagerController } from "../controller/PlatformManagerControllers";
 
-export function createPlatformRouter(db: NodePgDatabase) {
+export function createPlatformManagerRouter(db: NodePgDatabase) {
 const platformRouter = Router();
 const ctrl = new PlatformManagerController(db);
 
 // Service types for multiselect
 platformRouter.get("/service-types", async (_req, res) => {
   try {
-    const data = await ctrl.listServiceTypes();
+    const data = await ctrl.listActiveServiceTypes();
     res.json({ serviceTypes: data });
   } catch {
     res.status(500).json({ error: "Failed to load service types" });
@@ -55,7 +55,7 @@ platformRouter.put("/service-types/:id", async (req, res) => {
 platformRouter.delete("/service-types/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const resp = await ctrl.deleteServiceType(id);
+    const resp = await ctrl.softDeleteServiceType(id);
     res.json(resp);
   } catch (e: any) {
     res.status(400).json({ error: e.message ?? "Bad request" });
@@ -78,7 +78,7 @@ platformRouter.post("/service-types/:fromId/reassign", async (req, res) => {
   try {
     const fromId = Number(req.params.fromId);
     const { toId } = req.body ?? {};
-    const result = await ctrl.reassignServiceType(fromId, Number(toId));
+    const result = await ctrl.reassignRequestsToServiceType(fromId, Number(toId));
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ error: e.message ?? "Bad request" });
@@ -92,7 +92,7 @@ platformRouter.get("/reports/custom", async (req, res) => {
   try {
     const { start, end, types } = req.query as Record<string, string>;
     const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
-    const summary = await ctrl.getCustomReport({ start, end, typeNames: typeList });
+    const summary = await ctrl.getRequestsReportSummary({ start, end, typeNames: typeList });
     res.json(summary);
   } catch (e: any) {
     res.status(400).json({ error: e.message ?? "Bad request" });
@@ -104,7 +104,7 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
   try {
     const { start, end, types } = req.query as Record<string, string>;
     const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
-    const { trendDaily } = await ctrl.getCustomReport({ start, end, typeNames: typeList });
+    const { trendDaily } = await ctrl.getRequestsReportSummary({ start, end, typeNames: typeList });
 
     const header = ["date", "total", "Pending", "InProgress", "Completed", "Cancelled"];
     const lines = [header.join(",")];
@@ -131,7 +131,7 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
 platformRouter.post("/announcements/send", async (req, res) => {
   try {
     const { message } = req.body ?? {};
-    const result = await ctrl.sendAnnouncement({ message });
+    const result = await ctrl.sendAnnouncementToAllUsers({ message });
     res.json(result);
   } catch (e: any) {
     const code = e.message === "Message cannot be empty" ? 400 : 500;
@@ -144,7 +144,7 @@ platformRouter.get("/reports/custom-data.csv", async (req, res) => {
   try {
     const { start, end, types } = req.query as Record<string, string>;
     const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
-    const rows = await ctrl.getCustomReportRaw({ start, end, typeNames: typeList });
+    const rows = await ctrl.getRequestsReportRows({ start, end, typeNames: typeList });
 
     // CSV escaping helper
     const esc = (v: any) => {
@@ -153,12 +153,22 @@ platformRouter.get("/reports/custom-data.csv", async (req, res) => {
       return `"${q}"`;
     };
 
-    const header = ["requestedAt", "serviceType", "status", "pin_id", "csr_id", "message"];
+    const header = [
+      "requestedAt",
+      "requestedDate",
+      "serviceType",
+      "status",
+      "pin_id",
+      "csr_id",
+      "message",
+    ];
     const lines: string[] = [header.join(",")];
     for (const r of rows) {
       const dt = r.requestedAt instanceof Date ? r.requestedAt.toISOString() : String(r.requestedAt);
+      const requestedDate = dt.includes('T') ? dt.split('T')[0] : dt.slice(0, 10);
       lines.push([
         esc(dt),
+        esc(requestedDate),
         esc(r.serviceType),
         esc(r.status),
         esc(r.pin_id),
@@ -177,7 +187,7 @@ platformRouter.get("/reports/custom-data.csv", async (req, res) => {
 
 // Latest announcement (in-memory, minimal)
 platformRouter.get("/announcements/latest", (_req, res) => {
-  const latest = ctrl.getLatestAnnouncement();
+  const latest = ctrl.getLatestAnnouncementSnapshot();
   res.json({ latest });
 });
 
@@ -186,7 +196,7 @@ platformRouter.get("/announcements/latest", (_req, res) => {
   // Quick stats (today/week/month)
 platformRouter.get('/reports/quick', async (_req, res) => {
   try {
-    const data = await ctrl.getQuickStats();
+    const data = await ctrl.getRequestStatusCountsByPeriod();
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message ?? 'Failed to load quick stats' });
@@ -195,7 +205,7 @@ platformRouter.get('/reports/quick', async (_req, res) => {
 // Active users stats
   platformRouter.get('/stats/active', async (_req, res) => {
     try {
-      const s = await ctrl.getActiveCounts();
+      const s = await ctrl.countActiveUsersByRole();
       res.json(s);
   } catch (e: any) {
     res.status(500).json({ error: e.message ?? 'Failed to load stats' });

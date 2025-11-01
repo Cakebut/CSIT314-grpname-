@@ -12,8 +12,8 @@ export class PlatformManagerController {
   // Minimal in-memory latest announcement (non-persistent)
   private latestAnnouncement: { message: string; createdAt: string } | null = null;
 
-  async listServiceTypes() {
-    return this.entity.listServiceTypes();
+  async listActiveServiceTypes() {
+    return this.entity.listActiveServiceTypes();
   }
 
   async searchServiceTypes(q?: string, includeDeleted?: boolean) {
@@ -28,8 +28,8 @@ export class PlatformManagerController {
     return this.entity.updateServiceType(id, name);
   }
 
-  async deleteServiceType(id?: number) {
-    return this.entity.deleteServiceType(id);
+  async softDeleteServiceType(id?: number) {
+    return this.entity.softDeleteServiceType(id);
   }
 
   // force delete removed; only soft delete is supported
@@ -38,34 +38,34 @@ export class PlatformManagerController {
     return this.entity.restoreServiceType(id);
   }
 
-  async reassignServiceType(fromId?: number, toId?: number) {
-    return this.entity.reassignServiceType(fromId, toId);
+  async reassignRequestsToServiceType(fromId?: number, toId?: number) {
+    return this.entity.reassignRequestsToServiceType(fromId, toId);
   }
 
-  async getActiveCounts() {
-    return this.entity.getActiveCounts();
+  async countActiveUsersByRole() {
+    return this.entity.countActiveUsersByRole();
   }
 
-  async getQuickStats() {
-    return this.entity.getQuickStats();
+  async getRequestStatusCountsByPeriod() {
+    return this.entity.getRequestStatusCountsByPeriod();
   }
 
-  async getCustomReport(q: ReportQuery) {
-    return this.entity.getCustomReport(q);
+  async getRequestsReportSummary(q: ReportQuery) {
+    return this.entity.getRequestsReportSummary(q);
   }
 
-  async getCustomReportRaw(q: ReportQuery) {
-    return this.entity.getCustomReportRaw(q);
+  async getRequestsReportRows(q: ReportQuery) {
+    return this.entity.getRequestsReportRows(q);
   }
 
-  async sendAnnouncement({ message }: { message?: string }) {
+  async sendAnnouncementToAllUsers({ message }: { message?: string }) {
     if (!message || !message.trim()) throw new Error("Message cannot be empty");
     const deliveredCount = await this.entity.countActiveUsers();
     this.latestAnnouncement = { message: message.trim(), createdAt: new Date().toISOString() };
     return { deliveredCount };
   }
 
-  getLatestAnnouncement() {
+  getLatestAnnouncementSnapshot() {
     return this.latestAnnouncement;
   }
 

@@ -10,7 +10,7 @@ import { sql } from 'drizzle-orm';
 
 //Routers
 import { router } from './router/userAdmin';
-import { createPlatformRouter } from './router/platformManager';
+import { createPlatformManagerRouter } from './router/platformManager';
 import pinRouter from './router/personInNeed';
 
 declare module 'express-session' {
@@ -35,16 +35,19 @@ app.use(
       credentials: true
     })
 )
+const PgSession = connectPgSimple(session);
 app.use(
   session({
-    store: new (connectPgSimple(session))({
+    store: new PgSession({
       createTableIfMissing: true,
-      conString: DATABASE_URL
+      // Reuse the same pg Pool used by Drizzle to avoid duplicate configs
+      pool,
+      // If you prefer, you can use { conString: DATABASE_URL }
     }),
-    secret: "(@*#Y&URN(*WY#UN(YN(W#(#R*TVUYMN(*",
+    secret: process.env.SESSION_SECRET || "(@*#Y&URN(*WY#UN(YN(W#(#R*TVUYMN(*",
     resave: false,
+    saveUninitialized: false,
     cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, // 30 days
-    // Insert express-session options here
   })
 );
 
@@ -62,7 +65,7 @@ app.get("/", async (req, res) => {
 
 
 app.use("/api/", router)
-app.use("/api/pm", createPlatformRouter(db))
+app.use("/api/pm", createPlatformManagerRouter(db))
 app.use('/api/pin', pinRouter);
 
 app.listen(port, () => {

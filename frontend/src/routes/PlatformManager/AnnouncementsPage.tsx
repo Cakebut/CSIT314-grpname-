@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./AnnouncementsPage.css";
 
 export default function AnnouncementsPage() {
+  
   const [message, setMessage] = useState("");
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

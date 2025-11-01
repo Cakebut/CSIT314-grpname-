@@ -20,6 +20,7 @@ type QuickBucket = { total: number; Pending: number; InProgress: number; Complet
 type QuickStats = { day: QuickBucket | null; week: QuickBucket | null; month: QuickBucket | null };
 
 export default function ReportsPage() {
+  
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
@@ -66,7 +67,7 @@ export default function ReportsPage() {
     setDateRange(`${s} - ${e}`);
   }
 
-  const onGenerate = async (s?: string, e?: string) => {
+  const onGenerate = async (s?: string, e?: string, opts?: { ignoreType?: boolean }) => {
     setError(null);
     setSummary(null);
     let useStart = s ?? start;
@@ -80,7 +81,7 @@ export default function ReportsPage() {
     const params = new URLSearchParams();
     params.set("start", useStart);
     params.set("end", useEnd);
-    if (selectedType) params.set("types", selectedType);
+    if (!opts?.ignoreType && selectedType) params.set("types", selectedType);
     try {
       const res = await fetch(`/api/pm/reports/custom?${params.toString()}`);
       const data = await res.json();
@@ -94,7 +95,12 @@ export default function ReportsPage() {
   };
 
   // Quick date helpers
-  function fmt(d: Date) { return d.toISOString().slice(0,10); }
+  function fmt(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
   function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
   function endOfToday() { const d = new Date(); d.setHours(23,59,59,999); return d; }
   function startOfWeek() {
@@ -110,16 +116,17 @@ export default function ReportsPage() {
   function startOfYear() { const d = new Date(); d.setMonth(0,1); d.setHours(0,0,0,0); return d; }
   function endOfYear() { const d = new Date(); d.setMonth(11,31); d.setHours(23,59,59,999); return d; }
 
-  const runQuick = (range: 'day'|'week'|'month'|'year') => {
-    let s: Date, e: Date;
-    if (range === 'day') { s = startOfToday(); e = endOfToday(); }
-    else if (range === 'week') { s = startOfWeek(); e = endOfWeek(); }
-    else if (range === 'month') { s = startOfMonth(); e = endOfMonth(); }
-    else { s = startOfYear(); e = endOfYear(); }
-    const sStr = fmt(s); const eStr = fmt(e);
+  function runQuickRange(s: Date, e: Date) {
+    const sStr = fmt(s);
+    const eStr = fmt(e);
     syncDateRange(sStr, eStr);
-    onGenerate(sStr, eStr);
-  };
+    onGenerate(sStr, eStr, { ignoreType: true });
+  }
+
+  const runQuickDay = () => runQuickRange(startOfToday(), endOfToday());
+  const runQuickWeek = () => runQuickRange(startOfWeek(), endOfWeek());
+  const runQuickMonth = () => runQuickRange(startOfMonth(), endOfMonth());
+  const runQuickYear = () => runQuickRange(startOfYear(), endOfYear());
 
   const onDownloadCsv = () => {
     if (!start || !end) { setError("Invalid date range"); return; }
@@ -150,17 +157,17 @@ export default function ReportsPage() {
         <div className="card">
           <b>Today</b>
           <span>{quick?.day?.total ?? 0}</span>
-          <button onClick={()=>runQuick('day')} disabled={loading}>Generate Daily Report</button>
+          <button onClick={runQuickDay} disabled={loading}>Generate Daily Report</button>
         </div>
         <div className="card">
           <b>This Week</b>
           <span>{quick?.week?.total ?? 0}</span>
-          <button onClick={()=>runQuick('week')} disabled={loading}>Generate Weekly Report</button>
+          <button onClick={runQuickWeek} disabled={loading}>Generate Weekly Report</button>
         </div>
         <div className="card">
           <b>This Month</b>
           <span>{quick?.month?.total ?? 0}</span>
-          <button onClick={()=>runQuick('month')} disabled={loading}>Generate Monthly Report</button>
+          <button onClick={runQuickMonth} disabled={loading}>Generate Monthly Report</button>
         </div>
       </div>
       <h2>Platform Manager — Reports</h2>
