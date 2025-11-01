@@ -1,5 +1,6 @@
 
 import { Router } from 'express';
+import { eq } from 'drizzle-orm';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
 import { db } from "../index";
 import { urgency_levelTable, locationTable ,service_typeTable} from "../db/schema/aiodb";
@@ -133,7 +134,7 @@ router.get('/locations', async (req, res) => {
 // Get all service types (for dropdowns etc)
 router.get('/service-types', async (req, res) => {
   try {
-    const types = await db.select().from(service_typeTable);
+    const types = await db.select().from(service_typeTable).where(eq(service_typeTable.deleted, false));
     res.json({ data: types });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch service types' });

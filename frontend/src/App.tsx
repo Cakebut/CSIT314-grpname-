@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 // Component
@@ -21,6 +21,9 @@ import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
 
 // Platform Manager
 import PlatformManagerHome from './routes/PlatformManager';
+import CategoriesPage from './routes/PlatformManager/CategoriesPage';
+import ReportsPage from './routes/PlatformManager/ReportsPage';
+import AnnouncementsPage from './routes/PlatformManager/AnnouncementsPage';
 
 // CSS
 
@@ -46,8 +49,13 @@ function App() {
           <Route path="/useradmin/SystemLog" element={<UserAdminSystemLogPage />} />
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
-          {/* Platform Manager */}
-          <Route path="/platform-manager" element={<PlatformManagerHome />} />
+          {/* Platform Manager (Dashboard + nested pages) */}
+          <Route path="/platform-manager" element={<PlatformManagerHome />}>
+            <Route index element={<Navigate to="reports" replace />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
+          </Route>
         </Routes>
         <ToastContainer />
       </div>

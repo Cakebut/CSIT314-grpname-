@@ -20,7 +20,9 @@ platformRouter.get("/service-types", async (_req, res) => {
 platformRouter.get("/service-types/search", async (req, res) => {
   try {
     const q = (req.query.q as string) || "";
-    const rows = await ctrl.searchServiceTypes(q);
+    const inc = String(req.query.includeDeleted || '').toLowerCase();
+    const includeDeleted = inc === '1' || inc === 'true' || inc === 'yes';
+    const rows = await ctrl.searchServiceTypes(q, includeDeleted);
     res.json({ items: rows });
   } catch (e: any) {
     res.status(400).json({ error: e.message ?? "Bad request" });
@@ -59,6 +61,31 @@ platformRouter.delete("/service-types/:id", async (req, res) => {
     res.status(400).json({ error: e.message ?? "Bad request" });
   }
 });
+
+// Restore a soft-deleted service type
+platformRouter.post("/service-types/:id/restore", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const resp = await ctrl.restoreServiceType(id);
+    res.json(resp);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message ?? 'Bad request' });
+  }
+});
+
+// Reassign all references from one service type to another
+platformRouter.post("/service-types/:fromId/reassign", async (req, res) => {
+  try {
+    const fromId = Number(req.params.fromId);
+    const { toId } = req.body ?? {};
+    const result = await ctrl.reassignServiceType(fromId, Number(toId));
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message ?? "Bad request" });
+  }
+});
+
+// isactive removed; no soft-delete toggle route
 
 // JSON report summary
 platformRouter.get("/reports/custom", async (req, res) => {

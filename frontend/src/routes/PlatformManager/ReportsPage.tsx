@@ -34,21 +34,21 @@ export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<string>("");
 
   useEffect(() => {
-    fetch("/api/service-types")
+    fetch("/api/pm/service-types")
       .then(r => r.json())
       .then(d => setServiceTypes(d.serviceTypes || []))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    fetch('/api/stats/active')
+    fetch('/api/pm/stats/active')
       .then(r => r.ok ? r.json() : Promise.reject(new Error('stats failed')))
       .then(s => setActive(s))
       .catch(()=>{});
   }, []);
 
   useEffect(() => {
-    fetch('/api/reports/quick')
+    fetch('/api/pm/reports/quick')
       .then(r => r.ok ? r.json() : Promise.reject(new Error('quick failed')))
       .then(d => setQuick(d))
       .catch(()=>{});
@@ -82,7 +82,7 @@ export default function ReportsPage() {
     params.set("end", useEnd);
     if (selectedType) params.set("types", selectedType);
     try {
-      const res = await fetch(`/api/reports/custom?${params.toString()}`);
+      const res = await fetch(`/api/pm/reports/custom?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error occurred");
       setSummary(data);
@@ -128,8 +128,8 @@ export default function ReportsPage() {
     params.set("end", end);
     if (selectedType) params.set("types", selectedType);
     const urls = [
-      `/api/reports/custom.csv?${params.toString()}`,
-      `/api/reports/custom-data.csv?${params.toString()}`,
+      `/api/pm/reports/custom.csv?${params.toString()}`,
+      `/api/pm/reports/custom-data.csv?${params.toString()}`,
     ];
     // Trigger two downloads sequentially to avoid navigation replacement
     urls.forEach((u, idx) => {
@@ -222,6 +222,28 @@ export default function ReportsPage() {
 
           <h3>Daily Trend</h3>
           <TrendChart data={summary.trendDaily} />
+
+          <h3>Visualizations</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+            <div>
+              <b>Requests by Status (Pie)</b>
+              <PieChart
+                data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
+              />
+            </div>
+            <div>
+              <b>Requests by Service Type (Vertical)</b>
+              <BarChartVertical
+                data={Object.entries(summary.byServiceType).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
+              />
+            </div>
+            <div>
+              <b>Requests by Status (Horizontal)</b>
+              <BarChartHorizontal
+                data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -386,6 +408,96 @@ function TrendChart({ data }: { data: TrendRow[] }) {
       {data.map((d,i) => {
         const px = pad + (i/(data.length-1||1))*(w-2*pad);
         return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
+      })}
+    </svg>
+  );
+}
+
+type ChartDatum = { label: string; value: number; color?: string };
+const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#dc2626', '#0ea5e9', '#22c55e'];
+
+function PieChart({ data }: { data: ChartDatum[] }) {
+  const total = data.reduce((s, d) => s + (isFinite(d.value) ? d.value : 0), 0) || 1;
+  const size = 200, stroke = 18;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  let acc = 0;
+  return (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="chart">
+        <g transform={`translate(${size/2},${size/2})`}>
+          <circle r={r} fill="#f8fafc" />
+          {data.map((d, i) => {
+            const ratio = d.value / total;
+            const len = c * ratio;
+            const dash = `${len} ${c - len}`;
+            const el = (
+              <circle
+                key={i}
+                r={r}
+                fill="transparent"
+                stroke={d.color || palette[i % palette.length]}
+                strokeWidth={stroke}
+                strokeDasharray={dash}
+                strokeDashoffset={-acc}
+                transform="rotate(-90)"
+              />
+            );
+            acc += len;
+            return el;
+          })}
+        </g>
+      </svg>
+      <div>
+        {data.map((d, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, marginBottom: 4 }}>
+            <span style={{ display: 'inline-block', width: 10, height: 10, background: d.color || palette[i % palette.length] }} />
+            <span>{d.label}: {d.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BarChartVertical({ data }: { data: ChartDatum[] }) {
+  const w = 320, h = 200, pad = 24, barGap = 8;
+  const max = Math.max(...data.map(d => d.value), 1);
+  const bw = (w - 2*pad - (data.length - 1) * barGap) / Math.max(data.length, 1);
+  return (
+    <svg width={w} height={h} className="chart">
+      {data.map((d, i) => {
+        const x = pad + i * (bw + barGap);
+        const bh = (d.value / max) * (h - 2*pad);
+        const y = h - pad - bh;
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={bw} height={bh} fill={d.color || palette[i % palette.length]} />
+            <text x={x + bw/2} y={h - 6} fontSize="10" textAnchor="middle" fill="#334155">{d.label.length > 8 ? d.label.slice(0,8)+'…' : d.label}</text>
+            <text x={x + bw/2} y={y - 4} fontSize="10" textAnchor="middle" fill="#334155">{d.value}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function BarChartHorizontal({ data }: { data: ChartDatum[] }) {
+  const w = 320, h = 16 * data.length + 32, pad = 24, barGap = 8, barH = 12;
+  const max = Math.max(...data.map(d => d.value), 1);
+  return (
+    <svg width={w} height={h} className="chart">
+      {data.map((d, i) => {
+        const y = 16 + i * (barH + barGap);
+        const bw = (d.value / max) * (w - 2*pad);
+        const x = pad;
+        return (
+          <g key={i}>
+            <text x={4} y={y + barH - 2} fontSize="10" textAnchor="start" fill="#334155">{d.label}</text>
+            <rect x={x} y={y} width={bw} height={barH} fill={d.color || palette[i % palette.length]} />
+            <text x={x + bw + 4} y={y + barH - 2} fontSize="10" textAnchor="start" fill="#334155">{d.value}</text>
+          </g>
+        );
       })}
     </svg>
   );

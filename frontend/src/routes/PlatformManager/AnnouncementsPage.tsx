@@ -1,7 +1,4 @@
 import { useState } from "react";
-
-// Use absolute API URL in dev to avoid proxy issues
-const API_BASE = import.meta.env.DEV ? "http://localhost:3000" : "";
 import "./AnnouncementsPage.css";
 
 export default function AnnouncementsPage() {
@@ -15,7 +12,7 @@ export default function AnnouncementsPage() {
     if (!message.trim()) { setError("Message cannot be empty"); return; }
     setBusy(true);
     try {
-      const res = await fetch(`${API_BASE}/api/announcements/send`, {
+      const res = await fetch(`/api/pm/announcements/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message })

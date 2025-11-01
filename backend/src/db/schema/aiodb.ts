@@ -29,6 +29,7 @@ export const service_typeTable = pgTable(
     {
         id: serial().primaryKey(), //Medical , transport ,household assistants
         name: varchar({ length: 64 }).notNull().unique(),
+        deleted: boolean().notNull().default(false),
     },
     // table => [ uniqueIndex().on(table.label) ]
 )
