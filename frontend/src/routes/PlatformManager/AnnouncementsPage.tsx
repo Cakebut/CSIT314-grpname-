@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AnnouncementsPage.css";
+import { toast } from "react-toastify";
 
 export default function AnnouncementsPage() {
   
@@ -7,6 +8,21 @@ export default function AnnouncementsPage() {
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [latest, setLatest] = useState<{ message: string; createdAt: string } | null>(null);
+
+  const loadLatest = async () => {
+    try {
+      const res = await fetch(`/api/pm/announcements/latest`);
+      const data = await res.json();
+      setLatest(data?.latest ?? null);
+    } catch {
+      // ignore preview errors
+    }
+  };
+
+  useEffect(() => {
+    loadLatest();
+  }, []);
 
   const onSend = async () => {
     setInfo(null); setError(null);
@@ -22,10 +38,15 @@ export default function AnnouncementsPage() {
       let data: any = null;
       try { data = text ? JSON.parse(text) : null; } catch { /* non-JSON (e.g., HTML) */ }
       if (!res.ok) throw new Error(data?.error || `Failed to send (${res.status})`);
-      setInfo(`Sent to ${data.deliveredCount} users`);
+      const successMsg = `Sent to ${data.deliveredCount} users`;
+      setInfo(successMsg);
+      toast.success(successMsg);
       setMessage("");
+      loadLatest();
     } catch (e: any) {
-      setError(e.message || "Error occurred");
+      const errMsg = e.message || "Error occurred";
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setBusy(false);
     }
@@ -40,6 +61,13 @@ export default function AnnouncementsPage() {
       </div>
       {error && <div className="error">{error}</div>}
       {info && <div className="info">{info}</div>}
+      {latest && (
+        <div className="latest" style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 600 }}>Latest announcement</div>
+          <div style={{ color: '#374151' }}>{latest.message}</div>
+          <div style={{ color: '#6b7280', fontSize: 12 }}>at {new Date(latest.createdAt).toLocaleString()}</div>
+        </div>
+      )}
     </div>
   );
 }

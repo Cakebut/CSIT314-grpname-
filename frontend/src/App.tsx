@@ -50,7 +50,7 @@ function App() {
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
           {/* Platform Manager (Dashboard + nested pages) */}
-          <Route path="/platform-manager" element={<PlatformManagerHome />}>
+          <Route path="/platformManager" element={<PlatformManagerHome />}>
             <Route index element={<Navigate to="reports" replace />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="reports" element={<ReportsPage />} />

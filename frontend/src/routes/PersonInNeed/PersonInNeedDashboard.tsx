@@ -53,6 +53,8 @@ const PersonInNeedDashboard: React.FC = () => {
   const [urgencyLevelID, setUrgencyLevelID] = useState("");
   const [locations, setLocations] = useState<{ id: number; name: string; line: string }[]>([]);
   const [urgencyLevels, setUrgencyLevels] = useState<{ id: number; label: string; color: string }[]>([]);
+  const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   useEffect(() => {
     fetch(`${API_BASE}/api/pin/locations`)
       .then(res => res.json())
@@ -60,6 +62,20 @@ const PersonInNeedDashboard: React.FC = () => {
     fetch(`${API_BASE}/api/pin/urgency-levels`)
       .then(res => res.json())
       .then(data => setUrgencyLevels(data.data || []));
+    // Load latest platform announcement for PIN users
+    fetch(`${API_BASE}/api/pm/announcements/latest`)
+      .then(res => res.json())
+      .then(data => {
+        const latest = data?.latest ?? null;
+        setLatestAnnouncement(latest);
+        if (latest?.createdAt) {
+          const lastSeen = localStorage.getItem('latestAnnouncementSeenAt');
+          if (lastSeen !== latest.createdAt) {
+            setShowAnnouncementModal(true);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const userId = Number(localStorage.getItem("userId"));
@@ -150,6 +166,22 @@ const PersonInNeedDashboard: React.FC = () => {
 
 
   return (
+  <>
+
+      {latestAnnouncement && showAnnouncementModal && (
+        <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, left: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "#fff", borderRadius: 14, padding: "20px 24px", width: "min(640px, 92vw)", boxShadow: "0 12px 32px rgba(0,0,0,0.25)" }}>
+            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Announcement</div>
+            <div style={{ whiteSpace: "pre-wrap", color: "#111827" }}>{latestAnnouncement.message}</div>
+            <div style={{ color: "#6b7280", fontSize: 12, marginTop: 6 }}>at {new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+              <button className="button" onClick={() => { localStorage.setItem("latestAnnouncementSeenAt", latestAnnouncement!.createdAt); setShowAnnouncementModal(false); }} style={{ background: "#2563eb", color: "#fff" }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
     <div className="container">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
       <div className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -166,6 +198,7 @@ const PersonInNeedDashboard: React.FC = () => {
           >Logout</button>
         </div>
       </div>
+      
       {loading ? (
         <div>Loading...</div>
       ) : error ? (
@@ -623,6 +656,7 @@ const PersonInNeedDashboard: React.FC = () => {
         </div>
       )}
     </div>
+  </>
   );
 };
 
