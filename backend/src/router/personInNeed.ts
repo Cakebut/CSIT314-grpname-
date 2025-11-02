@@ -1,4 +1,5 @@
 
+
 import { Router } from 'express';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
 import { db } from "../index";
@@ -140,3 +141,15 @@ router.get('/service-types', async (req, res) => {
   }
 });
 export default router;
+
+// Download CSV history for a PIN user (BCE: router -> controller -> entity)
+router.get('/requests/history', async (req, res) => {
+	try {
+		const csv = await controller.getRequestsHistoryCSV();
+		res.setHeader('Content-Type', 'text/csv');
+		res.setHeader('Content-Disposition', 'attachment; filename="service-history.csv"');
+		return res.send(csv);
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to generate CSV' });
+	}
+});

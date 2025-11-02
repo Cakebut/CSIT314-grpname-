@@ -1,3 +1,24 @@
+// Centralized status color logic
+function getStatusColor(status?: string) {
+  switch ((status || '').toLowerCase()) {
+    case 'available':
+      return '#22c55e';
+    case 'pending':
+      return '#f59e42';
+    case 'completed':
+      return '#6b7280';
+    default:
+      return '#334155';
+  }
+}
+
+// Centralized status badge component
+const StatusBadge: React.FC<{ status?: string }> = ({ status }) => (
+  <span style={{ fontWeight: 600, color: getStatusColor(status) }}>
+    {status || <span style={{ color: '#6b7280' }}>-</span>}
+  </span>
+);
+
 import React, { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -147,6 +168,25 @@ const PersonInNeedDashboard: React.FC = () => {
     }
   };
 
+    // Download handler for past service history
+  const handleDownloadHistory = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/pin/requests/history?userId=${userId}`);
+      if (!res.ok) throw new Error('Failed to download history');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'service-history.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error('Could not download service history.');
+    }
+  };
+
 
 
   return (
@@ -222,12 +262,9 @@ const PersonInNeedDashboard: React.FC = () => {
                     textAlign: 'center',
                     fontWeight: 600,
                     fontSize: '1.05rem',
-                    color:
-                      r.status?.toLowerCase() === 'available' ? '#22c55e' :
-                      r.status?.toLowerCase() === 'pending' ? '#f59e42' : '#334155',
                   }}
                 >
-                  {r.status || <span style={{ color: '#6b7280' }}>-</span>}
+                  <StatusBadge status={r.status} />
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                   {r.urgencyLabel && (
@@ -268,12 +305,7 @@ const PersonInNeedDashboard: React.FC = () => {
             <div><b>Request Type:</b> {selected.categoryName}</div>
             <div><b>Location:</b> {selected.locationName || '-'}</div>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '8px 0' }}>
-              <div><b>Status:</b> <span style={{
-                fontWeight: 600,
-                color:
-                  selected.status?.toLowerCase() === 'available' ? '#22c55e' :
-                  selected.status?.toLowerCase() === 'pending' ? '#f59e42' : '#334155',
-              }}>{selected.status || <span style={{ color: '#6b7280' }}>-</span>}</span></div>
+              <div><b>Status:</b> <StatusBadge status={selected.status} /></div>
               <div> {selected.urgencyLabel && (
                 <span
                   style={{
@@ -312,7 +344,16 @@ const PersonInNeedDashboard: React.FC = () => {
             style={{ width: '1000px', maxWidth: '98vw', minHeight: '500px' }}
           >
             <h3>My Requests</h3>
-            <button className="button primary" style={{ float: 'right', marginBottom: 8 }} onClick={() => setShowCreate(true)}>Create Request</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <button className="button primary" onClick={() => setShowCreate(true)}>Create Request</button>
+              <button
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handleDownloadHistory}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download w-4 h-4 mr-2" aria-hidden="true"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+                Download Past Service History
+              </button>
+            </div>
             <table className="table">
               <thead>
                 <tr>
@@ -334,41 +375,36 @@ const PersonInNeedDashboard: React.FC = () => {
                     <tr key={r.id}>
                       <td>{r.title}</td>
                       <td>{r.categoryName}</td>
-                      <td
-                        style={{
-                          fontWeight: 600,
-                          textAlign: 'right',
-                          color:
-                            r.status?.toLowerCase() === 'available' ? '#22c55e' :
-                            r.status?.toLowerCase() === 'pending' ? '#f59e42' :
-                            r.status?.toLowerCase() === 'completed' ? '#6b7280' : '#334155',
-                        }}
-                      >
-                        {r.status || <span style={{ color: '#6b7280' }}>-</span>}
+                      <td style={{ padding: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 48 }}>
+                          <StatusBadge status={r.status} />
+                        </div>
                       </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {r.urgencyLabel ? (
-                          <span
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 70,
-                              padding: '0.3em 0.8em',
-                              borderRadius: 16,
-                              color: 'white',
-                              fontWeight: 600,
-                              backgroundColor:
-                                r.urgencyLabel.toLowerCase() === 'high priority' ? '#ef4444' :
-                                r.urgencyLabel.toLowerCase() === 'low priority' ? '#22c55e' : '#6b7280',
-                              textAlign: 'center',
-                            }}
-                          >
-                            {r.urgencyLabel}
-                          </span>
-                        ) : (
-                          <span style={{ color: '#6b7280' }}>-</span>
-                        )}
+                      <td style={{ padding: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 48 }}>
+                          {r.urgencyLabel ? (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minWidth: 70,
+                                padding: '0.3em 0.8em',
+                                borderRadius: 16,
+                                color: 'white',
+                                fontWeight: 600,
+                                backgroundColor:
+                                  r.urgencyLabel.toLowerCase() === 'high priority' ? '#ef4444' :
+                                  r.urgencyLabel.toLowerCase() === 'low priority' ? '#22c55e' : '#6b7280',
+                                textAlign: 'center',
+                              }}
+                            >
+                              {r.urgencyLabel}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#6b7280' }}>-</span>
+                          )}
+                        </div>
                       </td>
                       <td>{r.createdAt ? r.createdAt.slice(0, 10) : '-'}</td>
                       <td style={{ textAlign: 'center' }}>

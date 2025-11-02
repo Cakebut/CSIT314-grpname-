@@ -1,13 +1,4 @@
-// Only fields required from the API consumer for creation
-export type PinRequestCreateInput = {
-  pin_id: number;
-  csr_id?: number | null;
-  title: string;
-  categoryID: number;
-  message?: string | null;
-  locationID?: number | null;
-  urgencyLevelID?: number | null;
-};
+
 import { db } from '../index';
 import { and, eq, ilike, is } from 'drizzle-orm';
 import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable } from '../db/schema/aiodb';
@@ -30,6 +21,16 @@ export interface PinRequest {
   view_count: number;
   shortlist_count: number;
 }
+
+export type PinRequestCreateInput = {
+  pin_id: number;
+  csr_id?: number | null;
+  title: string;
+  categoryID: number;
+  message?: string | null;
+  locationID?: number | null;
+  urgencyLevelID?: number | null;
+};
 
 
 
@@ -139,5 +140,63 @@ export class PinRequestEntity {
   static async deleteRequest(id: number): Promise<boolean> {
     const result = await db.delete(pin_requestsTable).where(eq(pin_requestsTable.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+  /**
+   * Returns all requests as CSV string for download.
+   */
+  static async getRequestsHistoryCSV(): Promise<string> {
+    // Get all requests with joined info
+    const requests = await db
+      .select({
+        id: pin_requestsTable.id,
+        pin_id: pin_requestsTable.pin_id,
+        pinName: useraccountTable.username,
+        title: pin_requestsTable.title,
+        csr_id: pin_requestsTable.csr_id,
+        categoryID: pin_requestsTable.categoryID,
+        categoryName: service_typeTable.name,
+        message: pin_requestsTable.message,
+        locationID: pin_requestsTable.locationID,
+        locationName: locationTable.name,
+        urgencyLevelID: pin_requestsTable.urgencyLevelID,
+        urgencyLabel: urgency_levelTable.label,
+        view_count: pin_requestsTable.view_count,
+        shortlist_count: pin_requestsTable.shortlist_count,
+        createdAt: pin_requestsTable.createdAt,
+        status: pin_requestsTable.status,
+      })
+      .from(pin_requestsTable)
+      .leftJoin(useraccountTable, eq(pin_requestsTable.pin_id, useraccountTable.id))
+      .leftJoin(service_typeTable, eq(pin_requestsTable.categoryID, service_typeTable.id))
+      .leftJoin(locationTable, eq(pin_requestsTable.locationID, locationTable.id))
+      .leftJoin(urgency_levelTable, eq(pin_requestsTable.urgencyLevelID, urgency_levelTable.id));
+
+    // Convert to CSV with formatted date, custom id, and filtered columns
+    if (!requests.length) return '';
+    // Columns to include (exclude categoryID, locationID, urgencyLevelID)
+    const includeHeaders = Object.keys(requests[0]).filter(
+      h => !['categoryID', 'locationID', 'urgencyLevelID', 'id'].includes(h)
+    );
+    // Insert our own 'id' as the first column
+    const headers = ['id', ...includeHeaders];
+    const csvRows = [headers.join(',')];
+    requests.forEach((row, idx) => {
+      const values = headers.map(h => {
+        if (h === 'id') return (idx + 1).toString();
+        let val = row[h as keyof typeof row];
+        if (h === 'createdAt' && val) {
+          try {
+            val = new Date(val).toISOString().slice(0, 10);
+          } catch {}
+        }
+        if (h === 'csr_id' && (val === undefined || val === null || val === '')) {
+          return 'NULL';
+        }
+        if (val === null || val === undefined) return '';
+        return '"' + String(val).replace(/"/g, '""') + '"';
+      });
+      csvRows.push(values.join(','));
+    });
+    return csvRows.join('\n');
   }
 }
