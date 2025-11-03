@@ -4,6 +4,27 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import "./PersonInNeedDashboard.css";
 
+// Centralized status color logic
+function getStatusColor(status?: string) {
+  switch ((status || '').toLowerCase()) {
+    case 'available':
+      return '#22c55e';
+    case 'pending':
+      return '#f59e42';
+    case 'completed':
+      return '#6b7280';
+    default:
+      return '#334155';
+  }
+}
+
+// Centralized status badge component
+const StatusBadge: React.FC<{ status?: string }> = ({ status }) => (
+  <span style={{ fontWeight: 600, color: getStatusColor(status) }}>
+    {status || <span style={{ color: '#6b7280' }}>-</span>}
+  </span>
+);
+
 
 
 interface Request {
@@ -275,7 +296,7 @@ const PersonInNeedDashboard: React.FC = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       toast.error('Could not download service history.');
     }
   };
