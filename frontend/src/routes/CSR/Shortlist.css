@@ -1,0 +1,119 @@
+/* Container for the entire Shortlist page */
+.shortlist-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Header section */
+.header {
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.empty-state p {
+  color: #555;
+}
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.request-card {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.request-header h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.request-id {
+  font-size: 1rem;
+  color: #007bff;
+}
+
+.action-buttons button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.offer-help-btn {
+  background-color: #34d399;
+  color: white;
+  margin-right: 10px;
+}
+
+.offer-help-btn:hover {
+  background-color: #10b981;
+}
+
+.delete-btn {
+  background-color: #f87171;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.tags {
+  margin-top: 10px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #e0e7ff;
+  color: #1e3a8a;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  margin-right: 8px;
+  margin-top: 5px;
+}
+
+.tag:hover {
+  background-color: #93c5fd;
+}

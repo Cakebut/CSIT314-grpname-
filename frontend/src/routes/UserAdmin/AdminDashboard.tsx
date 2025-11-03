@@ -1,45 +1,78 @@
-import { useNavigate } from 'react-router-dom';
-import './AdminDashboard.css';
+import { useState } from "react";
+import { LogOut, Users, Key, FileText } from "lucide-react";
 
-function AdminDashboard() {
-  const navigate = useNavigate();
-  const username = localStorage.getItem('currentUsername');
-  const role = localStorage.getItem('currentRole');
+import UserAccounts from "./UserAccounts";
+import AdminPasswordRequests from "./AdminPasswordRequests";
+import SystemActivityLogs from "./SystemActivityLogs";
 
-  // Add a logout handler
-  const handleLogout = () => {
-    localStorage.removeItem('dummyUsers'); // Clear dummy users
-    localStorage.removeItem('currentUsername');
-    localStorage.removeItem('currentRole');
-    navigate('/'); // Redirect to login
-  };
+import "./AdminDashboard.css";
+
+
+interface AdminDashboardProps {
+  onLogout?: () => void;
+}
+
+type ActiveSection = "userAccounts" | "passwordRequests" | "activityLogs";
+
+export function AdminDashboard({ onLogout }: AdminDashboardProps) {
+  const [activeSection, setActiveSection] = useState<ActiveSection>("userAccounts");
 
   return (
-    <div className="admin-bg">
-      <div className="admin-container admin-card">
-        <div className="admin-logo">
-          <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="27" cy="27" r="27" fill="#6C63FF"/>
-            <text x="50%" y="54%" textAnchor="middle" fill="#fff" fontSize="24" fontFamily="Arial" dy=".3em">A</text>
-          </svg>
+    <div className="admin-dashboard-container">
+      {/* Sidebar */}
+      <div className="sidebar">
+        {/* Header */}
+        <div className="sidebar-header">
+          <h1 className="sidebar-title">Admin Dashboard</h1>
+          <p className="sidebar-subtitle">Management Panel</p>
         </div>
-        <h1 style={{ color: '#2d3748', fontWeight: 700, fontSize: '2.2rem', marginBottom: '0.5rem' }}>Admin Dashboard</h1>
-        {username && role && (
-          <div className="welcome-message" style={{marginBottom: '32px', fontSize: '1.25rem', color: '#333', fontWeight: 500}}>
-            Welcome, <span style={{color:'#6C63FF'}}>{username}</span>!<br />Role: <span style={{color:'#764ba2'}}>{role}</span>
+
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          <div className="nav-links">
+            <button
+              onClick={() => setActiveSection("userAccounts")}
+              className={`nav-button ${activeSection === "userAccounts" ? "active" : ""}`}
+            >
+              <Users className="icon" />
+              <span>User Accounts</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveSection("passwordRequests")}
+              className={`nav-button ${activeSection === "passwordRequests" ? "active" : ""}`}
+            >
+              <Key className="icon" />
+              <span>Password Requests</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection("activityLogs")}
+              className={`nav-button ${activeSection === "activityLogs" ? "active" : ""}`}
+            >
+              <FileText className="icon" />
+              <span>Activity Logs</span>
+            </button>
           </div>
-        )}
-        <div className="bubble-options">
-          <div className="bubble" onClick={() => navigate('/useradmin/ViewUserList')}>
-            View User Dashboard
-          </div>
-          <div className="bubble" onClick={() => navigate('/useradmin/ViewUserRoles')}>
-            View Roles Dashboard
-          </div>
-          <div className="bubble logout-bubble" onClick={handleLogout}>
+        </nav>
+
+        {/* Logout Button */}
+        <div className="sidebar-footer">
+          <button
+            onClick={onLogout}
+            className="logout-button"
+          >
+            <LogOut className="icon" />
             Logout
-          </div>
+          </button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="main-content">
+        {activeSection === "userAccounts" && <UserAccounts />}
+        {activeSection === "passwordRequests" && <AdminPasswordRequests />}
+        {activeSection === "activityLogs" && <SystemActivityLogs />}
       </div>
     </div>
   );

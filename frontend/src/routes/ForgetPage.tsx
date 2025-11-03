@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CircleCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "./ForgetPage.css";
 
@@ -27,6 +28,12 @@ function Forget({
       onSubmit();
     }
   };
+
+  const navigate = useNavigate();
+
+  const handleCancel = () => {
+    navigate(-1);
+  }
 
   return (
     <>
@@ -83,17 +90,29 @@ function Forget({
           <div className="validation-box">
             <p>Password must contain:</p>
             <ul>
-              <li style={{ color: hasMinLength ? "green" : "red" }}>
-                • At least 8 characters
+              <li className={hasMinLength ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={hasMinLength ? "valid-check" : "invalid-check"}
+                />
+                At least 8 characters
               </li>
-              <li style={{ color: hasUppercase ? "green" : "red" }}>
-                • One uppercase letter
+              <li className={hasUppercase ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={hasUppercase ? "valid-check" : "invalid-check"}
+                />
+                One uppercase letter
               </li>
-              <li style={{ color: hasNumber ? "green" : "red" }}>
-                • One number
+              <li className={hasNumber ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={hasNumber ? "valid-check" : "invalid-check"}
+                />
+                One number
               </li>
-              <li style={{ color: passwordsMatch ? "green" : "red" }}>
-                • Passwords match
+              <li className={passwordsMatch ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={passwordsMatch ? "valid-check" : "invalid-check"}
+                />
+                Passwords match
               </li>
             </ul>
           </div>
@@ -101,10 +120,10 @@ function Forget({
           <div className="input-wrapper">
             <div className="input-submit">
               <button
-                type="submit"
+                type="button"
                 className="submit-btn btn"
                 id="cancel"
-                onClick={onCancel}
+                onClick={handleCancel}
               ></button>
               <label htmlFor="cancel">Cancel</label>
             </div>
@@ -112,11 +131,10 @@ function Forget({
             <div className="input-submit">
               <button
                 type="submit"
-                // disabled={!allValid} FIX PLEASE THANKS
                 className="submit-btn btn"
                 id="submit"
                 onClick={handleSubmit}
-              ></button>
+                ></button>
               <label htmlFor="submit">Confirm</label>
             </div>
           </div>

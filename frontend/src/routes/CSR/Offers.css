@@ -1,0 +1,152 @@
+/* Container for the entire Offers page */
+.offers-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Header section */
+.header {
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.offers-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.offer-card {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.offer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.offer-header h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: white;
+  background-color: gray;
+}
+
+.status.pending {
+  background-color: yellow;
+  color: black;
+}
+
+.status.accepted {
+  background-color: blue;
+}
+
+.status.rejected {
+  background-color: red;
+}
+
+.status.completed {
+  background-color: green;
+}
+
+.tags {
+  margin-top: 10px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #e0e7ff;
+  color: #1e3a8a;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  margin-right: 8px;
+  margin-top: 5px;
+}
+
+.tag:hover {
+  background-color: #93c5fd;
+}
+
+.offer-actions {
+  margin-top: 20px;
+}
+
+.action-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.accept {
+  background-color: #34d399;
+  color: white;
+}
+
+.accept:hover {
+  background-color: #10b981;
+}
+
+.reject {
+  background-color: #f87171;
+  color: white;
+}
+
+.reject:hover {
+  background-color: #dc2626;
+}
+
+.complete {
+  background-color: #60a5fa;
+  color: white;
+}
+
+.complete:hover {
+  background-color: #3b82f6;
+}
+
+.disabled {
+  background-color: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.rating {
+  margin-top: 15px;
+  background-color: #f3f4f6;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.stars {
+  display: flex;
+  gap: 5px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}

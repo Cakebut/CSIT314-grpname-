@@ -1,0 +1,133 @@
+.categories-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.categories-header {
+  margin-bottom: 30px;
+}
+
+.categories-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.categories-header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.categories-table {
+  margin-top: 30px;
+  background-color: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-row span {
+  font-size: 1rem;
+}
+
+.color-tag {
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: white;
+}
+
+.color-tag.medical-support {
+  background-color: #3b82f6;
+}
+
+.color-tag.transport-services {
+  background-color: #34d399;
+}
+
+.color-tag.household-help {
+  background-color: #9333ea;
+}
+
+.color-tag.companionship {
+  background-color: #f97316;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+
+.status.active {
+  background-color: #10b981;
+  color: white;
+}
+
+.status.inactive {
+  background-color: #f87171;
+  color: white;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-button,
+.delete-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  color: #4b5563;
+}
+
+.delete-button:hover {
+  color: #dc2626;
+}
+
+.create-category-button {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.create-category-button button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.create-category-button button:hover {
+  background-color: #2563eb;
+}

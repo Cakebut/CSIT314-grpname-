@@ -13,13 +13,16 @@ import Login from './routes/LoginPage';
 import Forget from './routes/ForgetPage';
 
 // USER ADMIN PAGE
-import UserAdmin from './routes/UserAdmin/AdminDashboard';
-import UserList from './routes/UserAdmin/ViewUserAccountPage';
-import ViewRoles from './routes/UserAdmin/ViewUserRolesPage';
-import CreateUser from './routes/UserAdmin/CreateNewUserAccountPage';
+import AdminDashboard from './routes/UserAdmin/AdminDashboard';
 
 // PERSON IN NEED PAGE
-import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
+import PINDashboard from './routes/PersonInNeed/PINDashboard';
+
+// CSR PAGE
+import CSRDashboard from './routes/CSR/CSRDashboard';
+
+// PLAT MANAGER PAGE
+import PMDashboard from './routes/PlatformManager/PMDashboard';
 
 // CSS
 import './App.css';
@@ -40,13 +43,16 @@ function App() {
             <Route path="/forget" element={<Forget />} />
         
             {/* User Admin */}
-            <Route path="/useradmin" element={<UserAdmin />} />
-            <Route path="/useradmin/userlist" element={<UserList />} />
-            <Route path="/useradmin/viewroles" element={<ViewRoles />} />
-            <Route path="/useradmin/createuser" element={<CreateUser />} />
+            <Route path="/admin" element={<AdminDashboard />} />
 
             {/* Person-in-Need */}
-            <Route path="/PIN" element={<PersonInNeedDashboard />} />
+            <Route path="/pin" element={<PINDashboard />} />
+
+            {/* CSR */}
+            <Route path="/csr" element={<CSRDashboard />} />
+
+            {/* PM */}
+            <Route path="/pm" element={<PMDashboard />} />            
 
         </Routes>
 

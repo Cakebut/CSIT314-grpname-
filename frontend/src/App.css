@@ -1,19 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700);
 
-@import url(https://fonts.googleapis.com/css2?family=Hanuman:wght@100;300;400;600;700;900&display=swap);
-
-@font-face {
-  font-family: "Motter Corpus Std";
-  src: local("Motter Corpus Std"), local("MotterCorpusStd-Regular"),
-    url("./fonts/MotterCorpusStd-Regular.eot?#iefix")
-      format("embedded-opentype"),
-    url("./fonts/MotterCorpusStd-Regular.woff2") format("woff2"),
-    url("./fonts/MotterCorpusStd-Regular.woff") format("woff"),
-    url("./fonts/MotterCorpusStd-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 *,
 ::before,

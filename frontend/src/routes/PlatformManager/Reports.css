@@ -1,0 +1,138 @@
+.reports-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Header styling */
+.header {
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Date Range and Date Selector */
+.date-range-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.date-range-selector label {
+  font-size: 1rem;
+}
+
+.date-range-selector select,
+.date-range-selector input {
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* Stats Section */
+.stats-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background-color: #f3f4f6;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.stat-card p {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.percentage-change {
+  font-size: 0.875rem;
+  color: green;
+}
+
+/* Completion Time and Satisfaction Rate */
+.completion-time,
+.satisfaction-rate {
+  margin-bottom: 30px;
+}
+
+.completion-time h3,
+.satisfaction-rate h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.completion-time p,
+.satisfaction-rate p {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Graphs Section */
+.graphs {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.graph-row {
+  display: flex;
+  gap: 30px;
+}
+
+.graph-card {
+  flex: 1;
+  background-color: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.graph-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+/* Download Button */
+.download-button {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.download-button button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.download-button button:hover {
+  background-color: #0056b3;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}

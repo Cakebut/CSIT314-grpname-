@@ -1,0 +1,102 @@
+/* Main Container */
+.activity-logs-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.header p {
+  color: #555;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.search-input {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.filter-select {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.reset-btn, .export-btn {
+  padding: 6px 12px;
+  background-color: #f1f1f1;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.reset-btn:hover, .export-btn:hover {
+  background-color: #ddd;
+}
+
+.export-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.export-btn .icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+/* Table Section */
+.activity-logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.activity-logs-table th, .activity-logs-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.activity-logs-table th {
+  background-color: #f8f9fa;
+}
+
+/* Account Status */
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.status.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.status.suspended {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Actions */
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
