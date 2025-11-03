@@ -1,3 +1,10 @@
+ 
+import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import "./CSRRepDashboard.css";
+import "./CSRRepDashboard.extra.css";
+
+
 // --- Auth Utilities ---
 function getCSRId() {
   const role = localStorage.getItem("currentRole");
@@ -6,10 +13,8 @@ function getCSRId() {
   return null;
 }
 
-import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import "./CSRRepDashboard.css";
-import "./CSRRepDashboard.extra.css";
+
+
 
 // --- CSRHeader ---
 function CSRHeader() {
@@ -20,7 +25,7 @@ function CSRHeader() {
     if (!showNoti) return;
     function handleClick(e: MouseEvent) {
       const pop = document.getElementById('csr-noti-popover');
-      const btn = document.querySelector('.csr-icon-btn');
+        const btn = document.querySelector('.csr-icon-btn');
       // Only close if click is outside both popover and button
       if (pop && !pop.contains(e.target as Node) && btn && !btn.contains(e.target as Node)) {
         setShowNoti(false);
