@@ -1,3 +1,4 @@
+ 
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { faker } from "@faker-js/faker";
@@ -10,9 +11,15 @@ import {
   pin_requestsTable,
   csr_shortlistTable,
   csr_interestedTable,
+  roleTable,
 } from "../schema/aiodb";
 import dotenv from "dotenv";
 dotenv.config();
+
+
+
+// Allow skipping seeding via environment variable
+const SKIP_SEEDING = process.env.SKIP_SEEDING === 'true';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -32,6 +39,34 @@ const customUsers = [
   { username: "pm", password: "password", roleid: 4, issuspended: false },
 ];
 
+
+
+const roles = [
+  { label: 'User Admin', issuspended: false },
+  { label: 'Person In Need', issuspended: false },
+  { label: 'CSR Rep', issuspended: false },
+  { label: 'Platform Manager', issuspended: false },
+]
+
+async function seedRoles() {
+  // avoid duplicate inserts if run multiple times
+  if (SKIP_SEEDING) {
+    console.log('⚠️ SKIP_SEEDING is true, skipping role seeding.');
+    return;
+  }
+  try {
+    // insert only when roles table is empty
+    const existing = await db.select().from(roleTable).limit(1)
+    if ((existing as any[]).length === 0) {
+      await db.insert(roleTable).values(roles)
+      console.log(`✅ Inserted ${roles.length} roles successfully!`)
+    } else {
+      console.log('ℹ️ Roles already exist, skipping seeding.')
+    }
+  } catch (err) {
+    console.error('❌ Error seeding roles:', err)
+  }
+}
 // Generate scalable fake users
 function generateFakeUsers(count: number) {
   const roles = [1, 2, 3, 4];
@@ -48,6 +83,10 @@ function fakeInt(min: number, max: number) {
 }
 
 async function seedData() {
+  if (SKIP_SEEDING) {
+    console.log('⚠️ SKIP_SEEDING is true, skipping all data seeding.');
+    return;
+  }
   try {
     // Seed Service Types
     await db.insert(service_typeTable).values([
@@ -207,5 +246,6 @@ async function seedData() {
     await pool.end();
   }
 }
-
+seedRoles();
 seedData();
+

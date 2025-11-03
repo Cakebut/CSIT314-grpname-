@@ -1,14 +1,12 @@
-import { getAuditLogs } from "../entities/auditLog";
-import { auditLogTable } from "../db/schema/aiodb";
- 
-
 import { Router } from "express";
 import { db } from "../index";
 import { useraccountTable,roleTable } from "../db/schema/aiodb";
 import { sql, eq, and } from "drizzle-orm"; // Add this import
+
+
 //Controllers
 import { LoginController  } from "../controller/sharedControllers";
-import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController } from "../controller/UserAdminControllers";
+import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController ,ExportUserAccountController} from "../controller/UserAdminControllers";
 import { AuditLogController } from "../controller/AuditLogController";
  
 
@@ -21,10 +19,34 @@ const updateUserController = new UpdateUserController();
 const roleController = new RoleController();
 const searchUserController = new SearchUserController();
 const auditLogController = new AuditLogController();
+const exportUserAccountController = new ExportUserAccountController();
 
+// Export user accounts as CSV file
+router.get("/userAdmin/users/export", async (req, res) => {
+  try {
+    const actor = req.session?.username || "unknown";
+    const csv = await exportUserAccountController.exportUserAccountsCSV(actor);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to export user accounts as CSV" });
+  }
+});
 
+// Export audit logs as CSV file
+router.get("/userAdmin/audit-log/export", async (req, res) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const csv = await auditLogController.exportAuditLogsCSV(limit);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="audit-log.csv"');
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to export audit logs as CSV" });
+  }
+});
 
- 
 // Update user info
 router.post("/users/:id", async (req, res) => {
   const { username, roleid, issuspended } = req.body;

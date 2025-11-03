@@ -138,6 +138,7 @@ export class RoleController {
     return await this.roleEntity.searchRoles(keyword);
   }
 }
+//Search User Controller
 
 export class SearchUserController {
   private userAccount = new UserEntity();
@@ -151,4 +152,13 @@ export class SearchUserController {
   }
 }
 
+
+
+// Export user accounts as CSV
+export class ExportUserAccountController {
+  private userAccount = new UserEntity();
+  public async exportUserAccountsCSV(actor: string) {
+    return await this.userAccount.exportUserAccountsCSV(actor);
+  }
+}
 

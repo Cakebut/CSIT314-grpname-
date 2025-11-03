@@ -129,6 +129,21 @@ export default function UserAdminSystemLogPage() {
             <button className="clear-log-btn" onClick={handleClearLogs} disabled={clearing}>
               {clearing ? "Clearing..." : "Clear Logs"}
             </button>
+            <button
+              className="export-csv-btn"
+              style={{ background: '#22c55e', color: 'white', borderRadius: 8, padding: '0.5em 1.2em', fontWeight: 600, fontSize: '1em', border: 'none', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', cursor: 'pointer' }}
+              onClick={() => {
+                const url = `/api/userAdmin/audit-log/export${limit && limit > 0 ? `?limit=${limit}` : ''}`;
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'audit-log.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+            >
+              Export User Data CSV
+            </button>
           </div>
         </div>
       </div>

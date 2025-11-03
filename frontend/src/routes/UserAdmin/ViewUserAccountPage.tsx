@@ -1,7 +1,7 @@
-import { toast } from 'react-toastify';
-import { useLocation } from 'react-router-dom';
+import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FaExclamationCircle } from 'react-icons/fa';
+import { FaExclamationCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./ViewUserAccountPage.css";
 
@@ -19,7 +19,7 @@ type UserProfile = {
   issuspended: boolean;
 };
 
-function ViewUserAccountPage() {
+export default function ViewUserAccountPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
@@ -31,7 +31,6 @@ function ViewUserAccountPage() {
 
   const [users, setUsers] = useState<UserAccount[]>([]); // Store users from backend
   const [loadingUserId, setLoadingUserId] = useState<number | null>(null); // For spinner
- 
 
   const [roles, setRoles] = useState<UserProfile[]>([]); // Store roles from backend
 
@@ -60,7 +59,7 @@ function ViewUserAccountPage() {
 
   useEffect(() => {
     if (location.state?.accountCreated) {
-      toast.success('Account has been created');
+      toast.success("Account has been created");
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
@@ -87,9 +86,16 @@ function ViewUserAccountPage() {
 
   // Filter users by search term, role, and status
   const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = user.username
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesRole = filterRole ? user.userProfile === filterRole : true;
-    const matchesStatus = filterStatus ? (filterStatus === 'Active' ? !user.isSuspended : user.isSuspended) : true;
+    const matchesStatus =
+      filterStatus && filterStatus !== "All Status"
+        ? filterStatus === "Active"
+          ? !user.isSuspended
+          : user.isSuspended
+        : true;
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -103,19 +109,19 @@ function ViewUserAccountPage() {
 
   // Delete user by id
   const handleDelete = async (userId: number) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       const res = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       if (res.ok) {
-        toast.error('User deleted successfully');
+        toast.error("User deleted successfully");
         await fetchUsers();
       } else {
-        toast.error('Failed to delete user');
+        toast.error("Failed to delete user");
       }
     } catch {
-      toast.error('Error deleting user');
+      toast.error("Error deleting user");
     }
   };
 
@@ -128,11 +134,11 @@ function ViewUserAccountPage() {
     e.preventDefault();
     if (!selectedUser) return;
     // Find the selected role id from label
-    const selectedRole = roles.find(r => r.label === editRole);
+    const selectedRole = roles.find((r) => r.label === editRole);
     const roleid = selectedRole ? selectedRole.id : null;
     if (!roleid) {
-  toast.error("Please select a valid role.");
-  return;
+      toast.error("Please select a valid role.");
+      return;
     }
     try {
       const res = await fetch(`/api/users/${selectedUser.id}`, {
@@ -141,11 +147,13 @@ function ViewUserAccountPage() {
         body: JSON.stringify({
           username: editUsername,
           roleid: roleid,
-          issuspended: editSuspended
-        })
+          issuspended: editSuspended,
+        }),
       });
       if (res.ok) {
-        toast.success(`Account ID: ${selectedUser.id}  ,account details have been updated`);
+        toast.success(
+          `Account ID: ${selectedUser.id}  ,account details have been updated`
+        );
         await fetchUsers();
         closeModal();
       } else {
@@ -157,44 +165,150 @@ function ViewUserAccountPage() {
   };
 
   return (
-
-    
-    <div className="user-list-container">
+    <div className="view-user-account-container">
       <button className="back-btn" onClick={() => navigate("/useradmin")}>
         ← Back to Dashboard
       </button>
 
       <div className="user-list-header">
         <h2>User Accounts</h2>
-        <div className="user-list-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.2rem' }}>
-          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div
+          className="user-list-actions"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: "0.5rem",
+            marginBottom: "1.2rem",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
             <input
               type="text"
               placeholder="🔍 Search by username..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', width: '170px' }}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "8px",
+                border: "1.2px solid #bfc8d6",
+                fontSize: "0.98rem",
+                background: "#f3f6fb",
+                width: "170px",
+              }}
             />
-            <select value={filterRole} onChange={e => setFilterRole(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', minWidth: '110px' }}>
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "8px",
+                border: "1.2px solid #bfc8d6",
+                fontSize: "0.98rem",
+                background: "#f3f6fb",
+                minWidth: "110px",
+              }}
+            >
               <option value="">All Roles</option>
-              {roles.map(role => (
-                <option key={role.id} value={role.label}>{role.label}</option>
+              {roles.map((role) => (
+                <option key={role.id} value={role.label}>
+                  {role.label}
+                </option>
               ))}
             </select>
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1.2px solid #bfc8d6', fontSize: '0.98rem', background: '#f3f6fb', minWidth: '110px' }}>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "8px",
+                border: "1.2px solid #bfc8d6",
+                fontSize: "0.98rem",
+                background: "#f3f6fb",
+                minWidth: "110px",
+              }}
+            >
               <option value="">All Status</option>
               <option value="Active">Active</option>
               <option value="Suspended">Suspended</option>
             </select>
           </div>
-          <button onClick={() => navigate("/useradmin/create")}
-            style={{ background: '#0077cc', color: 'white', border: 'none', borderRadius: '8px', padding: '0.6rem 1.3rem', fontWeight: 700, fontSize: '1rem', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', cursor: 'pointer', letterSpacing: '0.01em', transition: 'background 0.2s', marginTop: '0.5rem', alignSelf: 'flex-end', display: 'block' }}>
-            ＋ Create Account
-          </button>
         </div>
       </div>
 
-  <table>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '1.2rem' }}>
+        <button
+          className="export-user-csv-btn"
+          style={{
+            background: "#22c55e",
+            color: "white",
+            borderRadius: 8,
+            padding: "0.5em 1.2em",
+            fontWeight: 600,
+            fontSize: "1em",
+            border: "none",
+            boxShadow: "0 1px 4px rgba(44,62,80,0.10)",
+            cursor: "pointer",
+          }}
+          onClick={async () => {
+            try {
+              // Fetch CSV first to count records
+              const res = await fetch("/api/userAdmin/users/export");
+              if (!res.ok) throw new Error("Failed to export");
+              const csv = await res.text();
+              // Count records (lines minus header)
+              const lines = csv.split("\n");
+              const recordCount = Math.max(0, lines.length - 1);
+              // Download CSV
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "users.csv";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+              toast.success(
+                `User data successfully exported. [${recordCount}] records included.`
+              );
+            } catch {
+              toast.error("Failed to export user data.");
+            }
+          }}
+        >
+          Export User Data
+        </button>
+        <button
+          onClick={() => navigate("/useradmin/create")}
+          style={{
+            background: "#0077cc",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            padding: "0.6rem 1.3rem",
+            fontWeight: 700,
+            fontSize: "1rem",
+            boxShadow: "0 1px 4px rgba(44,62,80,0.10)",
+            cursor: "pointer",
+            letterSpacing: "0.01em",
+            transition: "background 0.2s",
+            alignSelf: "flex-end",
+            display: "block",
+          }}
+        >
+          ＋ Create Account
+        </button>
+      </div>
+
+      <table>
         <thead>
           <tr>
             <th>ID</th>
@@ -206,44 +320,53 @@ function ViewUserAccountPage() {
         </thead>
         <tbody>
           {filteredUsers.map((user: UserAccount) => (
-            <tr key={user.id} style={user.isSuspended ? { background: '#ffeaea', borderLeft: '6px solid #d32f2f', opacity: 0.85 } : {}}>
+            <tr
+              key={user.id}
+              style={user.isSuspended ? { background: "#ffeaea", borderLeft: "6px solid #d32f2f", opacity: 0.85 } : {}}
+            >
               <td>{user.id}</td>
               <td>{user.username}</td>
               <td>{user.userProfile}</td>
               <td>
                 <span
                   style={{
-                    display: 'inline-block',
-                    padding: '0.3em 0.9em',
-                    borderRadius: '1em',
+                    display: "inline-block",
+                    padding: "0.3em 0.9em",
+                    borderRadius: "1em",
                     fontWeight: 600,
-                    color: 'white',
-                    background: user.isSuspended ? '#d32f2f' : '#388e3c',
-                    fontSize: '0.95em',
+                    color: "white",
+                    background: user.isSuspended ? "#d32f2f" : "#388e3c",
+                    fontSize: "0.95em",
                   }}
-                  title={user.isSuspended ? 'This user is currently suspended.' : 'This user is active.'}
+                  title={
+                    user.isSuspended
+                      ? "This user is currently suspended."
+                      : "This user is active."
+                  }
                 >
-                  {user.isSuspended ? <FaExclamationCircle style={{ marginRight: 4 }} /> : null}
-                  {user.isSuspended ? 'Suspended' : 'Active'}
+                  {user.isSuspended ? (
+                    <FaExclamationCircle style={{ marginRight: 4 }} />
+                  ) : null}
+                  {user.isSuspended ? "Suspended" : "Active"}
                 </span>
               </td>
               <td>
                 <button
                   style={{
-                    background: user.isSuspended ? '#388e3c' : '#d32f2f',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '0.4em 1.2em',
+                    background: user.isSuspended ? "#388e3c" : "#d32f2f",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "0.4em 1.2em",
                     fontWeight: 700,
-                    fontSize: '1em',
-                    marginRight: '0.5em',
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 4px rgba(44,62,80,0.10)',
-                    letterSpacing: '0.01em',
-                    transition: 'background 0.2s',
+                    fontSize: "1em",
+                    marginRight: "0.5em",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 4px rgba(44,62,80,0.10)",
+                    letterSpacing: "0.01em",
+                    transition: "background 0.2s",
                   }}
-                  title={user.isSuspended ? 'Reactivate this user' : 'Suspend this user'}
+                  title={user.isSuspended ? "Reactivate this user" : "Suspend this user"}
                   onClick={async () => {
                     if (!window.confirm(`Are you sure you want to ${user.isSuspended ? 'reactivate' : 'suspend'} this user?`)) return;
                     setLoadingUserId(user.id);
@@ -279,22 +402,29 @@ function ViewUserAccountPage() {
                   {loadingUserId === user.id ? (
                     <span className="spinner" style={{ marginRight: 8 }} />
                   ) : null}
-                  {user.isSuspended ? 'Reactivate' : 'Suspend'}
+                  {user.isSuspended ? "Reactivate" : "Suspend"}
                 </button>
-                <button className="edit-btn" onClick={() => handleEdit(user)} title="Edit user details">
+                <button
+                  className="edit-btn"
+                  onClick={() => handleEdit(user)}
+                  title="Edit user details"
+                >
                   ✏️ Edit
                 </button>
-                <button className="delete-btn" onClick={() => handleDelete(user.id)} title="Delete user">🗑️</button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDelete(user.id)}
+                  title="Delete user"
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-
-
-
-{/*EDIT MODEL */}
+      {/*EDIT MODEL */}
 
       {showModal && selectedUser && (
         <div className="modal-overlay">
@@ -302,10 +432,16 @@ function ViewUserAccountPage() {
             <h3>Edit User</h3>
             <form onSubmit={handleSubmit}>
               <label>Role</label>
-              <select value={editRole} onChange={e => setEditRole(e.target.value)} required>
+              <select
+                value={editRole}
+                onChange={(e) => setEditRole(e.target.value)}
+                required
+              >
                 <option value="">Select Role</option>
                 {roles.map((role: UserProfile) => (
-                  <option key={role.id} value={role.label}>{role.label}</option>
+                  <option key={role.id} value={role.label}>
+                    {role.label}
+                  </option>
                 ))}
               </select>
               <label>UserID</label>
@@ -319,7 +455,7 @@ function ViewUserAccountPage() {
               <input
                 type="text"
                 value={editUsername}
-                onChange={e => setEditUsername(e.target.value)}
+                onChange={(e) => setEditUsername(e.target.value)}
                 placeholder="Username"
                 required
               />
@@ -337,5 +473,3 @@ function ViewUserAccountPage() {
     </div>
   );
 }
-
-export default ViewUserAccountPage;
