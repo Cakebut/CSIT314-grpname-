@@ -1,3 +1,9 @@
+import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import "./PersonInNeedDashboard.css";
+
 // Centralized status color logic
 function getStatusColor(status?: string) {
   switch ((status || '').toLowerCase()) {
@@ -18,12 +24,6 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => (
     {status || <span style={{ color: '#6b7280' }}>-</span>}
   </span>
 );
-
-import React, { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
-import "./PersonInNeedDashboard.css";
 
 
 
@@ -182,7 +182,7 @@ const PersonInNeedDashboard: React.FC = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       toast.error('Could not download service history.');
     }
   };
