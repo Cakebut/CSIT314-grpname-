@@ -241,36 +241,23 @@ public async deleteUser(id: number): Promise<boolean> {
 
   // Export all user accounts as CSV
   async exportUserAccountsCSV(actor: string): Promise<string> {
-  const users = await new UserEntity().getAllUserAccounts();
-  const headers = ['ID', 'Username', 'Role', 'Status'];
-  function escapeCsv(val: any) {
-    if (val == null) return '';
-    const str = String(val);
-    const needsQuotes = /[",\n]/.test(str);
-    const escaped = str.replace(/"/g, '""');
-    return needsQuotes ? `"${escaped}"` : escaped;
-  }
-  const rows = users.map(u => [
-    u.id,
-    u.username,
-    u.userProfile,
-    u.isSuspended ? 'Suspended' : 'Active'
-  ]);
-  // Log the export activity
-  try {
-    const { createAuditLog } = require('./auditLog');
-    await createAuditLog({
-      actor,
-      action: 'export user data',
-      target: actor,
-      details: `Exported ${users.length} user accounts as CSV.`
-    });
-  } catch (err) {
-    // Logging failure should not block export
-    console.error('Audit log failed for exportUserAccountsCSV:', err);
-  }
-  const csv = [headers.join(','), ...rows.map(r => r.map(escapeCsv).join(','))].join('\n');
-  return csv;
+    const users = await new UserEntity().getAllUserAccounts();
+    const headers = ['ID', 'Username', 'Role', 'Status'];
+    function escapeCsv(val: any) {
+      if (val == null) return '';
+      const str = String(val);
+      const needsQuotes = /[",\n]/.test(str);
+      const escaped = str.replace(/"/g, '""');
+      return needsQuotes ? `"${escaped}"` : escaped;
+    }
+    const rows = users.map(u => [
+      u.id,
+      u.username,
+      u.userProfile,
+      u.isSuspended ? 'Suspended' : 'Active'
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.map(escapeCsv).join(','))].join('\n');
+    return csv;
 }
 }
 
