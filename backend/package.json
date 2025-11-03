@@ -22,8 +22,8 @@
                     "start":  "node dist/index.js",
                 "dev":  "nodemon",
                 "db:migrate:add_deleted": "tsx scripts/add_deleted_to_service_type.ts",
-                    "db:seed":  "ts-node src/db/Seeding/seedRoles.ts \u0026\u0026 ts-node src/db/Seeding/seedUsers.ts \u0026\u0026 ts-node src/db/Seeding/seedServiceTypes.ts \u0026\u0026 ts-node src/db/Seeding/seedLocations.ts \u0026\u0026 ts-node src/db/Seeding/seedUrgencyLevels.ts",
-                    "db:delete":  "ts-node src/db/Seeding/deleteUsers.ts \u0026\u0026 ts-node src/db/Seeding/deleteServiceTypes.ts \u0026\u0026 ts-node src/db/Seeding/deleteLocations.ts \u0026\u0026 ts-node src/db/Seeding/deleteUrgencyLevels.ts"
+                    "db:seed":  "ts-node src/db/Seeding/seedData.ts",
+                    "db:delete":  "ts-node src/db/Seeding/deleteData.ts"
                 },
     "repository":  {
                        "type":  "git",

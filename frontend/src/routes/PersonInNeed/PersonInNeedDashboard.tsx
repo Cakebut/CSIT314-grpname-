@@ -99,9 +99,28 @@ const PersonInNeedDashboard: React.FC = () => {
   const [notiLoading, setNotiLoading] = useState(false);
   const [notiError, setNotiError] = useState("");
   const [notiHasUnread, setNotiHasUnread] = useState(false);
+  const notiButtonRef = React.useRef<HTMLButtonElement>(null);
+  const notiPopoverRef = React.useRef<HTMLDivElement>(null);
+  // Outside click handler for notification popover
+  useEffect(() => {
+    if (!showNoti) return;
+    function handleClick(e: MouseEvent) {
+      const btn = notiButtonRef.current;
+      const pop = notiPopoverRef.current;
+      if (!btn || !pop) return;
+      if (
+        !btn.contains(e.target as Node) &&
+        !pop.contains(e.target as Node)
+      ) {
+        setShowNoti(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showNoti]);
 
   // Fetch notifications for PIN user
-  const fetchNotifications = () => {
+  const fetchNotifications = React.useCallback(() => {
     if (!userId) return;
     setNotiLoading(true);
     setNotiError("");
@@ -116,14 +135,14 @@ const PersonInNeedDashboard: React.FC = () => {
         setNotiError("Could not load notifications.");
         setNotiLoading(false);
       });
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchNotifications();
     // Optionally poll for new notifications every 60s
     // const interval = setInterval(fetchNotifications, 60000);
     // return () => clearInterval(interval);
-  }, [userId]);
+  }, [userId, fetchNotifications]);
   const [locationID, setLocationID] = useState("");
   const [urgencyLevelID, setUrgencyLevelID] = useState("");
   const [locations, setLocations] = useState<{ id: number; name: string; line: string }[]>([]);
@@ -317,27 +336,6 @@ const PersonInNeedDashboard: React.FC = () => {
     }
   };
 
-  // Centralized status color logic
-  function getStatusColor(status?: string) {
-    switch ((status || '').toLowerCase()) {
-      case 'available':
-        return '#22c55e';
-      case 'pending':
-        return '#f59e42';
-      case 'completed':
-        return '#6b7280';
-      default:
-        return '#334155';
-    }
-  }
-
-  // Centralized status badge component
-  const StatusBadge: React.FC<{ status?: string }> = ({ status }) => (
-    <span style={{ fontWeight: 600, color: getStatusColor(status) }}>
-      {status || <span style={{ color: '#6b7280' }}>-</span>}
-    </span>
-  );
-
 
 
   return (
@@ -361,6 +359,7 @@ const PersonInNeedDashboard: React.FC = () => {
       {/* Notification Button and Popover */}
       <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
         <button
+          ref={notiButtonRef}
           className="button"
           style={{ fontSize: 22, position: 'relative', background: notiHasUnread ? '#f59e42' : '#e0e7ef', color: notiHasUnread ? 'white' : '#334155', borderRadius: 24, width: 44, height: 44, boxShadow: notiHasUnread ? '0 0 0 2px #f59e42' : undefined }}
           onClick={() => setShowNoti(s => !s)}
@@ -370,7 +369,7 @@ const PersonInNeedDashboard: React.FC = () => {
           {notiHasUnread && <span style={{ position: 'absolute', top: 6, right: 8, width: 10, height: 10, background: '#ef4444', borderRadius: '50%' }} />}
         </button>
         {showNoti && (
-          <div style={{ position: 'absolute', top: 48, right: 0, minWidth: 320, background: '#fff', boxShadow: '0 4px 16px #cbd5e1', borderRadius: 12, zIndex: 200, padding: '14px 18px 12px 18px', animation: 'fadeIn 0.18s' }}>
+          <div ref={notiPopoverRef} style={{ position: 'absolute', top: 48, right: 0, minWidth: 320, background: '#fff', boxShadow: '0 4px 16px #cbd5e1', borderRadius: 12, zIndex: 200, padding: '14px 18px 12px 18px', animation: 'fadeIn 0.18s' }}>
             <div style={{ position: 'absolute', top: -10, right: 18, width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: '10px solid #fff' }} />
             <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Notifications</div>
             {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? <div className="row-muted">No notifications yet.</div> : (

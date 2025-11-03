@@ -20,7 +20,11 @@ function CSRHeader() {
     if (!showNoti) return;
     function handleClick(e: MouseEvent) {
       const pop = document.getElementById('csr-noti-popover');
-      if (pop && !pop.contains(e.target as Node)) setShowNoti(false);
+      const btn = document.querySelector('.csr-icon-btn');
+      // Only close if click is outside both popover and button
+      if (pop && !pop.contains(e.target as Node) && btn && !btn.contains(e.target as Node)) {
+        setShowNoti(false);
+      }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -303,7 +307,7 @@ function CSRAvailableRequests() {
               ×
             </button>
             <h3>Request Details</h3>
-            {selected.pinName && <div><b>PIN Name:</b> {selected.pinName}</div>}
+            <div><b>PIN Name:</b> {selected.pinName || 'N/A'}</div>
             <div><b>Title:</b> {selected.title || 'Untitled Request'}</div>
             <div><b>Request Type:</b> {selected.categoryName}</div>
             <div><b>Location:</b> {selected.location || selected.locationName || '-'}</div>
@@ -761,7 +765,7 @@ function CSRShortlist() {
               ×
             </button>
             <h3>Request Details</h3>
-            {selected.pinName && <div><b>PIN Name:</b> {selected.pinName}</div>}
+            <div><b>PIN Name:</b> {selected.pinName || 'N/A'}</div>
             <div><b>Title:</b> {selected.title || 'Untitled Request'}</div>
             <div><b>Request Type:</b> {selected.categoryName}</div>
             <div><b>Location:</b> {selected.location || selected.locationName || '-'}</div>

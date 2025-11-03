@@ -14,8 +14,10 @@
 					   urgencyLevelID: pin_requestsTable.urgencyLevelID,
 					   status: pin_requestsTable.status,
 					   message: pin_requestsTable.message,
+					   pinName: useraccountTable.username,
 				   })
-				.from(pin_requestsTable);
+				.from(pin_requestsTable)
+				.leftJoin(useraccountTable, eq(pin_requestsTable.pin_id, useraccountTable.id));
 
 			const serviceTypes = Object.fromEntries(
 				(await db.select().from(service_typeTable)).map(st => [st.id, st.name])
@@ -35,6 +37,7 @@
 				   urgencyLevel: r.urgencyLevelID ? (urgencies[r.urgencyLevelID] || null) : null,
 				   status: r.status,
 				   message: r.message,
+				   pinName: r.pinName || null,
 			}));
 		}
 
@@ -49,9 +52,11 @@
 					   urgencyLevelID: pin_requestsTable.urgencyLevelID,
 					   status: pin_requestsTable.status,
 					   message: pin_requestsTable.message,
+					   pinName: useraccountTable.username,
 				   })
 				.from(pin_requestsTable)
-				.where(eq(pin_requestsTable.status, 'Available'));
+				.where(eq(pin_requestsTable.status, 'Available'))
+				.leftJoin(useraccountTable, eq(pin_requestsTable.pin_id, useraccountTable.id));
 
 			// Join to get category, location, urgency labels
 			const serviceTypes = Object.fromEntries(
@@ -64,14 +69,16 @@
 				(await db.select().from(urgency_levelTable)).map(u => [u.id, u.label])
 			);
 
-				return rows.map(r => ({
-					requestId: r.requestId,
-					title: r.title,
-					categoryName: serviceTypes[r.categoryID] || '',
-					location: r.locationID ? (locations[r.locationID] || '') : '',
-					urgencyLevel: r.urgencyLevelID ? (urgencies[r.urgencyLevelID] || null) : null,
-					status: r.status,
-				}));
+			return rows.map(r => ({
+				requestId: r.requestId,
+				title: r.title,
+				categoryName: serviceTypes[r.categoryID] || '',
+				location: r.locationID ? (locations[r.locationID] || '') : '',
+				urgencyLevel: r.urgencyLevelID ? (urgencies[r.urgencyLevelID] || null) : null,
+				status: r.status,
+				message: r.message,
+				pinName: r.pinName || null,
+			}));
 		}
 
 
