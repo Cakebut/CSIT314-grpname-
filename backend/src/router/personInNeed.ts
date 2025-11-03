@@ -140,6 +140,21 @@ router.get('/service-types', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch service types' });
   }
 });
+
+// Get notifications for a PIN user
+router.get('/notifications/:pin_id', async (req, res) => {
+	const pin_id = Number(req.params.pin_id);
+	if (!pin_id) {
+		return res.status(400).json({ success: false, error: 'Missing pin_id' });
+	}
+	try {
+		const notifications = await controller.getNotifications(pin_id);
+		return res.json({ success: true, data: notifications });
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to fetch notifications' });
+	}
+});
+
 export default router;
 
 // Download CSV history for a PIN user (BCE: router -> controller -> entity)
@@ -151,5 +166,63 @@ router.get('/requests/history', async (req, res) => {
 		return res.send(csv);
 	} catch (err) {
 		return res.status(500).json({ success: false, error: 'Failed to generate CSV' });
+	}
+});
+
+
+// My Offers: Get all offers for a PIN user (all requests + interested CSRs)
+router.get('/offers/:pin_id', async (req, res) => {
+	const pin_id = Number(req.params.pin_id);
+	if (!pin_id) {
+		return res.status(400).json({ success: false, error: 'Missing pin_id' });
+	}
+	try {
+		const offers = await controller.getOffersByPinId(pin_id);
+		return res.json({ success: true, data: offers });
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to fetch offers' });
+	}
+});
+
+// My Offers: Accept a CSR for a request
+router.post('/offers/:requestId/accept', async (req, res) => {
+	const requestId = Number(req.params.requestId);
+	const { csrId } = req.body;
+	if (!requestId || !csrId) {
+		return res.status(400).json({ success: false, error: 'Missing requestId or csrId' });
+	}
+	try {
+		const result = await controller.acceptCsrForRequest(requestId, csrId);
+		return res.json({ success: true, data: result });
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to accept CSR' });
+	}
+});
+
+// My Offers: Cancel a CSR's interest for a request
+router.post('/offers/:requestId/cancel', async (req, res) => {
+	const requestId = Number(req.params.requestId);
+	const { csrId } = req.body;
+	if (!requestId || !csrId) {
+		return res.status(400).json({ success: false, error: 'Missing requestId or csrId' });
+	}
+	try {
+		const result = await controller.cancelCsrInterest(requestId, csrId);
+		return res.json({ success: true, data: result });
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to cancel CSR interest' });
+	}
+});
+// Delete a notification by id
+router.delete('/notifications/:id', async (req, res) => {
+	const id = Number(req.params.id);
+	if (!id) {
+		return res.status(400).json({ success: false, error: 'Missing notification id' });
+	}
+	try {
+		await controller.deleteNotification(id);
+		return res.json({ success: true });
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to delete notification' });
 	}
 });

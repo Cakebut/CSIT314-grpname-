@@ -1,24 +1,3 @@
-// Centralized status color logic
-function getStatusColor(status?: string) {
-  switch ((status || '').toLowerCase()) {
-    case 'available':
-      return '#22c55e';
-    case 'pending':
-      return '#f59e42';
-    case 'completed':
-      return '#6b7280';
-    default:
-      return '#334155';
-  }
-}
-
-// Centralized status badge component
-const StatusBadge: React.FC<{ status?: string }> = ({ status }) => (
-  <span style={{ fontWeight: 600, color: getStatusColor(status) }}>
-    {status || <span style={{ color: '#6b7280' }}>-</span>}
-  </span>
-);
-
 import React, { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -46,6 +25,15 @@ interface Request {
   shortlist_count?: number;
 }
 
+// --- My Offers types ---
+interface Offer {
+  requestId: number;
+  title: string;
+  status: string;
+  assignedCsrId?: number | null;
+  interestedCsrs: { csr_id: number; interestedAt: string; username: string }[];
+}
+
 const API_BASE = "http://localhost:3000";
 
 const PersonInNeedDashboard: React.FC = () => {
@@ -70,6 +58,51 @@ const PersonInNeedDashboard: React.FC = () => {
   const [message, setMessage] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
+
+  const userId = Number(localStorage.getItem("userId"));
+
+  // Notification type
+  interface Notification {
+    id: number;
+    type: string;
+    csr_id: number;
+    pin_request_id: number;
+    createdAt: string;
+    read: number;
+    csrUsername?: string;
+    requestTitle?: string;
+  }
+  // Notification state (must be inside component to access userId)
+  const [showNoti, setShowNoti] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notiLoading, setNotiLoading] = useState(false);
+  const [notiError, setNotiError] = useState("");
+  const [notiHasUnread, setNotiHasUnread] = useState(false);
+
+  // Fetch notifications for PIN user
+  const fetchNotifications = () => {
+    if (!userId) return;
+    setNotiLoading(true);
+    setNotiError("");
+    fetch(`${API_BASE}/api/pin/notifications/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        setNotifications(data.data || []);
+        setNotiLoading(false);
+        setNotiHasUnread((data.data || []).some((n: Notification) => n.read === 0));
+      })
+      .catch(() => {
+        setNotiError("Could not load notifications.");
+        setNotiLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    // Optionally poll for new notifications every 60s
+    // const interval = setInterval(fetchNotifications, 60000);
+    // return () => clearInterval(interval);
+  }, [userId]);
   const [locationID, setLocationID] = useState("");
   const [urgencyLevelID, setUrgencyLevelID] = useState("");
   const [locations, setLocations] = useState<{ id: number; name: string; line: string }[]>([]);
@@ -83,7 +116,6 @@ const PersonInNeedDashboard: React.FC = () => {
       .then(data => setUrgencyLevels(data.data || []));
   }, []);
 
-  const userId = Number(localStorage.getItem("userId"));
 
 
   useEffect(() => {
@@ -128,6 +160,67 @@ const PersonInNeedDashboard: React.FC = () => {
       })
       .catch(() => setStatusMsg("Network error while loading My Requests"));
   };
+
+  // My Offers state
+  const [showMyOffers, setShowMyOffers] = useState(false);
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [offersLoading, setOffersLoading] = useState(false);
+  const [offersError, setOffersError] = useState("");
+
+  // Fetch My Offers (all requests for PIN + interested CSRs)
+  const openMyOffers = () => {
+    if (!userId) {
+      setOffersError("No user is signed in.");
+      setShowMyOffers(true);
+      return;
+    }
+    setOffersLoading(true);
+    setOffersError("");
+    fetch(`${API_BASE}/api/pin/offers/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        setOffers(data.data || []);
+        setOffersLoading(false);
+        setShowMyOffers(true);
+      })
+      .catch(() => {
+        setOffersError("Could not load offers.");
+        setOffersLoading(false);
+        setShowMyOffers(true);
+      });
+  };
+
+  // Accept a CSR for a request
+  const handleAcceptCsr = async (requestId: number, csrId: number) => {
+    const res = await fetch(`${API_BASE}/api/pin/offers/${requestId}/accept`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ csrId }),
+    });
+    if (res.ok) {
+      toast.success("CSR accepted for this request.");
+      openMyOffers();
+    } else {
+      toast.error("Failed to accept CSR.");
+    }
+  };
+
+  // Cancel a CSR's interest for a request
+  const handleCancelCsr = async (requestId: number, csrId: number) => {
+    const res = await fetch(`${API_BASE}/api/pin/offers/${requestId}/cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ csrId }),
+    });
+    if (res.ok) {
+      toast.success("CSR interest cancelled.");
+      openMyOffers();
+    } else {
+      toast.error("Failed to cancel CSR interest.");
+    }
+  };
+
+
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,15 +280,135 @@ const PersonInNeedDashboard: React.FC = () => {
     }
   };
 
+  // Centralized status color logic
+  function getStatusColor(status?: string) {
+    switch ((status || '').toLowerCase()) {
+      case 'available':
+        return '#22c55e';
+      case 'pending':
+        return '#f59e42';
+      case 'completed':
+        return '#6b7280';
+      default:
+        return '#334155';
+    }
+  }
+
+  // Centralized status badge component
+  const StatusBadge: React.FC<{ status?: string }> = ({ status }) => (
+    <span style={{ fontWeight: 600, color: getStatusColor(status) }}>
+      {status || <span style={{ color: '#6b7280' }}>-</span>}
+    </span>
+  );
+
 
 
   return (
     <div className="container">
+      {/* Notification Button and Popover */}
+      <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
+        <button
+          className="button"
+          style={{ fontSize: 22, position: 'relative', background: notiHasUnread ? '#f59e42' : '#e0e7ef', color: notiHasUnread ? 'white' : '#334155', borderRadius: 24, width: 44, height: 44, boxShadow: notiHasUnread ? '0 0 0 2px #f59e42' : undefined }}
+          onClick={() => setShowNoti(s => !s)}
+          aria-label="Notifications"
+        >
+          🔔
+          {notiHasUnread && <span style={{ position: 'absolute', top: 6, right: 8, width: 10, height: 10, background: '#ef4444', borderRadius: '50%' }} />}
+        </button>
+        {showNoti && (
+          <div style={{ position: 'absolute', top: 48, right: 0, minWidth: 320, background: '#fff', boxShadow: '0 4px 16px #cbd5e1', borderRadius: 12, zIndex: 200, padding: '14px 18px 12px 18px', animation: 'fadeIn 0.18s' }}>
+            <div style={{ position: 'absolute', top: -10, right: 18, width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: '10px solid #fff' }} />
+            <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Notifications</div>
+            {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? <div className="row-muted">No notifications yet.</div> : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: 320, overflowY: 'auto' }}>
+                {notifications.map(noti => (
+                  <li
+                    key={noti.id}
+                    style={{ padding: '8px 0', borderBottom: '1px solid #e5e7eb', background: noti.read === 0 ? '#fef9c3' : undefined, cursor: 'pointer', position: 'relative' }}
+                    onClick={async () => {
+                      try {
+                        await fetch(`${API_BASE}/api/pin/notifications/${noti.id}`, { method: 'DELETE' });
+                        setNotifications(prev => prev.filter(n => n.id !== noti.id));
+                        toast.success('Notification cleared');
+                      } catch {
+                        toast.error('Failed to clear notification');
+                      }
+                    }}
+                  >
+                    <div style={{ fontWeight: 600 }}>{noti.type === 'interested' ? 'CSR Interested' : noti.type === 'shortlist' ? 'CSR Shortlisted' : noti.type}</div>
+                    <div style={{ fontSize: 14, color: '#334155' }}>CSR: {noti.csrUsername || noti.csr_id} | Request: {noti.requestTitle || noti.pin_request_id}</div>
+                    <div style={{ fontSize: 13, color: '#64748b' }}>{noti.createdAt?.slice(0, 19).replace('T', ' ')}</div>
+                    <span style={{ position: 'absolute', top: 8, right: 8, color: '#ef4444', fontWeight: 700, fontSize: 18, cursor: 'pointer' }} title="Clear notification">×</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
       <div className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <h2>All Person-In-Need Requests</h2>
         <div style={{ display: 'flex', gap: 12 }}>
           <button className="button primary" onClick={openMyRequests}>My Requests</button>
+          <button className="button" style={{ backgroundColor: '#0ea5e9', color: 'white' }} onClick={openMyOffers}>My Offers</button>
+      {/* My Offers Modal */}
+      {showMyOffers && (
+        <div className="modal" onClick={() => setShowMyOffers(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 700, maxWidth: '98vw', minHeight: 400 }}>
+            <h3>My Offers (Interested CSRs for My Requests)</h3>
+            {offersLoading ? (
+              <div>Loading...</div>
+            ) : offersError ? (
+              <div style={{ color: '#b91c1c' }}>{offersError}</div>
+            ) : offers.length === 0 ? (
+              <div className="row-muted">No offers found.</div>
+            ) : (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Request Title</th>
+                    <th>Status</th>
+                    <th>Interested CSRs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {offers.map(offer => (
+                    <tr key={offer.requestId}>
+                      <td>{offer.title}</td>
+                      <td><StatusBadge status={offer.status} /></td>
+                      <td>
+                        {offer.interestedCsrs.length === 0 ? (
+                          <span style={{ color: '#6b7280' }}>No interested CSRs</span>
+                        ) : (
+                          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                            {offer.interestedCsrs.map(csr => (
+                              <li key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ fontWeight: 600 }}>{csr.username || `CSR #${csr.csr_id}`}</span>
+                                <span style={{ color: '#64748b', fontSize: 13 }}>({new Date(csr.interestedAt).toLocaleDateString()})</span>
+                                {offer.assignedCsrId === csr.csr_id ? (
+                                  <span style={{ color: '#22c55e', fontWeight: 700, marginLeft: 8 }}>Assigned</span>
+                                ) : (
+                                  <>
+                                    <button className="button" style={{ backgroundColor: '#22c55e', color: 'white', marginLeft: 8 }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
+                                    <button className="button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
+                                  </>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <button className="button" onClick={() => setShowMyOffers(false)} style={{ marginTop: 16 }}>Close</button>
+          </div>
+        </div>
+      )}
           <button
             className="button"
             style={{ backgroundColor: '#64748b', color: 'white' }}

@@ -15,6 +15,16 @@ import "./CSRRepDashboard.extra.css";
 function CSRHeader() {
   const [showNoti, setShowNoti] = useState(false);
   const [hasUpdates, setHasUpdates] = useState(false);
+  // Close popover on outside click
+  React.useEffect(() => {
+    if (!showNoti) return;
+    function handleClick(e: MouseEvent) {
+      const pop = document.getElementById('csr-noti-popover');
+      if (pop && !pop.contains(e.target as Node)) setShowNoti(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showNoti]);
   return (
     <header className="csr-header">
       <div className="csr-header-left">
@@ -22,11 +32,23 @@ function CSRHeader() {
         <p className="csr-welcome">Welcome to your Customer Service Representative Portal</p>
       </div>
       <div className="csr-header-right">
-        <div className="csr-noti">
+        <div className="csr-noti" style={{ position: 'relative' }}>
           <button className="csr-icon-btn" onClick={() => setShowNoti(s => !s)} aria-label="Notifications">🔔</button>
           {showNoti && (
-            <div className="csr-noti-panel">
-              <div className="csr-noti-title">Notifications</div>
+            <div id="csr-noti-popover" style={{
+              position: 'absolute',
+              top: 38,
+              right: 0,
+              minWidth: 260,
+              background: '#fff',
+              boxShadow: '0 4px 16px #cbd5e1',
+              borderRadius: 12,
+              zIndex: 100,
+              padding: '14px 18px 12px 18px',
+              animation: 'fadeIn 0.18s',
+            }}>
+              <div style={{ position: 'absolute', top: -10, right: 18, width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: '10px solid #fff' }} />
+              <div className="csr-noti-title" style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Notifications</div>
               {hasUpdates ? <div>Update on your offers.</div> : <div className="csr-muted">No notifications yet</div>}
             </div>
           )}
@@ -556,18 +578,16 @@ function CSRHistory() {
 function CSROffers() {
   type OfferStatus = "All" | "Pending" | "Accepted" | "Rejected" | "Completed";
   type OfferItem = {
-    id: number;
-    title: string;
-    reqNo: string;
-    pinId: string;
-    pinUsername?: string;
-    date: string;
-    status: OfferStatus;
-    rating?: number;
-    comment?: string;
-    ratedOn?: string;
-    feedbackDescription?: string;
-    feedbackCreatedAt?: string;
+  id: number;
+  title: string;
+  reqNo: string;
+  pinId: string;
+  pinUsername?: string;
+  date: string;
+  status: OfferStatus;
+  feedbackRating?: number;
+  feedbackDescription?: string;
+  feedbackCreatedAt?: string;
   };
   const TABS: OfferStatus[] = ["All", "Pending", "Accepted", "Rejected", "Completed"];
   const [tab, setTab] = useState<OfferStatus>("All");
@@ -591,9 +611,7 @@ function CSROffers() {
           pinUsername: r.pinUsername || '',
           date: r.interestedAt ? r.interestedAt.slice(0, 10) : (r.createdAt ? r.createdAt.slice(0, 10) : '-'),
           status: (r.status && ["Pending", "Accepted", "Rejected", "Completed"].includes(r.status)) ? r.status : "Pending",
-          rating: r.rating, // feedback fields (may be undefined for now)
-          comment: r.comment,
-          ratedOn: r.ratedOn,
+          feedbackRating: r.feedbackRating,
           feedbackDescription: r.feedbackDescription,
           feedbackCreatedAt: r.feedbackCreatedAt,
         }));
@@ -645,25 +663,19 @@ function CSROffers() {
             <div className="csr-req-row-bottom" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <div className="csr-req-pin"><strong>PIN User:</strong> {o.pinUsername ? o.pinUsername : o.pinId}</div>
               <div className="csr-req-interested-date"><strong>Interested On:</strong> {o.date}</div>
-              {/* Feedback section: only show if feedback fields exist */}
-              {(o.rating || o.comment || o.feedbackDescription || o.ratedOn || o.feedbackCreatedAt) ? (
+              {/* Feedback section: show only if feedback exists, else show 'No feedback yet.' */}
+              {(o.feedbackRating || o.feedbackDescription || o.feedbackCreatedAt) ? (
                 <div className="csr-rating" style={{ marginTop: 8 }}>
                   <strong>Feedback:</strong>
                   <div style={{ marginLeft: 8 }}>
-                    {typeof o.rating === 'number' && (
-                      <span>Rating: {"★".repeat(o.rating)}{"☆".repeat(5 - o.rating)} ({o.rating}/5)</span>
+                    {typeof o.feedbackRating === 'number' && (
+                      <span>Rating: {"★".repeat(o.feedbackRating)}{"☆".repeat(5 - o.feedbackRating)} ({o.feedbackRating}/5)</span>
                     )}
                     {o.feedbackDescription && (
                       <div>Description: {o.feedbackDescription}</div>
                     )}
-                    {o.comment && (
-                      <div>Comment: <span className="csr-muted">“{o.comment}”</span></div>
-                    )}
-                    {o.ratedOn && (
-                      <div className="csr-muted small">Rated on {o.ratedOn}</div>
-                    )}
                     {o.feedbackCreatedAt && (
-                      <div className="csr-muted small">Feedback created: {o.feedbackCreatedAt}</div>
+                      <div className="csr-muted small">Feedback created: {o.feedbackCreatedAt.slice(0,10)}</div>
                     )}
                   </div>
                 </div>

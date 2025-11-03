@@ -1,7 +1,51 @@
 
+
+import { notificationTable, useraccountTable, pin_requestsTable } from '../db/schema/aiodb';
+import { db } from '../index';
+import { eq, desc } from 'drizzle-orm';
+
 import { PinRequestEntity, PinRequest } from '../entities/personInNeedrequests';
 
 export class PersonInNeedControllers {
+  // My Offers: Get all requests for a PIN user, with interested CSRs for each
+  async getOffersByPinId(pin_id: number) {
+    return await PinRequestEntity.getOffersByPinId(pin_id);
+  }
+
+  // Accept a CSR for a request
+  async acceptCsrForRequest(requestId: number, csrId: number) {
+    return await PinRequestEntity.acceptCsrForRequest(requestId, csrId);
+  }
+
+  // Cancel a CSR's interest for a request
+  async cancelCsrInterest(requestId: number, csrId: number) {
+    return await PinRequestEntity.cancelCsrInterest(requestId, csrId);
+  }
+  // Fetch notifications for a PIN user
+  async getNotifications(pin_id: number) {
+    // Join notificationTable with useraccountTable (CSR) and pin_requestsTable for username and title
+    return await db
+      .select({
+        id: notificationTable.id,
+        pin_id: notificationTable.pin_id,
+        type: notificationTable.type,
+        csr_id: notificationTable.csr_id,
+        pin_request_id: notificationTable.pin_request_id,
+        createdAt: notificationTable.createdAt,
+        read: notificationTable.read,
+        csrUsername: useraccountTable.username,
+        requestTitle: pin_requestsTable.title,
+      })
+      .from(notificationTable)
+      .leftJoin(useraccountTable, eq(notificationTable.csr_id, useraccountTable.id))
+      .leftJoin(pin_requestsTable, eq(notificationTable.pin_request_id, pin_requestsTable.id))
+      .where(eq(notificationTable.pin_id, pin_id))
+      .orderBy(desc(notificationTable.read), desc(notificationTable.createdAt));
+  }
+
+  async deleteNotification(id: number) {
+    await db.delete(notificationTable).where(eq(notificationTable.id, id));
+  }
   // Download CSV history for a PIN user (BCE: controller -> entity)
   async getRequestsHistoryCSV(): Promise<string> {
     return await PinRequestEntity.getRequestsHistoryCSV();

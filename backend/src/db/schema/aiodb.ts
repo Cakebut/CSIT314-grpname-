@@ -1,5 +1,8 @@
 
+
+
 import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core';
+
 // CSR Rep <-> PIN Request Shortlist Join Table (Many-to-Many)
 export const csr_shortlistTable = pgTable(
     'csr_shortlist',
@@ -117,5 +120,34 @@ export const auditLogTable = pgTable(
         target: varchar({ length: 64 }).notNull(), // e.g. User455
         timestamp: timestamp().notNull().defaultNow(),
         details: text(),
+    }
+);
+
+
+// Notification table for PIN users
+export const notificationTable = pgTable(
+    'notification',
+    {
+        id: serial('id').primaryKey(),
+        pin_id: integer().notNull().references(() => useraccountTable.id), // PIN user to notify
+        type: text().notNull(), // 'shortlist' or 'interested'
+        csr_id: integer().notNull().references(() => useraccountTable.id), // CSR who triggered
+        pin_request_id: integer().notNull(), // Which request
+        createdAt: timestamp().notNull().defaultNow(),
+        read: integer().notNull().default(0), // 0 = unread, 1 = read
+    }
+);
+
+// Feedback table: Each feedback links a PIN, a CSR, and a request, with rating, optional description, and date
+export const feedbackTable = pgTable(
+    'feedback',
+    {
+        id: serial().primaryKey(),
+        pin_id: integer().notNull().references(() => useraccountTable.id), // PIN user
+        csr_id: integer().notNull().references(() => useraccountTable.id), // CSR
+        request_id: integer().notNull().references(() => pin_requestsTable.id),
+        rating: integer().notNull(), // 1-5
+        description: text(), // optional
+        createdAt: timestamp().notNull().defaultNow(),
     }
 );

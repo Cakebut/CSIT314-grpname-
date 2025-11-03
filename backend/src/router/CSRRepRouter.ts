@@ -63,16 +63,24 @@ router.post('/:csrId/shortlist/:requestId', async (req, res) => {
 
 // INTERESTED: POST /api/csr/:csrId/interested/:requestId
 router.post('/:csrId/interested/:requestId', async (req, res) => {
-       try {
-	       const csrId = Number(req.params.csrId);
-	       const requestId = Number(req.params.requestId);
-	       await controller.addToInterested(csrId, requestId);
-	       res.json({ success: true });
-       } catch (err) {
-			   const errorMsg = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : String(err);
-			   console.error('Failed to add to interested:', errorMsg);
-			   res.status(500).json({ error: 'Failed to add to interested', details: errorMsg });
-       }
+	   try {
+		   const csrId = Number(req.params.csrId);
+		   const requestId = Number(req.params.requestId);
+		   const result = await controller.addToInterested(csrId, requestId);
+		   if (result && typeof result === 'object' && 'alreadyInterested' in result && (result as any).alreadyInterested) {
+			   return res.status(200).json({ alreadyInterested: true });
+		   }
+		   return res.json({ success: true });
+	   } catch (err) {
+		   // Check for unique constraint violation in error message/code
+		   const e = err as any;
+		   if (e && (e.code === '23505' || e.message?.includes('duplicate key'))) {
+			   return res.status(200).json({ alreadyInterested: true });
+		   }
+		   const errorMsg = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : String(err);
+		   console.error('Failed to add to interested:', errorMsg);
+		   return res.status(500).json({ error: 'Failed to add to interested', details: errorMsg });
+	   }
 });
 
 // DELETE /api/csr/:csrId/shortlist/:requestId
