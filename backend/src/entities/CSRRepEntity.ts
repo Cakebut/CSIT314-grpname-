@@ -94,21 +94,22 @@
 			const pinRequestIds = shortlistRows.map(row => row.pin_request_id);
 			if (pinRequestIds.length === 0) return [];
 
-			// Fetch the actual requests
-			// Use inArray for Drizzle ORM
+			// Fetch the actual requests with PIN name
 			const { inArray } = require('drizzle-orm');
 			const rows = await db
-				   .select({
-					   requestId: pin_requestsTable.id,
-					   title: pin_requestsTable.title,
-					   categoryID: pin_requestsTable.categoryID,
-					   locationID: pin_requestsTable.locationID,
-					   urgencyLevelID: pin_requestsTable.urgencyLevelID,
-					   status: pin_requestsTable.status,
-					   message: pin_requestsTable.message,
-				   })
+				.select({
+					requestId: pin_requestsTable.id,
+					title: pin_requestsTable.title,
+					categoryID: pin_requestsTable.categoryID,
+					locationID: pin_requestsTable.locationID,
+					urgencyLevelID: pin_requestsTable.urgencyLevelID,
+					status: pin_requestsTable.status,
+					message: pin_requestsTable.message,
+					pinName: useraccountTable.username,
+				})
 				.from(pin_requestsTable)
-				.where(inArray(pin_requestsTable.id, pinRequestIds));
+				.where(inArray(pin_requestsTable.id, pinRequestIds))
+				.leftJoin(useraccountTable, eq(pin_requestsTable.pin_id, useraccountTable.id));
 
 			const serviceTypes = Object.fromEntries(
 				(await db.select().from(service_typeTable)).map(st => [st.id, st.name])
@@ -127,6 +128,8 @@
 				location: r.locationID ? (locations[r.locationID] || '') : '',
 				urgencyLevel: r.urgencyLevelID ? (urgencies[r.urgencyLevelID] || null) : null,
 				status: r.status,
+				pinName: r.pinName || null,
+				message: r.message,
 			}));
 		}
 
