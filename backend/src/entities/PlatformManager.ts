@@ -35,7 +35,7 @@ export class PlatformManagerEntity {
       const res = await this.db
         .insert(service_typeTable)
         .values({ name: nm })
-        .returning({ id: service_typeTable.id, name: service_typeTable.name });
+        .returning({ id: service_typeTable.id, name: service_typeTable.name , deleted: service_typeTable.deleted });
       return res[0];
     } catch (e: any) {
       if (/duplicate/i.test(String(e?.message))) throw new Error("Service type already exists");

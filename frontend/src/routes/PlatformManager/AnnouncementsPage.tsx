@@ -1,3 +1,8 @@
+function isAnnouncementResponse(obj: unknown): obj is { error?: string; deliveredCount?: number } {
+  return typeof obj === 'object' && obj !== null && (
+    'error' in obj || 'deliveredCount' in obj
+  );
+}
 import { useEffect, useState } from "react";
 import "./AnnouncementsPage.css";
 import { toast } from "react-toastify";
@@ -35,16 +40,22 @@ export default function AnnouncementsPage() {
         body: JSON.stringify({ message })
       });
       const text = await res.text();
-      let data: any = null;
+      let data: unknown = null;
       try { data = text ? JSON.parse(text) : null; } catch { /* non-JSON (e.g., HTML) */ }
-      if (!res.ok) throw new Error(data?.error || `Failed to send (${res.status})`);
-      const successMsg = `Sent to ${data.deliveredCount} users`;
+      let errorMsg: string | undefined = undefined;
+      let deliveredCount: number | undefined = undefined;
+      if (isAnnouncementResponse(data)) {
+        errorMsg = data.error;
+        deliveredCount = data.deliveredCount;
+      }
+      if (!res.ok) throw new Error(errorMsg || `Failed to send (${res.status})`);
+      const successMsg = `Sent to ${deliveredCount ?? '?'} users`;
       setInfo(successMsg);
       toast.success(successMsg);
       setMessage("");
       loadLatest();
-    } catch (e: any) {
-      const errMsg = e.message || "Error occurred";
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : "Error occurred";
       setError(errMsg);
       toast.error(errMsg);
     } finally {

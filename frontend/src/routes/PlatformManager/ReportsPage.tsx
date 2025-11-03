@@ -87,8 +87,12 @@ export default function ReportsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error occurred");
       setSummary(data);
-    } catch (e: any) {
-      setError(e.message || "Error occurred");
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message || "Error occurred");
+      } else {
+        setError("Error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -113,8 +117,7 @@ export default function ReportsPage() {
   function endOfWeek() { const d = startOfWeek(); d.setDate(d.getDate() + 6); d.setHours(23,59,59,999); return d; }
   function startOfMonth() { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; }
   function endOfMonth() { const d = new Date(); d.setMonth(d.getMonth()+1, 0); d.setHours(23,59,59,999); return d; }
-  function startOfYear() { const d = new Date(); d.setMonth(0,1); d.setHours(0,0,0,0); return d; }
-  function endOfYear() { const d = new Date(); d.setMonth(11,31); d.setHours(23,59,59,999); return d; }
+  // Removed unused startOfYear and endOfYear functions
 
   function runQuickRange(s: Date, e: Date) {
     const sStr = fmt(s);
@@ -126,7 +129,6 @@ export default function ReportsPage() {
   const runQuickDay = () => runQuickRange(startOfToday(), endOfToday());
   const runQuickWeek = () => runQuickRange(startOfWeek(), endOfWeek());
   const runQuickMonth = () => runQuickRange(startOfMonth(), endOfMonth());
-  const runQuickYear = () => runQuickRange(startOfYear(), endOfYear());
 
   const onDownloadCsv = () => {
     if (!start || !end) { setError("Invalid date range"); return; }

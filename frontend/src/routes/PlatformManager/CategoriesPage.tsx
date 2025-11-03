@@ -24,8 +24,12 @@ export default function CategoriesPage() {
       const data = await res.json();
       const rows: Item[] = data.items || [];
       setItems(rows);
-    } catch (e: any) {
-      setError(e.message || "Failed to load categories");
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message || "Failed to load categories");
+      } else {
+        setError("Failed to load categories");
+      }
     }
   };
 
@@ -50,8 +54,12 @@ export default function CategoriesPage() {
       if (!res.ok) throw new Error(data.error || 'Create failed');
       setName("");
       await load();
-    } catch (e: any) {
-      setError(e.message || 'Create failed');
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message || 'Create failed');
+      } else {
+        setError('Create failed');
+      }
     } finally { setBusy(false); }
   };
 
@@ -66,8 +74,12 @@ export default function CategoriesPage() {
       if (!res.ok) throw new Error(data.error || 'Update failed');
       setEditing(null);
       await load();
-    } catch (e: any) {
-      setError(e.message || 'Update failed');
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message || 'Update failed');
+      } else {
+        setError('Update failed');
+      }
     } finally { setBusy(false); }
   };
 
@@ -80,8 +92,12 @@ export default function CategoriesPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Delete failed');
       await load();
-    } catch (e: any) {
-      setError(String(e?.message || 'Delete failed'));
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message || 'Delete failed');
+      } else {
+        setError('Delete failed');
+      }
     } finally { setBusy(false); }
   };
 
@@ -93,8 +109,12 @@ export default function CategoriesPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Restore failed');
       await load();
-    } catch (e: any) {
-      setError(String(e?.message || 'Restore failed'));
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message || 'Restore failed');
+      } else {
+        setError('Restore failed');
+      }
     } finally { setBusy(false); }
   };
 
