@@ -1,7 +1,7 @@
 
 import { db } from '../index';
 import { and, eq, ilike, is } from 'drizzle-orm';
-import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable } from '../db/schema/aiodb';
+import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable, csr_interestedTable } from '../db/schema/aiodb';
 
 
 
@@ -36,6 +36,58 @@ export type PinRequestCreateInput = {
 
 
 export class PinRequestEntity {
+  // For My Offers: Get all requests for a PIN user, with interested CSRs for each
+  static async getOffersByPinId(pin_id: number) {
+    // Get all requests for this PIN
+    const requests = await db
+      .select({
+        id: pin_requestsTable.id,
+        title: pin_requestsTable.title,
+        status: pin_requestsTable.status,
+        csr_id: pin_requestsTable.csr_id,
+      })
+      .from(pin_requestsTable)
+      .where(eq(pin_requestsTable.pin_id, pin_id));
+
+    // For each request, get interested CSRs
+    const offers = [];
+    for (const req of requests) {
+      const interested = await db
+        .select({
+          csr_id: csr_interestedTable.csr_id,
+          interestedAt: csr_interestedTable.interestedAt,
+          username: useraccountTable.username,
+        })
+        .from(csr_interestedTable)
+        .leftJoin(useraccountTable, eq(csr_interestedTable.csr_id, useraccountTable.id))
+        .where(eq(csr_interestedTable.pin_request_id, req.id));
+      offers.push({
+        requestId: req.id,
+        title: req.title,
+        status: req.status,
+        assignedCsrId: req.csr_id,
+        interestedCsrs: interested,
+      });
+    }
+    return offers;
+  }
+
+  // Accept a CSR for a request (assign and set status to pending)
+  static async acceptCsrForRequest(requestId: number, csrId: number) {
+    const [updated] = await db
+      .update(pin_requestsTable)
+      .set({ csr_id: csrId, status: 'pending' })
+      .where(eq(pin_requestsTable.id, requestId))
+      .returning();
+    return updated;
+  }
+
+  // Cancel a CSR's interest for a request
+  static async cancelCsrInterest(requestId: number, csrId: number) {
+    await db.delete(csr_interestedTable)
+      .where(and(eq(csr_interestedTable.pin_request_id, requestId), eq(csr_interestedTable.csr_id, csrId)));
+    return true;
+  }
   static async getAllRequests(): Promise<any[]> {
     // Join pin_requests with users to get username as pinName
     return await db
