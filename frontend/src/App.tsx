@@ -18,6 +18,8 @@ import UserAdminSystemLogPage from './routes/UserAdmin/UserAdminSystemLogPage';
 
 //Person In Need
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
+// CSR Rep
+import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
 // CSS
 
 import { ToastContainer } from 'react-toastify';
@@ -42,6 +44,8 @@ function App() {
           <Route path="/useradmin/SystemLog" element={<UserAdminSystemLogPage />} />
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
+          {/* CSR Rep */}
+          <Route path="/csr/*" element={<CSRRepDashboard />} />
         </Routes>
         <ToastContainer />
       </div>
