@@ -1,5 +1,26 @@
- 
-import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core'
+
+import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core';
+// CSR Rep <-> PIN Request Shortlist Join Table (Many-to-Many)
+export const csr_shortlistTable = pgTable(
+    'csr_shortlist',
+    {
+        csr_id: integer().notNull().references(() => useraccountTable.id),
+        pin_request_id: integer().notNull().references(() => pin_requestsTable.id),
+        shortlistedAt: timestamp().notNull().defaultNow(),
+    },
+    table => [ uniqueIndex().on(table.csr_id, table.pin_request_id) ]
+);
+
+// CSR Rep <-> PIN Request Interested Join Table (Many-to-Many, separate from shortlist)
+export const csr_interestedTable = pgTable(
+    'csr_interested',
+    {
+        csr_id: integer().notNull().references(() => useraccountTable.id),
+        pin_request_id: integer().notNull().references(() => pin_requestsTable.id),
+        interestedAt: timestamp().notNull().defaultNow(),
+    },
+    table => [ uniqueIndex().on(table.csr_id, table.pin_request_id) ]
+);
 
 export const useraccountTable = pgTable(
     'users',

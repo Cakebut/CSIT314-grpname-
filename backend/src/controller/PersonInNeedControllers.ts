@@ -1,6 +1,11 @@
+
 import { PinRequestEntity, PinRequest } from '../entities/personInNeedrequests';
 
 export class PersonInNeedControllers {
+  // Download CSV history for a PIN user (BCE: controller -> entity)
+  async getRequestsHistoryCSV(): Promise<string> {
+    return await PinRequestEntity.getRequestsHistoryCSV();
+  }
   async incrementViewCount(requestId: number): Promise<void> {
     await PinRequestEntity.incrementViewCount(requestId);
   }

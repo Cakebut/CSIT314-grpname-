@@ -4,9 +4,11 @@ import { useEffect } from 'react';
 // Component
 // import Navbar from './components/Navbar';
 
+
+
+//===========================================================================
 // LOGIN PAGE
 import Login from './routes/LoginPage';
-
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
@@ -25,8 +27,11 @@ import CategoriesPage from './routes/PlatformManager/CategoriesPage';
 import ReportsPage from './routes/PlatformManager/ReportsPage';
 import AnnouncementsPage from './routes/PlatformManager/AnnouncementsPage';
 
-// CSS
+// CSR Rep
+import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
 
+//===========================================================================
+// CSS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -47,8 +52,14 @@ function App() {
           <Route path="/useradmin/createuser" element={<CreateNewUserAccountPage />} />
           <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
           <Route path="/useradmin/SystemLog" element={<UserAdminSystemLogPage />} />
+
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
+          
+          {/* CSR Rep */}
+          <Route path="/csr/*" element={<CSRRepDashboard />} />
+
+
           {/* Platform Manager (Dashboard + nested pages) */}
           <Route path="/platformManager" element={<PlatformManagerHome />}>
             <Route index element={<Navigate to="reports" replace />} />
@@ -56,6 +67,7 @@ function App() {
             <Route path="reports" element={<ReportsPage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
           </Route>
+         
         </Routes>
         <ToastContainer />
       </div>
