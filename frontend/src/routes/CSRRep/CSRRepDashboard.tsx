@@ -51,7 +51,16 @@ function CSRRequestDetailsModal({ request, onClose, csrId, shortlistedIds, inter
         <div><b>Request Type:</b> {request.categoryName}</div>
         <div><b>Location:</b> {request.location || request.locationName || '-'}</div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '8px 0' }}>
-          <div><b>Status:</b> {request.status || '-'}</div>
+          <div>
+            <b>Status:</b> <span style={{
+              color:
+                request.status === 'Pending' ? '#f59e42' :
+                request.status === 'Available' ? '#22c55e' :
+                '#6b7280',
+              fontWeight: 700,
+              fontSize: '1.05rem',
+            }}>{request.status || '-'}</span>
+          </div>
           <div>
             {request.urgencyLevel && (
               <span
@@ -82,9 +91,21 @@ function CSRRequestDetailsModal({ request, onClose, csrId, shortlistedIds, inter
         <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
           <button
             className={interestedIds.includes(request.requestId) ? "csr-btn-danger" : "csr-btn"}
-            style={{ minWidth: 110 }}
-            disabled={!csrId}
+            style={{
+              minWidth: 110,
+              background: request.status === 'Pending' ? '#e5e7eb' : '#2563eb',
+              color: request.status === 'Pending' ? '#a1a1aa' : '#fff',
+              border: request.status === 'Pending' ? '1px solid #cbd5e1' : 'none',
+              opacity: request.status === 'Pending' ? 0.55 : 1,
+              cursor: request.status === 'Pending' ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '1rem',
+              borderRadius: 8,
+              transition: 'all 0.2s',
+            }}
+            disabled={request.status === 'Pending'}
             onClick={async () => {
+              if (request.status === 'Pending') return;
               if (!csrId) {
                 alert("You must be logged in as a CSR rep to mark interest.");
                 return;
@@ -403,7 +424,8 @@ function CSRAvailableRequests() {
       if (!csrId) return;
       const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
       const json = await res.json();
-      setInterestedIds((json.interestedRequests || []).map((r: any) => r.requestId));
+      // Support both requestId and pin_request_id from backend
+      setInterestedIds((json.interestedRequests || []).map((r: any) => r.requestId ?? r.pin_request_id));
     };
     loadRequests();
     loadShortlist();
@@ -421,7 +443,7 @@ function CSRAvailableRequests() {
     if (!csrId) return;
     const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
     const json = await res.json();
-    setInterestedIds((json.interestedRequests || []).map((r: any) => r.requestId));
+    setInterestedIds((json.interestedRequests || []).map((r: any) => r.requestId ?? r.pin_request_id));
   };
   return (
     <div className="csr-page">
@@ -431,7 +453,8 @@ function CSRAvailableRequests() {
         {requests.length === 0 ? (
           <div className="csr-empty">No requests found.</div>
         ) : (
-          requests.map((r) => (
+          // Filter out duplicate requests by requestId
+          Array.from(new Map(requests.map(r => [r.requestId, r])).values()).map((r) => (
             <div
               key={r.requestId}
               className="csr-req-row"
@@ -465,6 +488,7 @@ function CSRAvailableRequests() {
       </div>
       {selected && (
         <CSRRequestDetailsModal
+          key={selected.requestId + '-' + interestedIds.join(',')}
           request={selected}
           onClose={() => setSelected(null)}
           csrId={csrId}
@@ -650,17 +674,19 @@ function CSROffers() {
         return;
       }
       try {
+        // Fetch all offers the CSR is interested in
         const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
         const json = await res.json();
+        const requests = json.interestedRequests || [];
         // Map backend data to OfferItem[]
-        const data = (json.interestedRequests || []).map((r: any) => ({
+        const data = requests.map((r: any) => ({
           id: r.requestId,
           title: r.title || 'Untitled Request',
           reqNo: `REQ-${String(r.requestId).padStart(3, "0")}`,
           pinId: r.pinId ? `PIN-${String(r.pinId).padStart(3, "0")}` : '—',
           pinUsername: r.pinUsername || '',
           date: r.interestedAt ? r.interestedAt.slice(0, 10) : (r.createdAt ? r.createdAt.slice(0, 10) : '-'),
-          status: (r.status && ["Pending", "Accepted", "Rejected", "Completed"].includes(r.status)) ? r.status : "Pending",
+          status: r.status || '-',
           feedbackRating: r.feedbackRating,
           feedbackDescription: r.feedbackDescription,
           feedbackCreatedAt: r.feedbackCreatedAt,
@@ -672,15 +698,64 @@ function CSROffers() {
     };
     fetchOffers();
   }, [csrId]);
-  const total = offers.length;
-  const pending = offers.filter(o => o.status === "Pending").length;
-  const accepted = offers.filter(o => o.status === "Accepted").length;
-  const rejected = offers.filter(o => o.status === "Rejected").length;
-  const completed = offers.filter(o => o.status === "Completed").length;
+  // --- Fetch offer counters from csr_requests ---
+  const [offerCounters, setOfferCounters] = useState({
+    total: 0,
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+    completed: 0,
+  });
+  useEffect(() => {
+    const fetchCounters = async () => {
+      const csrId = getCSRId();
+      if (!csrId) return;
+      try {
+        const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
+        const json = await res.json();
+        // Expect json.interestedRequests to be an array of offers
+        const requests = json.interestedRequests || [];
+        setOfferCounters({
+          total: requests.length,
+          pending: requests.filter((r: any) => r.status === "Pending").length,
+          accepted: requests.filter((r: any) => r.status === "Accepted").length,
+          rejected: requests.filter((r: any) => r.status === "Rejected").length,
+          completed: requests.filter((r: any) => r.status === "Completed").length,
+        });
+      } catch (e) {
+        setOfferCounters({ total: 0, pending: 0, accepted: 0, rejected: 0, completed: 0 });
+      }
+    };
+    fetchCounters();
+  }, []);
+  const total = offerCounters.total;
+  const pending = offerCounters.pending;
+  const accepted = offerCounters.accepted;
+  const rejected = offerCounters.rejected;
+  const completed = offerCounters.completed;
   const filtered = useMemo(() => {
     if (tab === "All") return offers;
     return offers.filter(o => o.status === tab);
   }, [tab, offers]);
+  const handleCancelInterest = async (requestId: number) => {
+    const csrId = getCSRId();
+    if (!csrId) return;
+    try {
+      const resp = await fetch(`http://localhost:3000/api/pin/offers/${requestId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csrId }),
+      });
+      if (!resp.ok) {
+        alert('Failed to cancel interest');
+        return;
+      }
+      // Reload offers after cancel
+      window.location.reload(); // or refetch offers if you use state
+    } catch (e) {
+      alert('Error cancelling interest');
+    }
+  };
   return (
     <div className="csr-page">
       <h2 className="csr-section-title big">My Offers</h2>
@@ -732,6 +807,15 @@ function CSROffers() {
               ) : (
                 <div className="csr-muted small" style={{ marginTop: 8 }}>No feedback yet.</div>
               )}
+              <div style={{ marginTop: 8 }}>
+                <button
+                  className="csr-btn-danger"
+                  style={{ minWidth: 110, marginRight: 8 }}
+                  onClick={() => handleCancelInterest(o.id)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -816,7 +900,16 @@ function CSRShortlist() {
             <div><b>Request Type:</b> {selected.categoryName}</div>
             <div><b>Location:</b> {selected.location || selected.locationName || '-'}</div>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '8px 0' }}>
-              <div><b>Status:</b> {selected.status || '-'}</div>
+              <div>
+                <b>Status:</b> <span style={{
+                  color:
+                    selected.status === 'Pending' ? '#f59e42' :
+                    selected.status === 'Available' ? '#22c55e' :
+                    '#6b7280',
+                  fontWeight: 700,
+                  fontSize: '1.05rem',
+                }}>{selected.status || '-'}</span>
+              </div>
               <div>
                 {selected.urgencyLevel && (
                   <span

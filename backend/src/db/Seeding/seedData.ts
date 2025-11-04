@@ -142,7 +142,7 @@ async function seedData() {
     for (let i = 0; i < NUM_FAKE_PIN_REQUESTS; i++) {
       await db.insert(pin_requestsTable).values({
         pin_id: faker.helpers.arrayElement(pinIds),
-        csr_id: faker.helpers.arrayElement(csrIds),
+        csr_id: null,
         title: faker.lorem.words(3),
         categoryID: faker.helpers.arrayElement(serviceTypeIds),
         requestType: faker.helpers.arrayElement([
@@ -154,11 +154,7 @@ async function seedData() {
         locationID: faker.helpers.arrayElement(locationIds),
         urgencyLevelID: faker.helpers.arrayElement(urgencyIds),
         createdAt: faker.date.recent({ days: 30 }),
-        status: faker.helpers.arrayElement([
-          "Available",
-          "In Progress",
-          "Completed",
-        ]),
+        status: "Available",
         view_count: fakeInt(0, 100),
         shortlist_count: fakeInt(0, 10),
       });
@@ -166,21 +162,21 @@ async function seedData() {
     console.log("✅ Seeded PIN requests");
 
     // Example: Seed CSR requests
-    for (let i = 0; i < NUM_FAKE_CSR_REQUESTS; i++) {
-      await db.insert(csr_requestsTable).values({
-        pin_id: faker.helpers.arrayElement(pinIds),
-        csr_id: faker.helpers.arrayElement(csrIds),
-        categoryID: faker.helpers.arrayElement(serviceTypeIds),
-        message: faker.lorem.sentence(),
-        requestedAt: faker.date.recent({ days: 30 }),
-        status: faker.helpers.arrayElement([
-          "Pending",
-          "Completed",
-          "Cancelled",
-        ]),
-      });
-    }
-    console.log("✅ Seeded CSR requests");
+    // for (let i = 0; i < NUM_FAKE_CSR_REQUESTS; i++) {
+    //   await db.insert(csr_requestsTable).values({
+    //     pin_id: faker.helpers.arrayElement(pinIds),
+    //     csr_id: faker.helpers.arrayElement(csrIds),
+    //     categoryID: faker.helpers.arrayElement(serviceTypeIds),
+    //     message: faker.lorem.sentence(),
+    //     requestedAt: faker.date.recent({ days: 30 }),
+    //     status: faker.helpers.arrayElement([
+    //       "Pending",
+    //       "Completed",
+    //       "Cancelled",
+    //     ]),
+    //   });
+    // }
+    // console.log("✅ Seeded CSR requests");
 
     // Fetch all pin request IDs for dynamic assignment
     const pinRequests = await db.select().from(pin_requestsTable);

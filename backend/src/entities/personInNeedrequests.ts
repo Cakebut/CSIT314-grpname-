@@ -1,5 +1,5 @@
 import { db } from '../db/client';
-import { and, eq, ilike, is } from 'drizzle-orm';
+import { and, eq, ilike, is, not } from 'drizzle-orm';
 import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable, csr_interestedTable } from '../db/schema/aiodb';
 
 
@@ -73,11 +73,39 @@ export class PinRequestEntity {
 
   // Accept a CSR for a request (assign and set status to pending)
   static async acceptCsrForRequest(requestId: number, csrId: number) {
+    // 1. Assign CSR and set status to Pending
     const [updated] = await db
       .update(pin_requestsTable)
-      .set({ csr_id: csrId, status: 'pending' })
+      .set({ csr_id: csrId, status: 'Pending' })
       .where(eq(pin_requestsTable.id, requestId))
       .returning();
+
+    // 2. Update csr_requestsTable: accepted CSR gets 'Accepted', all others get 'Rejected'
+    const { and, not } = require('drizzle-orm');
+    // Accept the chosen CSR
+    await db.update(require('../db/schema/aiodb').csr_requestsTable)
+      .set({ status: 'Accepted' })
+      .where(and(
+        eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId),
+        eq(require('../db/schema/aiodb').csr_requestsTable.pin_id, updated.pin_id)
+      ));
+    // Reject all other interested CSRs for this request
+    await db.update(require('../db/schema/aiodb').csr_requestsTable)
+      .set({ status: 'Rejected' })
+      .where(and(
+        not(eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId)),
+        eq(require('../db/schema/aiodb').csr_requestsTable.pin_id, updated.pin_id)
+      ));
+
+    // 3. Remove all other interested CSRs for this request (except accepted)
+    await db.delete(csr_interestedTable)
+      .where(
+        and(
+          eq(csr_interestedTable.pin_request_id, requestId),
+          not(eq(csr_interestedTable.csr_id, csrId))
+        )
+      );
+
     return updated;
   }
 
