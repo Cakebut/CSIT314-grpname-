@@ -1,4 +1,4 @@
-	import { db } from '../index';
+	import { db } from '../db/client';
 	import { pin_requestsTable, service_typeTable, locationTable, urgency_levelTable, csr_shortlistTable, csr_interestedTable, useraccountTable, feedbackTable } from '../db/schema/aiodb';
 	import { eq } from 'drizzle-orm';
 

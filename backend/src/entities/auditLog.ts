@@ -1,5 +1,4 @@
- 
-import { db } from "../index";
+import { db } from "../db/client";
 import { auditLogTable } from "../db/schema/aiodb";
 import { desc } from "drizzle-orm";
 

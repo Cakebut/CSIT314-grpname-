@@ -6,6 +6,10 @@
 import type {Config} from 'jest';
 
 const config: Config = {
+  // Use ts-jest to transform TypeScript files
+  preset: 'ts-jest',
+  // Run tests in a Node environment
+  testEnvironment: 'node',
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 

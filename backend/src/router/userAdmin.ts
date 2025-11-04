@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Request, Response } from "express";
-import { db } from "../index";
+import { db } from "../db/client";
 import { useraccountTable,roleTable } from "../db/schema/aiodb";
 import { sql, eq, and } from "drizzle-orm"; // Add this import
 

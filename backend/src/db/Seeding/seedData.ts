@@ -37,6 +37,7 @@ const customUsers = [
   { username: "pin", password: "password", roleid: 2, issuspended: false },
   { username: "csr", password: "password", roleid: 3, issuspended: false },
   { username: "pm", password: "password", roleid: 4, issuspended: false },
+  { username: "suspended_user", password: "password", roleid: 1, issuspended: true }
 ];
 
 

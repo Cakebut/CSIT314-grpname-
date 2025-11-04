@@ -3,10 +3,9 @@ import express from 'express'
 import cors from 'cors' 
 
 // Drizzle ORM
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
 import connectPgSimple from 'connect-pg-simple';
 import { sql } from 'drizzle-orm';
+import { db, pool, DATABASE_URL } from './db/client';
 
 //Routers
 import { router } from './router/userAdmin';
@@ -22,12 +21,6 @@ declare module 'express-session' {
 
 export const app = express();
 const port = 3000;
-export const DATABASE_URL =
-  "postgresql://crashout_user:crashout_password@localhost:5433/crashout_db";
-
-// Initialize pg pool and pass to drizzle (required)
-const pool = new Pool({ connectionString: DATABASE_URL });
-export const db = drizzle(pool);
 
 app.use(express.json())
 app.use(

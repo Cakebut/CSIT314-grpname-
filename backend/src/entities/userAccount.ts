@@ -2,7 +2,7 @@
 import { useraccountTable, roleTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
-import { db } from "../index";
+import { db } from "../db/client";
 import { useraccountData } from "../shared/dataClasses";
 
 export class UserEntity {
@@ -66,7 +66,7 @@ public async createUserFunc(
       });
       return true
     } catch (err) {
-      console.error(err)
+      console.error("ERROR HELP")
       return false;
     }
   }

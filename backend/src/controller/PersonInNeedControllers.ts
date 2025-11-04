@@ -1,7 +1,7 @@
 
 
 import { notificationTable, useraccountTable, pin_requestsTable } from '../db/schema/aiodb';
-import { db } from '../index';
+import { db } from '../db/client';
 import { eq, desc } from 'drizzle-orm';
 
 import { PinRequestEntity, PinRequest } from '../entities/personInNeedrequests';

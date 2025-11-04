@@ -1,5 +1,4 @@
-
-import { db } from '../index';
+import { db } from '../db/client';
 import { and, eq, ilike, is } from 'drizzle-orm';
 import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable, csr_interestedTable } from '../db/schema/aiodb';
 

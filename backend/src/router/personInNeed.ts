@@ -3,7 +3,7 @@
 import { Router } from 'express';
 import { eq } from 'drizzle-orm';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
-import { db } from "../index";
+import { db } from "../db/client";
 import { urgency_levelTable, locationTable ,service_typeTable} from "../db/schema/aiodb";
 
 

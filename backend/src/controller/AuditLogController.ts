@@ -1,5 +1,4 @@
 import { createAuditLog, fetchAuditLogs,clearAuditLogs,exportAuditLogsCSV } from "../entities/auditLog";
-import { db } from "../index";
 
 
 export class AuditLogController {
