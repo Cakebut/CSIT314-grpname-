@@ -1,4 +1,4 @@
-/* Main Container */
+Main Container
 .activity-logs-container {
   padding: 20px;
   font-family: Arial, sans-serif;
@@ -38,7 +38,7 @@
   border: 1px solid #ccc;
 }
 
-.reset-btn, .export-btn {
+.reset-btn {
   padding: 6px 12px;
   background-color: #f1f1f1;
   border: none;
@@ -46,14 +46,14 @@
   cursor: pointer;
 }
 
-.reset-btn:hover, .export-btn:hover {
+.reset-btn:hover {
   background-color: #ddd;
 }
 
-.export-btn {
+/* .export-btn {
   background-color: #007bff;
   color: white;
-}
+} */
 
 .export-btn .icon {
   width: 16px;

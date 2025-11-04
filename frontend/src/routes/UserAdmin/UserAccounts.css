@@ -1,81 +1,82 @@
 /* Main Container */
 .user-accounts-container {
   padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto; /* To center */
+}
+
+.user-accounts-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
 }
 
 /* Header Section */
-.header {
+.user-accounts-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.header h1 {
+.user-accounts-header h1 {
   font-size: 24px;
   font-weight: bold;
 }
 
-.header p {
+.user-accounts-header p {
   color: #555;
 }
 
-.actions {
+.user-accounts-actions {
   display: flex;
+  align-items: center;
   gap: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #F9FAFB;
 }
 
-.search-input {
+.search-user-accounts {
   padding: 5px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
 
-.filter-select {
+.filter-user-accounts {
   padding: 5px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
 
-.reset-btn {
+.reset-user-accounts {
   padding: 6px 12px;
-  background-color: #f1f1f1;
-  border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.create-btn, .export-btn {
+.export-user-accounts {
   padding: 6px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
+  width: 200px;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.create-btn:hover, .export-btn:hover {
-  background-color: #0056b3;
-}
-
-.reset-btn:hover {
-  background-color: #ddd;
 }
 
 /* Table Section */
-.user-table {
+.user-accounts-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
 
-.user-table th, .user-table td {
+.user-accounts-table th, .user-accounts-table td {
   padding: 12px;
   border: 1px solid #ddd;
   text-align: left;
 }
 
-.user-table th {
+.user-accounts-table th {
   background-color: #f8f9fa;
 }
 
@@ -95,32 +96,64 @@
 }
 
 /* Action Buttons */
-.edit-btn, .delete-btn {
+.edit-user-accounts, .delete-user-accounts {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.edit-btn {
+.edit-user-accounts {
   background-color: #007bff;
   color: white;
 }
 
-.delete-btn {
+.delete-user-accounts {
   background-color: #dc3545;
   color: white;
 }
 
-.edit-btn:hover {
+.edit-user-accounts:hover {
   background-color: #0056b3;
 }
 
-.delete-btn:hover {
+.delete-user-accounts-:hover {
   background-color: #c82333;
 }
 
-.user-accounts-top {
-  display: flex;  
-  
+.create-user-accounts {
+  height: 60px;
+  width: 145px;
+}
+
+.create-text {
+  font-size: 15px;
+}
+
+
+/* Button CSS ---------------------------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-block;
+  font-weight: 500;
+  background-color: black;
+  color: white;
+  text-decoration: none;
+  padding: 1em 1.2em;
+  border-radius: 12px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
 }

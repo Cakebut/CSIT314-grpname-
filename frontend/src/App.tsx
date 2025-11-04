@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 // COMPONENT
 
@@ -35,9 +33,10 @@ function App() {
   return (
     <Router>
       <div className="app-wrapper">
-        {/* <Video /> */}
         <Routes>
-          <Route path="/" element={<Login />} />
+
+            {/* Login */}
+            <Route path="/" element={<Login />} />
 
             {/* Forget Password */}
             <Route path="/forget" element={<Forget />} />
@@ -55,9 +54,6 @@ function App() {
             <Route path="/pm" element={<PMDashboard />} />            
 
         </Routes>
-
-        <ToastContainer />
-
       </div>
     </Router>
   );

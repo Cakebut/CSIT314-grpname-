@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Bell, Check, X, Eye, Edit } from "lucide-react";
+import ReviewPasswordRequest from "./ReviewPasswordRequests"; // Import the modal component
 import "./AdminPasswordRequests.css";
 
 interface PasswordRequest {
@@ -21,19 +22,25 @@ const AdminPasswordRequests: React.FC = () => {
   const [requests, setRequests] = useState<PasswordRequest[]>(initialRequests);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All Status");
-  
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal visibility
+  const [currentRequest, setCurrentRequest] = useState<PasswordRequest | null>(null); // Store the current request to be reviewed
+
   const handleViewDetails = (id: string) => {
     alert(`View details for request ID: ${id}`);
   };
 
   const handleReviewRequest = (id: string) => {
-    alert(`Review password change request for ID: ${id}`);
+    // Find the request from the list to pass it to the modal
+    const requestToReview = requests.find((request) => request.id === id);
+    if (requestToReview) {
+      setCurrentRequest(requestToReview); // Set the selected request
+      setIsModalOpen(true); // Open the modal
+    }
   };
 
   const filteredRequests = requests.filter((request) => {
     const matchesUsername = request.username.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === "All Status" || request.status === filterStatus;
-
     return matchesUsername && matchesStatus;
   });
 
@@ -108,6 +115,15 @@ const AdminPasswordRequests: React.FC = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Modal for reviewing password requests */}
+      {isModalOpen && currentRequest && (
+        <ReviewPasswordRequest
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          request={currentRequest}
+        />
+      )}
     </div>
   );
 };

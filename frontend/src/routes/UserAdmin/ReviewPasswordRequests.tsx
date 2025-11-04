@@ -125,17 +125,6 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
           </div>
         </div>
 
-        {/* Admin Notes */}
-        <div className="admin-notes">
-          <label>Admin Notes (Optional):</label>
-          <textarea
-            value={adminNotes}
-            onChange={(e) => setAdminNotes(e.target.value)}
-            placeholder="Add any notes about this decision..."
-            className="notes-textarea"
-          />
-        </div>
-
         {/* Decision */}
         <div className="decision-section">
           <label>Decision:</label>

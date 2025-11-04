@@ -193,7 +193,7 @@
 }
 
 .validation-box li .valid-check {
-  color: #1f2937;
+  color: #297a2f;
 }
 
 .validation-box li .invalid-check {
@@ -201,7 +201,7 @@
 }
 
 .validation-box li.valid {
-  color: #1f2937;
+  color: #297a2f;
 }
 
 .validation-box li.invalid {

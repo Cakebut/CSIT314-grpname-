@@ -82,9 +82,7 @@ const Categories: React.FC = () => {
       <div className="categories-table">
         <div className="table-header">
           <span>Category Name</span>
-          <span>Description</span>
           <span>Color Tag</span>
-          <span>Created Date</span>
           <span>Status</span>
           <span>Actions</span>
         </div>
@@ -92,11 +90,9 @@ const Categories: React.FC = () => {
         {filteredCategories.map((category) => (
           <div key={category.id} className="table-row">
             <span>{category.name}</span>
-            <span>{category.description}</span>
             <span className={`color-tag ${category.colorTag.replace(" ", "-").toLowerCase()}`}>
               <Tag /> {category.colorTag}
             </span>
-            <span>{category.createdDate}</span>
             <span className={`status ${category.status.toLowerCase()}`}>{category.status}</span>
             <div className="action-buttons">
               <button onClick={() => handleEdit(category.id)} className="edit-button">
