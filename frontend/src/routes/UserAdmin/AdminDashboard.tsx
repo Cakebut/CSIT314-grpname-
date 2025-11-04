@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { LogOut, Users, Key, FileText } from "lucide-react";
+import { LogOut, Users, Key, FileText, Tags } from "lucide-react";
 
 import UserAccounts from "./UserAccounts";
 import AdminPasswordRequests from "./AdminPasswordRequests";
 import SystemActivityLogs from "./SystemActivityLogs";
+import Roles from "./Roles";
 
 import "./AdminDashboard.css";
-
 
 interface AdminDashboardProps {
   onLogout?: () => void;
 }
 
-type ActiveSection = "userAccounts" | "passwordRequests" | "activityLogs";
+type ActiveSection = "userAccounts" | "roles" | "passwordRequests" | "activityLogs";
 
 export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeSection, setActiveSection] = useState<ActiveSection>("userAccounts");
@@ -36,6 +36,14 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
             >
               <Users className="icon" />
               <span>User Accounts</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection("roles")}
+              className={`nav-button ${activeSection === "roles" ? "active" : ""}`}
+            >
+              <Tags className="icon" />
+              <span>Roles</span>
             </button>
             
             <button
@@ -71,6 +79,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
       {/* Main Content */}
       <div className="main-content">
         {activeSection === "userAccounts" && <UserAccounts />}
+        {activeSection === "roles" && <Roles />}
         {activeSection === "passwordRequests" && <AdminPasswordRequests />}
         {activeSection === "activityLogs" && <SystemActivityLogs />}
       </div>

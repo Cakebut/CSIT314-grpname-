@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { LogOut, Users, FileText } from "lucide-react";
+import { LogOut, Users, FileText, ClipboardList } from "lucide-react";
 
+import AllRequests from "./AllRequests";
 import PendingOffers from "./PendingOffers";
 import MyRequests from "./MyRequests";
 import NotificationButton from "../../components/NotificationButton";
@@ -10,10 +11,10 @@ interface PINDashboardProps {
   onLogout?: () => void;
 }
 
-type ActiveSection = "PendingOffers" | "MyRequests";
+type ActiveSection = "AllRequests" | "PendingOffers" | "MyRequests";
 
 function PINDashboard({ onLogout }: PINDashboardProps) {
-  const [activeSection, setActiveSection] = useState<ActiveSection>("PendingOffers");
+  const [activeSection, setActiveSection] = useState<ActiveSection>("AllRequests");
 
   return (
     <div className="PIN-dashboard-container">
@@ -30,6 +31,14 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
         <nav className="sidebar-nav">
           <div className="nav-links">
             <button
+              onClick={() => setActiveSection("AllRequests")}
+              className={`nav-button ${activeSection === "AllRequests" ? "active" : ""}`}
+            >
+              <ClipboardList className="icon" />
+              <span>Available Requests</span>
+            </button>
+
+            <button
               onClick={() => setActiveSection("PendingOffers")}
               className={`nav-button ${activeSection === "PendingOffers" ? "active" : ""}`}
             >
@@ -42,7 +51,7 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
               className={`nav-button ${activeSection === "MyRequests" ? "active" : ""}`}
             >
               <FileText className="icon" />
-              <span>All Requests</span>
+              <span>My Requests</span>
             </button>
           </div>
         </nav>
@@ -61,6 +70,7 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
 
       {/* Main Content */}
       <div className="main-content">
+        {activeSection === "AllRequests" && <AllRequests />}
         {activeSection === "PendingOffers" && <PendingOffers />}
         {activeSection === "MyRequests" && <MyRequests />}
       </div>

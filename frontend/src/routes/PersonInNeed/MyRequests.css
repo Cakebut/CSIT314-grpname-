@@ -1,7 +1,6 @@
 /* Main Container */
 .my-requests-container {
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
 /* Header Section */
@@ -21,17 +20,13 @@
   color: #555;
 }
 
+/* Action Buttons (global for search, filters, and reset) */
 .actions {
   display: flex;
   gap: 10px;
 }
 
-.search-input {
-  padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
+.search-input,
 .filter-select {
   padding: 5px 10px;
   border-radius: 4px;
@@ -62,9 +57,11 @@
   padding: 20px;
   margin-bottom: 20px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 10px; /* Increased border-radius */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional: Add some shadow */
 }
 
+/* Request Header */
 .request-header {
   display: flex;
   justify-content: space-between;
@@ -102,7 +99,21 @@
   margin-bottom: 10px;
 }
 
-/* Action Buttons */
+/* Urgency and Shortlist */
+.request-card p {
+  margin-bottom: 5px;
+}
+
+.heart-icon {
+  cursor: pointer;
+  color: #f00; /* Heart icon color */
+}
+
+.heart-icon:hover {
+  transform: scale(1.1); /* Scale effect on hover */
+}
+
+/* Action Buttons inside Request Cards */
 .actions {
   display: flex;
   gap: 10px;
@@ -137,7 +148,19 @@
   background-color: #c82333;
 }
 
+/* Icons inside buttons */
 .icon {
   width: 16px;
   height: 16px;
+}
+
+/* Optional: Add focus and active states for better UX */
+.edit-btn:focus,
+.delete-btn:focus {
+  outline: 2px solid #0056b3; /* Add focus outline for better accessibility */
+}
+
+.edit-btn:active,
+.delete-btn:active {
+  transform: scale(0.98); /* Button press effect */
 }

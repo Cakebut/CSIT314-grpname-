@@ -5,95 +5,58 @@ import "./SystemActivityLogs.css";  // Importing the CSS file
 // Defining the type for each log entry
 interface ActivityLog {
   username: string;
-  sessions: number;
-  loginCount: number;
-  logoutCount: number;
-  accountStatus: "Active" | "Suspended";
-  lastSuspension: string | "N/A";
-  lastPasswordChange: string;
+  action: string;
+  target: string;
+  timestamp: string;
+  details: string;
 }
 
 const initialLogs: ActivityLog[] = [
   {
     username: "john_doe",
-    sessions: 45,
-    loginCount: 52,
-    logoutCount: 48,
-    accountStatus: "Active",
-    lastSuspension: "N/A",
-    lastPasswordChange: "Oct 15, 2025 at 2:30 PM",
+    action: "login",
+    target: "admin",
+    timestamp: "31 October 2025 @ 3:00:00PM",
+    details: "User logged in"
   },
   {
     username: "jane_smith",
-    sessions: 78,
-    loginCount: 89,
-    logoutCount: 85,
-    accountStatus: "Active",
-    lastSuspension: "N/A",
-    lastPasswordChange: "Oct 10, 2025 at 10:15 AM",
-  },
-  {
-    username: "bob_wilson",
-    sessions: 12,
-    loginCount: 15,
-    logoutCount: 14,
-    accountStatus: "Suspended",
-    lastSuspension: "Oct 28, 2025 at 9:00 AM",
-    lastPasswordChange: "Sept 20, 2025 at 4:45 PM",
+    action: "password_change",
+    target: "user",
+    timestamp: "01 November 2025 @ 4:15:00PM",
+    details: "User requested password change"
   },
   {
     username: "alice_jones",
-    sessions: 34,
-    loginCount: 40,
-    logoutCount: 38,
-    accountStatus: "Active",
-    lastSuspension: "Oct 1, 2025 at 11:30 AM",
-    lastPasswordChange: "Oct 5, 2025 at 3:20 PM",
-  },
-  {
-    username: "mike_brown",
-    sessions: 56,
-    loginCount: 62,
-    logoutCount: 60,
-    accountStatus: "Active",
-    lastSuspension: "N/A",
-    lastPasswordChange: "Oct 22, 2025 at 1:10 PM",
-  },
-  {
-    username: "sarah_davis",
-    sessions: 23,
-    loginCount: 28,
-    logoutCount: 26,
-    accountStatus: "Suspended",
-    lastSuspension: "Oct 29, 2025 at 8:15 AM",
-    lastPasswordChange: "Oct 12, 2025 at 5:00 PM",
+    action: "login",
+    target: "admin",
+    timestamp: "02 November 2025 @ 10:00:00AM",
+    details: "Admin logged in"
   },
 ];
 
 const SystemActivityLogs: React.FC = () => {
   const [logs, setLogs] = useState<ActivityLog[]>(initialLogs);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All Status");
+  const [filterStatus, setFilterStatus] = useState("All Actions");
 
-  // Filter the logs based on username and status
+  // Filter the logs based on username and status (action)
   const filteredLogs = logs.filter((log) => {
     const matchesUsername = log.username.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === "All Status" || log.accountStatus === filterStatus;
+    const matchesStatus = filterStatus === "All Actions" || log.action === filterStatus;
 
     return matchesUsername && matchesStatus;
   });
 
   const handleDownloadCSV = () => {
     // Function to export the logs as a CSV file
-    const headers = ["Username", "Sessions", "Login Count", "Logout Count", "Account Status", "Last Suspension", "Last Password Change"];
+    const headers = ["Username", "Action", "Target", "Timestamp", "Details"];
     const rows = filteredLogs.map((log) => [
       log.username,
-      log.sessions,
-      log.loginCount,
-      log.logoutCount,
-      log.accountStatus,
-      log.lastSuspension,
-      log.lastPasswordChange,
+      log.action,
+      log.target,
+      log.timestamp,
+      log.details
     ]);
     const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
 
@@ -125,11 +88,11 @@ const SystemActivityLogs: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="filter-select"
           >
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Suspended</option>
+            <option>All Actions</option>
+            <option>login</option>
+            <option>password_change</option>
           </select>
-          <button className="reset-btn" onClick={() => { setSearchQuery(""); setFilterStatus("All Status"); }}>
+          <button className="reset-btn" onClick={() => { setSearchQuery(""); setFilterStatus("All Actions"); }}>
             Reset
           </button>
           <button className="export-btn" onClick={handleDownloadCSV}>
@@ -142,28 +105,24 @@ const SystemActivityLogs: React.FC = () => {
         <thead>
           <tr>
             <th>Username</th>
-            <th>Sessions</th>
-            <th>Login Count</th>
-            <th>Logout Count</th>
-            <th>Account Status</th>
-            <th>Last Suspension</th>
-            <th>Last Password Change</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Timestamp</th>
+            <th>Details</th>
           </tr>
         </thead>
         <tbody>
           {filteredLogs.map((log, index) => (
             <tr key={index}>
               <td>{log.username}</td>
-              <td>{log.sessions}</td>
-              <td>{log.loginCount}</td>
-              <td>{log.logoutCount}</td>
+              <td>{log.action}</td>
+              <td>{log.target}</td>
+              <td>{log.timestamp}</td>
               <td>
-                <span className={`status ${log.accountStatus.toLowerCase()}`}>
-                  {log.accountStatus}
+                <span className={`status ${log.details.toLowerCase()}`}>
+                  {log.details}
                 </span>
               </td>
-              <td>{log.lastSuspension}</td>
-              <td>{log.lastPasswordChange}</td>
             </tr>
           ))}
         </tbody>

@@ -6,15 +6,15 @@ interface User {
   id: string;
   username: string;
   role: string;
-  status: "Active" | "Inactive";
+  status: "Active" | "Inactive" | "Suspended";
 }
 
 const initialUsers: User[] = [
   { id: "001", username: "john_doe", role: "Admin", status: "Active" },
-  { id: "002", username: "jane_smith", role: "PIN", status: "Active" },
+  { id: "002", username: "jane_smith", role: "PIN", status: "Suspended" },
   { id: "003", username: "bob_wilson", role: "User", status: "Inactive" },
   { id: "004", username: "alice_jones", role: "PIN", status: "Active" },
-  { id: "005", username: "mike_brown", role: "Admin", status: "Active" },
+  { id: "005", username: "mike_brown", role: "Admin", status: "Suspended" },
 ];
 
 const UserAccounts: React.FC = () => {
@@ -29,6 +29,16 @@ const UserAccounts: React.FC = () => {
 
   const handleEdit = (id: string) => {
     alert(`Edit user with ID: ${id}`);
+  };
+
+  const handleSuspend = (id: string) => {
+    setUsers(users.map(user => {
+      if (user.id === id) {
+        let newStatus: "Active" | "Inactive" | "Suspended" = user.status === "Suspended" ? "Active" : "Suspended";
+        return { ...user, status: newStatus };
+      }
+      return user;
+    }));
   };
 
   const filteredUsers = users.filter(user => {
@@ -66,7 +76,7 @@ const UserAccounts: React.FC = () => {
               onChange={(e) => setFilterRole(e.target.value)}
               className="filter-user-accounts"
             >
-              <option>All Roles</option>
+              <option>Roles</option>
               <option>Admin</option>
               <option>PIN</option>
               <option>User</option>
@@ -76,7 +86,7 @@ const UserAccounts: React.FC = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="filter-user-accounts"
             >
-              <option>All Status</option>
+              <option>Status</option>
               <option>Active</option>
               <option>Inactive</option>
             </select>
@@ -84,7 +94,7 @@ const UserAccounts: React.FC = () => {
               Reset
             </button>
             
-            <button className="export-user-accounts btn"><Download className="icon" />Export File</button>
+            <button className="export-user-accounts btn"><Download className="icon"/>Export File</button>
           </div>
 
         <table className="user-accounts-table">
@@ -104,9 +114,10 @@ const UserAccounts: React.FC = () => {
                 <td>{user.username}</td>
                 <td>{user.role}</td>
                 <td>
-                  <span className={`status ${user.status.toLowerCase()}`}>{user.status}</span>
+                  <span className={`user-account-status ${user.status.toLowerCase()}`}>{user.status}</span>
                 </td>
                 <td>
+                  <button className="suspend-user-accounts" onClick={() => handleSuspend(user.id)}>{user.status === "Suspended" ? "Reactivate" : "Suspended"}</button>
                   <button className="edit-user-accounts" onClick={() => handleEdit(user.id)}>Edit</button>
                   <button className="delete-user-accounts" onClick={() => handleDelete(user.id)}>Delete</button>
                 </td>

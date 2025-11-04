@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Trash2 } from "lucide-react";  // Importing the Edit and Delete icons from lucide-react
+import { Edit, Trash2, Heart } from "lucide-react";  // Added Heart icon for Shortlist
 import "./MyRequests.css";
 
 // Interface for each request
@@ -10,6 +10,8 @@ interface Request {
   submittedDate: string;
   status: "Available" | "Pending" | "Completed";
   csrOffersCount: number; // Number of CSR offers pending for the request
+  urgencyStatus: "High Priority" | "Low Priority"; // Urgency status
+  shortlistCount: number; // Number of shortlists for this request
 }
 
 const initialRequests: Request[] = [
@@ -20,6 +22,8 @@ const initialRequests: Request[] = [
     submittedDate: "25/10/2024",
     status: "Available",
     csrOffersCount: 1,
+    urgencyStatus: "High Priority",
+    shortlistCount: 2,
   },
   {
     id: "REQ-002",
@@ -28,6 +32,8 @@ const initialRequests: Request[] = [
     submittedDate: "24/10/2024",
     status: "Available",
     csrOffersCount: 2,
+    urgencyStatus: "Low Priority",
+    shortlistCount: 1,
   },
   {
     id: "REQ-003",
@@ -36,6 +42,8 @@ const initialRequests: Request[] = [
     submittedDate: "23/10/2024",
     status: "Available",
     csrOffersCount: 1,
+    urgencyStatus: "High Priority",
+    shortlistCount: 0,
   },
   {
     id: "REQ-004",
@@ -44,6 +52,8 @@ const initialRequests: Request[] = [
     submittedDate: "22/10/2024",
     status: "Available",
     csrOffersCount: 3,
+    urgencyStatus: "Low Priority",
+    shortlistCount: 5,
   },
 ];
 
@@ -60,6 +70,15 @@ const MyRequests: React.FC = () => {
   // Handle editing a request (this will just show an alert for now)
   const handleEdit = (id: string) => {
     alert(`Editing request with ID: ${id}`);
+  };
+
+  // Handle shortlist count
+  const handleShortlist = (id: string) => {
+    setRequests((prevRequests) =>
+      prevRequests.map((request) =>
+        request.id === id ? { ...request, shortlistCount: request.shortlistCount + 1 } : request
+      )
+    );
   };
 
   // Filter requests based on search query and status
@@ -121,6 +140,8 @@ const MyRequests: React.FC = () => {
             <p>{request.description}</p>
             <p>Submitted on {request.submittedDate}</p>
             <p>{request.csrOffersCount} CSR offer{request.csrOffersCount > 1 ? "s" : ""} pending</p>
+            <p>Urgency: <strong>{request.urgencyStatus}</strong></p>
+            <p>Shortlisted: {request.shortlistCount} <Heart className="heart-icon" onClick={() => handleShortlist(request.id)} /></p>
             <div className="actions">
               <button className="edit-btn" onClick={() => handleEdit(request.id)}>
                 <Edit className="icon" />

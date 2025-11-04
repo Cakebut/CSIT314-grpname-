@@ -1,11 +1,11 @@
 /* Main Container */
-.user-accounts-container {
+.roles-container {
   padding: 20px;
-  max-width:100%;
+  max-width: 100%;
   margin: 0 auto; /* To center */
 }
 
-.user-accounts-top {
+.roles-top {
   display: flex;  
   justify-content: space-between;
   align-items: center;
@@ -13,23 +13,23 @@
 }
 
 /* Header Section */
-.user-accounts-header {
+.roles-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.user-accounts-header h1 {
+.roles-header h1 {
   font-size: 24px;
   font-weight: bold;
 }
 
-.user-accounts-header p {
+.roles-header p {
   color: #555;
 }
 
-.user-accounts-actions {
+.roles-actions {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -40,7 +40,7 @@
   margin-top: 30px;
 }
 
-.search-user-accounts {
+.search-roles {
   padding: 5px 10px;
   border-radius: 10px;
   height: 50px;
@@ -50,7 +50,7 @@
   outline: none;
 }
 
-.filter-user-accounts {
+.filter-roles {
   padding: 5px 40px; /* left:(top bottom) right:(left right) */
   border-radius: 10px;
   height: 50px;
@@ -61,7 +61,7 @@
   text-align: left;
 }
 
-.reset-user-accounts {
+.reset-roles {
   padding: 6px 12px;
   border-radius: 10px;
   cursor: pointer;
@@ -70,7 +70,7 @@
   box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
 }
 
-.export-user-accounts {
+.export-roles {
   width: 130px;
   height: 50px;
   border-radius: 4px;
@@ -79,14 +79,14 @@
   box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
 }
 
-.export-user-accounts .icon {
+.export-roles .icon {
   width: 16px;
   height: 16px;
   margin-right: 8px;
 }
 
 /* Table Section */
-.user-accounts-table {
+.roles-table {
   width: 100%;
   border-spacing: 0;
   margin-top: 40px;
@@ -95,65 +95,63 @@
   overflow: hidden;
 }
 
-.user-accounts-table th, .user-accounts-table td {
+.roles-table th, .roles-table td {
   padding: 20px 15px;
   text-align: left;
   border: none;
 }
 
-.user-accounts-table tr {
+.roles-table tr {
   border: 1px solid black;
 }
 
-.user-accounts-table th {
+.roles-table th {
   background-color: #f8f9fa;
   border: none;
 }
 
-.user-account-status {
-  padding: 5px 8px;
-  border-radius: 5px;
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
-.user-account-status.active {
-  background-color: #155224;
+.status.active {
+  background-color: #28a745;
   color: white;
 }
 
-.user-account-status.inactive {
-  background-color: #831c26;
-  color: white;
-}
-
-.user-account-status.suspended {
-  background-color: #af2d05;
+.status.inactive {
+  background-color: #dc3545;
   color: white;
 }
 
 /* Action Buttons */
-.edit-user-accounts, .delete-user-accounts, .suspended-user-accounts {
+.edit-roles, .delete-roles {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.suspended-user-accounts {
-  background-color: green;
-  color: white;
-}
-
-.edit-user-accounts {
+.edit-roles {
   background-color: #007bff;
   color: white;
 }
 
-.delete-user-accounts {
+.delete-roles {
   background-color: #dc3545;
   color: white;
 }
 
-.create-user-accounts {
+.edit-roles:hover {
+  background-color: #0056b3;
+}
+
+.delete-roles-:hover {
+  background-color: #c82333;
+}
+
+.create-roles {
   height: 60px;
   width: 145px;
   box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
