@@ -89,13 +89,19 @@ router.post('/requests/:id/increment-view', async (req, res) => {
 	if (!id) {
 		return res.status(400).json({ success: false, error: 'Missing or invalid request id' });
 	}
+	// Restrict to CSR Rep only
+	// Accept role from req.headers['x-user-role'] or session (customize as needed)
+	const userRole = req.headers['x-user-role'] || req.body.role;
+	if (userRole !== 'CSR Rep') {
+		return res.status(403).json({ success: false, error: 'Only CSR Rep can increment view count' });
+	}
 	try {
 		await controller.incrementViewCount(id);
 		return res.json({ success: true });
 	} catch (err) {
 		return res.status(500).json({ success: false, error: 'Failed to increment view count' });
 	}
-});
+	});
 
 // Increment shortlist count for a request
 router.post('/requests/:id/increment-shortlist', async (req, res) => {

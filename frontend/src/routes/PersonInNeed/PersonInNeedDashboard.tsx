@@ -257,7 +257,7 @@ const PersonInNeedDashboard: React.FC = () => {
       toast.success("CSR accepted for this request.");
       openMyOffers();
     } else {
-      toast.error("Failed to accept CSR.");
+        toast.error("Failed to accept CSR.");
     }
   };
 
@@ -272,7 +272,7 @@ const PersonInNeedDashboard: React.FC = () => {
       toast.success("CSR interest cancelled.");
       openMyOffers();
     } else {
-      toast.error("Failed to cancel CSR interest.");
+        toast.error("Failed to cancel CSR interest.");
     }
   };
 
@@ -503,10 +503,7 @@ const PersonInNeedDashboard: React.FC = () => {
                   justifyContent: 'space-between',
                   position: 'relative',
                 }}
-                onClick={async () => {
-                  await fetch(`${API_BASE}/api/pin/requests/${r.id}/increment-view`, { method: 'POST' });
-                  setSelected(r);
-                }}
+                onClick={() => setSelected(r)}
               >
                 <div style={{ flex: 3, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#1e293b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
