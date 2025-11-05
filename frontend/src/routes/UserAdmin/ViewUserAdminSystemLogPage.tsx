@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaSearch, FaFilter } from 'react-icons/fa';
 import { toast } from "react-toastify";
-import "./UserAdminSystemLogPage.css";
+import "./ViewUserAdminSystemLogPage.css";
 
 interface AuditLogEntry {
   id: number;
