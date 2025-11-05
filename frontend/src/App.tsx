@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import React from 'react';
+ 
 
 // LOGIN PAGE
 import Login from './routes/LoginPage';
@@ -37,6 +39,18 @@ function App() {
     document.title = "Volunteering Service in Singapore"
   })
 
+
+  // ProtectedRoute component for all actors
+function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, allowedRole: string }) {
+  const role = localStorage.getItem('currentRole');
+  if (role === allowedRole) {
+    return <>{children}</>;
+  } else {
+    return <Navigate to="/" replace />;
+  }
+}
+
+
   return (
     <Router>
       <div className="app-wrapper">
@@ -44,27 +58,27 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           {/* User Admin */}
-          <Route path="/useradmin" element={<AdminDashboard />} />
-          <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
-          <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
-          <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
-          <Route path="/useradmin/SystemLog" element={<UserAdminSystemLogPage />} />
-          <Route path="/useradmin/PasswordResetRequests" element={<AdminPasswordResetDashboard />} />
+          <Route path="/useradmin" element={<ProtectedRoute allowedRole="User Admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/useradmin/ViewUserList" element={<ProtectedRoute allowedRole="User Admin"><ViewUserAccountPage /></ProtectedRoute>} />
+          <Route path="/useradmin/ViewUserRoles" element={<ProtectedRoute allowedRole="User Admin"><ViewUserRolesPage /></ProtectedRoute>} />
+          <Route path="/useradmin/create" element={<ProtectedRoute allowedRole="User Admin"><CreateNewUserAccountPage /></ProtectedRoute>} />
+          <Route path="/useradmin/SystemLog" element={<ProtectedRoute allowedRole="User Admin"><UserAdminSystemLogPage /></ProtectedRoute>} />
+          <Route path="/useradmin/PasswordResetRequests" element={<ProtectedRoute allowedRole="User Admin"><AdminPasswordResetDashboard /></ProtectedRoute>} />
 
           
           {/* Person In Need */}
-          <Route path="/PIN" element={<PersonInNeedDashboard />} />
+          <Route path="/PIN" element={<ProtectedRoute allowedRole="Person In Need"><PersonInNeedDashboard /></ProtectedRoute>} />
           
           {/* CSR Rep */}
-          <Route path="/csr/*" element={<CSRRepDashboard />} />
+          <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRRepDashboard /></ProtectedRoute>} />
 
 
           {/* Platform Manager (Dashboard + nested pages) */}
-          <Route path="/platformManager" element={<PlatformManagerHome />}>
+          <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PlatformManagerHome /></ProtectedRoute>}>
             <Route index element={<Navigate to="reports" replace />} />
-            <Route path="categories" element={<CategoriesPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="categories" element={<ProtectedRoute allowedRole="Platform Manager"><CategoriesPage /></ProtectedRoute>} />
+            <Route path="reports" element={<ProtectedRoute allowedRole="Platform Manager"><ReportsPage /></ProtectedRoute>} />
+            <Route path="announcements" element={<ProtectedRoute allowedRole="Platform Manager"><AnnouncementsPage /></ProtectedRoute>} />
           </Route>
          
         </Routes>
