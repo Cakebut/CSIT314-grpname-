@@ -28,9 +28,6 @@ public async exportAuditLogsCSV(limit?: number): Promise<string> {
   return csvData;
 }
 
-
-
-
 //Crate audit log entry
 public async  createAuditLog({ actor, action, target, details }: {
   actor: string;

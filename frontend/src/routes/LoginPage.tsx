@@ -112,12 +112,9 @@ function Login() {
             />
           </div>
           <div className="forgot">
+        
             <section>
-              <input type="checkbox" id="check" />
-              <label htmlFor="check">Remember me</label>
-            </section>
-            <section>
-              <a className="login-text" href="#">Forgot Password</a>
+              <a className="login-text"  href="/forgot-password">Forgot Password</a>
             </section>
           </div>
           <div className="input-submit" style={{ marginBottom: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
