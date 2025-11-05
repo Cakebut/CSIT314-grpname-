@@ -54,6 +54,12 @@ interface Offer {
   status: string;
   assignedCsrId?: number | null;
   interestedCsrs: { csr_id: number; interestedAt: string; username: string }[];
+  feedback?: {
+    id: number;
+    rating: number;
+    description?: string;
+    createdAt: string;
+  } | null;
 }
 
 const API_BASE = "http://localhost:3000";
@@ -388,6 +394,8 @@ const PersonInNeedDashboard: React.FC = () => {
       });
       if (res.ok) {
         toast.success('Feedback submitted!');
+        // Refetch offers from backend to get updated feedback data
+        openMyOffers();
         handleCancelFeedback();
       } else {
         toast.error('Failed to submit feedback.');
@@ -422,12 +430,27 @@ const PersonInNeedDashboard: React.FC = () => {
         <button
           ref={notiButtonRef}
           className="button"
-          style={{ fontSize: 22, position: 'relative', background: notiHasUnread ? '#f59e42' : '#e0e7ef', color: notiHasUnread ? 'white' : '#334155', borderRadius: 24, width: 44, height: 44, boxShadow: notiHasUnread ? '0 0 0 2px #f59e42' : undefined }}
+          style={{ fontSize: 24, position: 'relative', background: '#e0e7ef', color: '#334155', borderRadius: 24, width: 44, height: 44, boxShadow: notiHasUnread ? '0 0 0 2px #ef4444' : undefined }}
           onClick={() => setShowNoti(s => !s)}
           aria-label="Notifications"
         >
-          🔔
-          {notiHasUnread && <span style={{ position: 'absolute', top: 6, right: 8, width: 10, height: 10, background: '#ef4444', borderRadius: '50%' }} />}
+          <span style={{ position: 'relative' }}>
+            🔔
+            {notiHasUnread && (
+              <span style={{
+                position: 'absolute',
+                top: -2,
+                right: -6,
+                width: 12,
+                height: 12,
+                background: '#ef4444',
+                borderRadius: '50%',
+                border: '2px solid #fff',
+                boxShadow: '0 0 4px #ef4444',
+                display: 'inline-block',
+              }} />
+            )}
+          </span>
         </button>
         {showNoti && (
           <div ref={notiPopoverRef} style={{ position: 'absolute', top: 48, right: 0, minWidth: 320, background: '#fff', boxShadow: '0 4px 16px #cbd5e1', borderRadius: 12, zIndex: 200, padding: '14px 18px 12px 18px', animation: 'fadeIn 0.18s' }}>
@@ -438,7 +461,18 @@ const PersonInNeedDashboard: React.FC = () => {
                 {notifications.map(noti => (
                   <li
                     key={noti.id}
-                    style={{ padding: '8px 0', borderBottom: '1px solid #e5e7eb', background: noti.read === 0 ? '#fef9c3' : undefined, cursor: 'pointer', position: 'relative' }}
+                    style={{
+                      padding: '12px 0',
+                      borderBottom: '1px solid #e5e7eb',
+                      background: noti.read === 0 ? 'linear-gradient(90deg,#fef9c3 60%,#f3f4f6 100%)' : '#f3f4f6',
+                      cursor: 'pointer',
+                      borderRadius: 8,
+                      marginBottom: 2,
+                      boxShadow: noti.read === 0 ? '0 2px 8px #fef9c3' : 'none',
+                      transition: 'background 0.2s, box-shadow 0.2s',
+                      position: 'relative',
+                    }}
+                    title="Click to clear notification"
                     onClick={async () => {
                       try {
                         await fetch(`${API_BASE}/api/pin/notifications/${noti.id}`, { method: 'DELETE' });
@@ -449,10 +483,17 @@ const PersonInNeedDashboard: React.FC = () => {
                       }
                     }}
                   >
-                    <div style={{ fontWeight: 600 }}>{noti.type === 'interested' ? 'CSR Interested' : noti.type === 'shortlist' ? 'CSR Shortlisted' : noti.type}</div>
-                    <div style={{ fontSize: 14, color: '#334155' }}>CSR: {noti.csrUsername || noti.csr_id} | Request: {noti.requestTitle || noti.pin_request_id}</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.08rem', color: '#2563eb', marginBottom: 2 }}>
+                      {noti.type === 'interested' ? '👀 CSR Interested'
+                        : noti.type === 'shortlist' ? '❤️ CSR Shortlisted'
+                        : noti.type === 'accepted' ? `✅ CSR Accepted`
+                        : noti.type === 'rejected' ? `❌ CSR Rejected`
+                        : noti.type === 'feedback' ? '⭐ Feedback received'
+                        : noti.type}
+                    </div>
+                    <div style={{ fontSize: 15, color: '#334155', fontWeight: 500, marginBottom: 2 }}>CSR: <span style={{ color: '#0ea5e9' }}>{noti.csrUsername || noti.csr_id}</span> | Request: <span style={{ color: '#0ea5e9' }}>{noti.requestTitle || noti.pin_request_id}</span></div>
                     <div style={{ fontSize: 13, color: '#64748b' }}>{noti.createdAt?.slice(0, 19).replace('T', ' ')}</div>
-                    <span style={{ position: 'absolute', top: 8, right: 8, color: '#ef4444', fontWeight: 700, fontSize: 18, cursor: 'pointer' }} title="Clear notification">×</span>
+                    <span style={{ position: 'absolute', top: 8, right: 12, color: '#ef4444', fontWeight: 700, fontSize: 18, cursor: 'pointer' }} title="Clear notification">×</span>
                   </li>
                 ))}
               </ul>
@@ -484,6 +525,7 @@ const PersonInNeedDashboard: React.FC = () => {
                     <th>Request Title</th>
                     <th>Status</th>
                     <th>Interested CSRs</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -500,48 +542,54 @@ const PersonInNeedDashboard: React.FC = () => {
                               <li key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span style={{ fontWeight: 600 }}>{csr.username || `CSR #${csr.csr_id}`}</span>
                                 <span style={{ color: '#64748b', fontSize: 13 }}>({new Date(csr.interestedAt).toLocaleDateString()})</span>
-                                {/* Only show Assigned if status is Pending */}
                                 {offer.assignedCsrId === csr.csr_id && offer.status === 'Pending' && (
                                   <span style={{ color: '#22c55e', fontWeight: 700, marginLeft: 8 }}>Assigned</span>
-                                )}
-                                {/* Accept/Cancel buttons for non-assigned CSRs */}
-                                {offer.assignedCsrId !== csr.csr_id && (
-                                  <>
-                                    <button className="button" style={{ backgroundColor: '#22c55e', color: 'white', marginLeft: 8 }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
-                                    <button className="button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
-                                  </>
-                                )}
-                                {/* Mark Completed button for pending requests with assigned CSR */}
-                                {offer.status === 'Pending' && offer.assignedCsrId === csr.csr_id && (
-                                  <button
-                                    className="button"
-                                    style={{ backgroundColor: '#6b7280', color: 'white', marginLeft: 8 }}
-                                    onClick={async () => {
-                                      if (window.confirm('Mark this request as completed?')) {
-                                        // FIX: Use correct backend endpoint for completion
-                                        const res = await fetch(`${API_BASE}/api/pin/offers/${offer.requestId}/complete`, { method: 'POST' });
-                                        if (res.ok) {
-                                          toast.success('Request marked as completed.');
-                                          openMyOffers();
-                                        } else {
-                                          toast.error('Failed to mark request as completed.');
-                                        }
-                                      }
-                                    }}
-                                  >Mark Completed</button>
-                                )}
-                                {/* Feedback button for completed offers, only for assigned CSR */}
-                                {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
-                                  <button
-                                    className="button"
-                                    style={{ backgroundColor: '#2563eb', color: 'white', marginLeft: 8 }}
-                                    onClick={() => openFeedbackModal(offer.requestId, csr.csr_id, csr.username)}
-                                  >Feedback</button>
                                 )}
                               </li>
                             ))}
                           </ul>
                         )}
+                      </td>
+                      <td>
+                        {offer.interestedCsrs.map(csr => (
+                          <div key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {/* Accept/Cancel buttons for non-assigned CSRs */}
+                            {offer.assignedCsrId !== csr.csr_id && (
+                              <>
+                                <button className="button" style={{ backgroundColor: '#22c55e', color: 'white' }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
+                                <button className="button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
+                              </>
+                            )}
+                            {/* Mark Completed button for pending requests with assigned CSR */}
+                            {offer.status === 'Pending' && offer.assignedCsrId === csr.csr_id && (
+                              <button
+                                className="button"
+                                style={{ backgroundColor: '#6b7280', color: 'white' }}
+                                onClick={async () => {
+                                  if (window.confirm('Mark this request as completed?')) {
+                                    const res = await fetch(`${API_BASE}/api/pin/offers/${offer.requestId}/complete`, { method: 'POST' });
+                                    if (res.ok) {
+                                      toast.success('Request marked as completed.');
+                                      openMyOffers();
+                                    } else {
+                                      toast.error('Failed to mark request as completed.');
+                                    }
+                                  }
+                                }}
+                              >Mark Completed</button>
+                            )}
+                            {/* Feedback button for completed offers, only for assigned CSR */}
+                            {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
+                              (!offer.feedback) ? (
+                                <button
+                                  className="button"
+                                  style={{ backgroundColor: '#2563eb', color: 'white' }}
+                                  onClick={() => openFeedbackModal(offer.requestId, csr.csr_id, csr.username)}
+                                >Feedback</button>
+                              ) : null
+                            )}
+                          </div>
+                        ))}
                       </td>
                     </tr>
                   ))}

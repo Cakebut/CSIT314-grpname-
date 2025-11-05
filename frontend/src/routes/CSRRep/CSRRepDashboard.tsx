@@ -214,7 +214,34 @@ function getCSRId() {
 // --- CSRHeader ---
 function CSRHeader() {
   const [showNoti, setShowNoti] = useState(false);
-  const [hasUpdates, setHasUpdates] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notiLoading, setNotiLoading] = useState(false);
+  const [notiError, setNotiError] = useState("");
+  const [hasUnread, setHasUnread] = useState(false);
+  const csrId = getCSRId();
+
+  // Fetch notifications for CSR user
+  useEffect(() => {
+    if (!csrId) return;
+    setNotiLoading(true);
+    setNotiError("");
+    fetch(`http://localhost:3000/api/pin/notifications/csr/${csrId}`)
+      .then(res => res.json())
+      .then(data => {
+        // Only show notifications for accepted, rejected, or feedback
+        const filtered = (data.data || []).filter((n: any) =>
+          n.type === 'accepted' || n.type === 'rejected' || n.type === 'feedback'
+        );
+        setNotifications(filtered);
+        setHasUnread(filtered.some((n: any) => n.read === 0));
+        setNotiLoading(false);
+      })
+      .catch(() => {
+        setNotiError("Could not load notifications.");
+        setNotiLoading(false);
+      });
+  }, [csrId, showNoti]);
+
   // Close popover on outside click
   React.useEffect(() => {
     if (!showNoti) return;
@@ -237,7 +264,25 @@ function CSRHeader() {
       </div>
       <div className="csr-header-right">
         <div className="csr-noti" style={{ position: 'relative' }}>
-          <button className="csr-icon-btn" onClick={() => setShowNoti(s => !s)} aria-label="Notifications">🔔</button>
+          <button className="csr-icon-btn" onClick={() => setShowNoti(s => !s)} aria-label="Notifications" style={{ position: 'relative', fontSize: 24 }}>
+            <span style={{ position: 'relative' }}>
+              🔔
+              {hasUnread && (
+                <span style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -6,
+                  width: 12,
+                  height: 12,
+                  background: '#ef4444',
+                  borderRadius: '50%',
+                  border: '2px solid #fff',
+                  boxShadow: '0 0 4px #ef4444',
+                  display: 'inline-block',
+                }} />
+              )}
+            </span>
+          </button>
           {showNoti && (
             <div id="csr-noti-popover" style={{
               position: 'absolute',
@@ -253,7 +298,45 @@ function CSRHeader() {
             }}>
               <div style={{ position: 'absolute', top: -10, right: 18, width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: '10px solid #fff' }} />
               <div className="csr-noti-title" style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Notifications</div>
-              {hasUpdates ? <div>Update on your offers.</div> : <div className="csr-muted">No notifications yet</div>}
+              {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? <div className="csr-muted">No notifications yet</div> : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: 320, overflowY: 'auto' }}>
+                  {notifications.map(noti => (
+                    <li
+                      key={noti.id}
+                      style={{
+                        padding: '12px 0',
+                        borderBottom: '1px solid #e5e7eb',
+                        background: noti.read === 0 ? 'linear-gradient(90deg,#fef9c3 60%,#f3f4f6 100%)' : '#f3f4f6',
+                        cursor: 'pointer',
+                        borderRadius: 8,
+                        marginBottom: 2,
+                        boxShadow: noti.read === 0 ? '0 2px 8px #fef9c3' : 'none',
+                        transition: 'background 0.2s, box-shadow 0.2s',
+                        position: 'relative',
+                      }}
+                      title="Click to clear notification"
+                      onClick={async () => {
+                        try {
+                          await fetch(`http://localhost:3000/api/pin/notifications/${noti.id}`, { method: 'DELETE' });
+                          setNotifications(prev => prev.filter(n => n.id !== noti.id));
+                        } catch {
+                          alert('Failed to clear notification');
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, fontSize: '1.08rem', color: '#2563eb', marginBottom: 2 }}>
+                        {noti.type === 'accepted' ? `✅ Accepted by ${noti.pinUsername || 'PIN'}`
+                          : noti.type === 'rejected' ? `❌ Rejected by ${noti.pinUsername || 'PIN'}`
+                          : noti.type === 'feedback' ? '⭐ Feedback received'
+                          : noti.type}
+                      </div>
+                      <div style={{ fontSize: 15, color: '#334155', fontWeight: 500, marginBottom: 2 }}>Request: <span style={{ color: '#0ea5e9' }}>{noti.requestTitle || noti.pin_request_id}</span></div>
+                      <div style={{ fontSize: 13, color: '#64748b' }}>{noti.createdAt?.slice(0, 19).replace('T', ' ')}</div>
+                      <span style={{ position: 'absolute', top: 8, right: 12, color: '#ef4444', fontWeight: 700, fontSize: 18, cursor: 'pointer' }} title="Clear notification">×</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>
@@ -283,7 +366,6 @@ function CSRHeader() {
 function NavBar({ setPage }: { setPage: (page: string) => void }) {
   return (
     <nav className="csr-navbar">
-      <button onClick={() => setPage("dashboard")}>Dashboard</button>
       <button onClick={() => setPage("requests")}>Requests</button>
       <button onClick={() => setPage("shortlist")}>Shortlist</button>
       <button onClick={() => setPage("offers")}>Offers</button>
@@ -506,36 +588,8 @@ function CSRAvailableRequests() {
 
 // --- CSRDashboard ---
 function CSRDashboard() {
-  const [availableCount, setAvailableCount] = useState(0);
-  const [shortlistCount, setShortlistCount] = useState(0);
-  const navigate = useNavigate();
-  const loadData = async () => {
-    try {
-      // Use the same endpoint as CSRAvailableRequests for available requests
-      const reqRes = await fetch("http://localhost:3000/api/csr/pin_requests");
-      const reqJson = await reqRes.json();
-      setAvailableCount(reqJson.requests?.length ?? 0);
-      const id = localStorage.getItem("CSR_ID");
-      if (id) {
-        const shortRes = await fetch(`http://localhost:3000/api/csr/${id}/shortlist`);
-        const shortJson = await shortRes.json();
-        setShortlistCount(shortJson.shortlistedRequests?.length ?? 0);
-      }
-    } catch (e) {
-      console.error("Failed to load dashboard counts", e);
-    }
-  };
-  useEffect(() => { loadData(); }, []);
-  return (
-    <div className="csr-page">
-      <div className="csr-dash-summary">
-        <SummaryCard label="Available Requests" value={availableCount} onClick={() => navigate("/csr/requests")} />
-        <SummaryCard label="Shortlisted" value={shortlistCount} onClick={() => navigate("/csr/shortlist")} />
-        <SummaryCard label="Active Offers" value="0" />
-        <SummaryCard label="Completed Services" value="0" />
-      </div>
-    </div>
-  );
+  // CSRDashboard removed; CSR users are redirected to Requests page by default
+  return null;
 }
 
 // --- CSRHistory ---
@@ -926,17 +980,53 @@ function CSRShortlist() {
 // --- Main Combined CSRRep Page ---
 export default function CSRRepDashboard() {
   const [page, setPage] = useState("dashboard");
+  // Announcement modal state
+  const [latestAnnouncement, setLatestAnnouncement] = React.useState<{ message: string; createdAt: string } | null>(null);
+  const [showAnnouncementModal, setShowAnnouncementModal] = React.useState(false);
+  React.useEffect(() => {
+    fetch('http://localhost:3000/api/pm/announcements/latest')
+      .then(res => res.json())
+      .then(data => {
+        const latest = data?.latest ?? null;
+        setLatestAnnouncement(latest);
+        if (latest?.createdAt) {
+          const lastSeen = localStorage.getItem('latestAnnouncementSeenAt_csr');
+          if (lastSeen !== latest.createdAt) {
+            setShowAnnouncementModal(true);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
   return (
-    <div className="csr-wrap">
-      <CSRHeader />
-      <NavBar setPage={setPage} />
-      <main className="csr-content">
-        {page === "dashboard" && <CSRDashboard />}
-        {page === "requests" && <CSRAvailableRequests />}
-        {page === "shortlist" && <CSRShortlist />}
-        {page === "offers" && <CSROffers />}
-        {page === "history" && <CSRHistory />}
-      </main>
-    </div>
+    <>
+      {/* Latest Announcement Modal for CSR */}
+      {showAnnouncementModal && latestAnnouncement && (
+        <div className="modal" onClick={() => setShowAnnouncementModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+            <h3>Platform Announcement</h3>
+            <div style={{ marginBottom: 12, fontWeight: 600 }}>{latestAnnouncement.message}</div>
+            <div style={{ color: '#64748b', fontSize: 13, marginBottom: 18 }}>Posted: {latestAnnouncement.createdAt.slice(0, 10)}</div>
+            <button className="button primary" style={{ background: '#2563eb', color: '#fff' }}
+              onClick={() => {
+                setShowAnnouncementModal(false);
+                localStorage.setItem('latestAnnouncementSeenAt_csr', latestAnnouncement.createdAt);
+              }}
+            >Dismiss</button>
+          </div>
+        </div>
+      )}
+      <div className="csr-wrap">
+        <CSRHeader />
+        <NavBar setPage={setPage} />
+        <main className="csr-content">
+          {page === "dashboard" && <CSRDashboard />}
+          {page === "requests" && <CSRAvailableRequests />}
+          {page === "shortlist" && <CSRShortlist />}
+          {page === "offers" && <CSROffers />}
+          {page === "history" && <CSRHistory />}
+        </main>
+      </div>
+    </>
   );
 }
