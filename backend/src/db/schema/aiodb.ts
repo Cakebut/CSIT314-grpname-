@@ -153,3 +153,18 @@ export const feedbackTable = pgTable(
         createdAt: timestamp().notNull().defaultNow(),
     }
 );
+// Place this at the end of the file to avoid identifier conflicts
+export const passwordResetRequestsTable = pgTable(
+  'password_reset_requests',
+  {
+    id: serial().primaryKey(),
+    user_id: integer().notNull().references(() => useraccountTable.id),
+    new_password: varchar({ length: 64 }).notNull(), // Should be hashed
+    status: varchar({ length: 16 }).notNull().default('Pending'), // Pending, Approved, Rejected
+    requested_at: timestamp().notNull().defaultNow(),
+    reviewed_at: timestamp(),
+    reviewed_by: integer().references(() => useraccountTable.id), // Admin user id
+    rejection_reason: text(),
+  },
+  table => [ uniqueIndex().on(table.user_id, table.status) ]
+);

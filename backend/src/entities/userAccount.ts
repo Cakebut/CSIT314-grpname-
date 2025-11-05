@@ -1,9 +1,10 @@
 // User Entity Class
-import { useraccountTable, roleTable } from "../db/schema/aiodb";
+import { useraccountTable, roleTable, passwordResetRequestsTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
 import { db } from "../db/client";
 import { useraccountData } from "../shared/dataClasses";
+ 
 
 export class UserEntity {
 
@@ -259,5 +260,74 @@ public async deleteUser(id: number): Promise<boolean> {
     const csvData = [headers.join(','), ...rows.map(r => r.map(escapeCsv).join(','))].join('\n');
     return csvData;
 }
+
+// Password Reset Request Entity Methods
+  // Create a new password reset request
+  async createPasswordResetRequest(userId: number, newPassword: string) {
+    try {
+      const [request] = await db.insert(passwordResetRequestsTable).values({
+        user_id: userId,
+        new_password: newPassword, // Store as plain text for now
+        status: "Pending",
+        requested_at: new Date(),
+      }).returning();
+      return request;
+    } catch (err) {
+      console.error("Create password reset request error:", err);
+      return null;
+    }
+  }
+
+  // Fetch all password reset requests (for admin dashboard)
+  async getPasswordResetRequests(status?: string) {
+    try {
+      let requests;
+      if (status) {
+        requests = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.status, status));
+      } else {
+        requests = await db.select().from(passwordResetRequestsTable);
+      }
+      return requests;
+    } catch (err) {
+      console.error("Fetch password reset requests error:", err);
+      return [];
+    }
+  }
+
+  // Approve a password reset request
+  async approvePasswordResetRequest(requestId: number, adminId: number) {
+    try {
+      // 1. Get the request
+      const [request] = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.id, requestId)).limit(1);
+      if (!request || request.status !== "Pending") return false;
+      // 2. Update user's password
+      await db.update(useraccountTable)
+        .set({ password: request.new_password })
+        .where(eq(useraccountTable.id, request.user_id));
+      // 3. Update request status
+      await db.update(passwordResetRequestsTable)
+        .set({ status: "Approved", reviewed_at: new Date(), reviewed_by: adminId })
+        .where(eq(passwordResetRequestsTable.id, requestId));
+      // 4. Optionally log to audit table (not shown)
+      return true;
+    } catch (err) {
+      console.error("Approve password reset request error:", err);
+      return false;
+    }
+  }
+
+  // Reject a password reset request
+  async rejectPasswordResetRequest(requestId: number, adminId: number, reason?: string) {
+    try {
+      await db.update(passwordResetRequestsTable)
+        .set({ status: "Rejected", reviewed_at: new Date(), reviewed_by: adminId, rejection_reason: reason })
+        .where(eq(passwordResetRequestsTable.id, requestId));
+      // Optionally log to audit table (not shown)
+      return true;
+    } catch (err) {
+      console.error("Reject password reset request error:", err);
+      return false;
+    }
+  }
 }
 
