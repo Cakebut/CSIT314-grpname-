@@ -1,17 +1,19 @@
-import { createAuditLog, fetchAuditLogs,clearAuditLogs,exportAuditLogsCSV } from "../entities/auditLog";
+import {AuditLogs} from "../entities/auditLog";
 
 
 export class AuditLogController {
+  private auditLogsEntity = new AuditLogs();  
+
   async exportAuditLogsCSV(limit?: number) {
     // Call entity function to get CSV string
-    return await exportAuditLogsCSV(limit);
+    return await this.auditLogsEntity.AuditLogsCSV(limit);
   }
   async createAuditLog(actor: string, action: string, target: string, details?: string) {
     try {
       if (details !== undefined) {
-        return await createAuditLog({ actor, action, target, details });
+        return await this.auditLogsEntity.createAuditLog({ actor, action, target, details });
       } else {
-        return await createAuditLog({ actor, action, target });
+        return await this.auditLogsEntity.createAuditLog({ actor, action, target });
       }
     } catch (error) {
       console.error("Error creating audit log:", error);
@@ -20,10 +22,10 @@ export class AuditLogController {
   }
 
   async fetchAuditLogs(limit?: number) {
-    return await fetchAuditLogs(limit);
+    return await this.auditLogsEntity.fetchAuditLogs(limit);
   }
 
   async clearAuditLogs() {
-    return await clearAuditLogs();
+    return await this.auditLogsEntity.clearAuditLogs();
   }
 }

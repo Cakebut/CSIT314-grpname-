@@ -2,11 +2,11 @@ import { db } from "../db/client";
 import { auditLogTable } from "../db/schema/aiodb";
 import { desc } from "drizzle-orm";
 
+export class AuditLogs {
 
-
-// Export audit logs as CSV
-export async function exportAuditLogsCSV(limit?: number): Promise<string> {
-  const logs = await fetchAuditLogs(limit);
+// public audit logs as CSV
+public async  AuditLogsCSV(limit?: number): Promise<string> {
+  const logs = await this.fetchAuditLogs(limit);
   const headers = ['id', 'actor', 'action', 'target', 'timestamp', 'details'];
   function escapeCsv(val: any) {
     if (val == null) return '';
@@ -28,8 +28,11 @@ export async function exportAuditLogsCSV(limit?: number): Promise<string> {
   return csvData;
 }
 
+
+
+
 //Crate audit log entry
-export async function createAuditLog({ actor, action, target, details }: {
+public async  createAuditLog({ actor, action, target, details }: {
   actor: string;
   action: string;
   target: string;
@@ -45,7 +48,7 @@ export async function createAuditLog({ actor, action, target, details }: {
 }
 
 //Fetch audit logs with optional limit
-export async function fetchAuditLogs(limit?: number) {
+public async  fetchAuditLogs(limit?: number) {
   let query = db.select().from(auditLogTable).orderBy(desc(auditLogTable.timestamp));
   if (limit && limit > 0) {
     // drizzle-orm chaining: .orderBy(...).limit(...)
@@ -54,6 +57,8 @@ export async function fetchAuditLogs(limit?: number) {
   return await query;
 }
 
-export async function clearAuditLogs() {
+public async  clearAuditLogs() {
   await db.delete(auditLogTable);
+}
+
 }
