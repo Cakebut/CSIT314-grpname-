@@ -187,7 +187,7 @@ router.delete("/users/:id", async (req: Request, res: Response) => {
 router.get("/userAdmin/users/export", async (req: Request, res: Response) => {
   try {
     const actor = req.session?.username || "unknown";
-    const csv = await exportUserAccountController.exportUserAccountsCSV(actor);
+    const csv = await exportUserAccountController.exportUserAccountsCSV();
     // Audit log for export action
     try {
       await auditLogController.createAuditLog(

@@ -104,8 +104,8 @@ export class SearchUserController {
 // Export user accounts as CSV
 export class ExportUserAccountController {
   private userAccount = new UserEntity();
-  public async exportUserAccountsCSV(actor: string) {
-    return await this.userAccount.exportUserAccountsCSV(actor);
+  public async exportUserAccountsCSV() {
+    return await this.userAccount.exportUserAccountsCSV();
   }
 }
 

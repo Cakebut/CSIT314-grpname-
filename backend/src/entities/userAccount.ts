@@ -240,7 +240,7 @@ public async deleteUser(id: number): Promise<boolean> {
   }
 
   // Export all user accounts as CSV
-  async exportUserAccountsCSV(actor: string): Promise<string> {
+  async exportUserAccountsCSV(): Promise<string> {
     const users = await new UserEntity().getAllUserAccounts();
     const headers = ['ID', 'Username', 'Role', 'Status'];
     function escapeCsv(val: any) {
