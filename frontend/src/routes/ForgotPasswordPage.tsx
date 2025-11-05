@@ -34,11 +34,25 @@ export default function ForgotPasswordPage() {
       return;
     }
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1200);
+    try {
+      // Call backend to submit password reset request
+      const res = await fetch('/api/userAdmin/password-reset-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+       
+        body: JSON.stringify({ username, newPassword }),
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setSubmitted(true);
+        toast.success("Password reset request submitted!");
+      } else {
+        toast.error("Failed to submit request.");
+      }
+    } catch  {
+      toast.error("Error submitting request.");
+    }
+    setLoading(false);
   };
 
   if (submitted) {
@@ -52,7 +66,7 @@ export default function ForgotPasswordPage() {
             <li>✔ Request is pending approval from the administrator</li>
             <li>✔ You will receive confirmation once approved</li>
           </ul>
-          <button className="back-login-btn" onClick={() => navigate("/login")}>Back to Login</button>
+          <button className="back-login-btn" onClick={() => navigate("/")}>Back to Login</button>
           <div className="request-note">This usually takes 1-2 business days</div>
         </div>
       </div>

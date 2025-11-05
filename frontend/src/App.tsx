@@ -12,7 +12,7 @@ import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
 import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
 import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
 import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
-
+import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboard';
 
 
 //Person In Need
@@ -49,7 +49,9 @@ function App() {
           <Route path="/useradmin/ViewUserRoles" element={<ViewUserRolesPage />} />
           <Route path="/useradmin/create" element={<CreateNewUserAccountPage />} />
           <Route path="/useradmin/SystemLog" element={<UserAdminSystemLogPage />} />
+          <Route path="/useradmin/PasswordResetRequests" element={<AdminPasswordResetDashboard />} />
 
+          
           {/* Person In Need */}
           <Route path="/PIN" element={<PersonInNeedDashboard />} />
           

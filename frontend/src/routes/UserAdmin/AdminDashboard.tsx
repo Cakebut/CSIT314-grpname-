@@ -78,6 +78,9 @@ function AdminDashboard() {
           <div className="bubble" onClick={() => navigate('/useradmin/SystemLog')}>
             View System Log
           </div>
+          <div className="bubble" onClick={() => navigate('/useradmin/PasswordResetRequests')}>
+            View Password Reset Dashboard
+          </div>
           <div className="bubble logout-bubble" onClick={handleLogout}>
             Logout
           </div>

@@ -7,7 +7,7 @@ import { sql, eq, and } from "drizzle-orm"; // Add this import
 
 //Controllers
 import { LoginController  } from "../controller/sharedControllers";
-import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController ,ExportUserAccountController} from "../controller/UserAdminControllers";
+import { ViewUserAccountController, UpdateUserController ,RoleController, CreateUserController, SearchUserController ,ExportUserAccountController, PasswordResetRequestController} from "../controller/UserAdminControllers";
 import { AuditLogController } from "../controller/AuditLogController";
  
 
@@ -21,6 +21,7 @@ const roleController = new RoleController();
 const searchUserController = new SearchUserController();
 const auditLogController = new AuditLogController();
 const exportUserAccountController = new ExportUserAccountController();
+const passwordResetRequestController = new PasswordResetRequestController();
 
  
 
@@ -371,6 +372,57 @@ router.get("/userAdmin/audit-log/export", async (req: Request, res: Response) =>
     res.send(csv);
   } catch (err) {
     res.status(500).json({ error: "Failed to export audit logs as CSV" });
+  }
+});
+
+// Password Reset Request Routes
+// User submits a password reset request
+router.post("/userAdmin/password-reset-request", async (req: Request, res: Response) => {
+  const { username, newPassword } = req.body;
+  if (!username || !newPassword) {
+    return res.status(400).json({ success: false, error: "Missing required fields" });
+  }
+  // Use controller to handle user lookup and request creation
+  const result = await passwordResetRequestController.submitPasswordResetRequest(username, newPassword);
+  if (result && result.success) {
+    return res.status(200).json({ success: true, request: result.request });
+  } else {
+    return res.status(result?.status || 500).json({ success: false, error: result?.error || "Failed to submit request" });
+  }
+});
+
+// Admin fetches all password reset requests
+router.get("/userAdmin/password-reset-requests", async (req: Request, res: Response) => {
+  const { status } = req.query;
+  const requests = await passwordResetRequestController.getPasswordResetRequests(status as string);
+  return res.status(200).json({ success: true, requests });
+});
+
+// Admin approves a password reset request
+router.post("/userAdmin/password-reset-approve", async (req: Request, res: Response) => {
+  const { requestId, adminId, adminName,note } = req.body;
+  if (!requestId || !adminId || !adminName|| !note) {
+    return res.status(400).json({ success: false, error: "Missing required fields" });
+  }
+  const result = await passwordResetRequestController.approvePasswordResetRequest(requestId, adminId,adminName,note);
+  if (result) {
+    return res.status(200).json({ success: true });
+  } else {
+    return res.status(500).json({ success: false, error: "Failed to approve request" });
+  }
+});
+
+// Admin rejects a password reset request
+router.post("/userAdmin/password-reset-reject", async (req: Request, res: Response) => {
+  const { requestId, adminId, adminName,note } = req.body;
+  if (!requestId || !adminId || !adminName|| !note) {
+    return res.status(400).json({ success: false, error: "Missing required fields" });
+  }
+  const result = await passwordResetRequestController.rejectPasswordResetRequest(requestId, adminId, adminName, note);
+  if (result) {
+    return res.status(200).json({ success: true });
+  } else {
+    return res.status(500).json({ success: false, error: "Failed to reject request" });
   }
 });
 

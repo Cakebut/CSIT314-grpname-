@@ -261,12 +261,16 @@ public async deleteUser(id: number): Promise<boolean> {
     return csvData;
 }
 
+
+
+//==================================================
 // Password Reset Request Entity Methods
   // Create a new password reset request
-  async createPasswordResetRequest(userId: number, newPassword: string) {
+  async createPasswordResetRequest(userId: number, username: string, newPassword: string) {
     try {
       const [request] = await db.insert(passwordResetRequestsTable).values({
         user_id: userId,
+        username: username, // Store username in table
         new_password: newPassword, // Store as plain text for now
         status: "Pending",
         requested_at: new Date(),
@@ -283,11 +287,52 @@ public async deleteUser(id: number): Promise<boolean> {
     try {
       let requests;
       if (status) {
-        requests = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.status, status));
+        requests = await db
+          .select({
+            id: passwordResetRequestsTable.id,
+            user_id: passwordResetRequestsTable.user_id,
+            username: passwordResetRequestsTable.username,
+            new_password: passwordResetRequestsTable.new_password,
+            status: passwordResetRequestsTable.status,
+            requested_at: passwordResetRequestsTable.requested_at,
+            reviewed_at: passwordResetRequestsTable.reviewed_at,
+            reviewed_by: passwordResetRequestsTable.reviewed_by,
+            admin_note: passwordResetRequestsTable.admin_note,
+            user_role: roleTable.label,
+            account_status: useraccountTable.issuspended,
+            admin_name: passwordResetRequestsTable.admin_name,
+          
+          })
+          .from(passwordResetRequestsTable)
+          .leftJoin(useraccountTable, eq(passwordResetRequestsTable.user_id, useraccountTable.id))
+          .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id))
+          .where(eq(passwordResetRequestsTable.status, status));
       } else {
-        requests = await db.select().from(passwordResetRequestsTable);
+        requests = await db
+          .select({
+            id: passwordResetRequestsTable.id,
+            user_id: passwordResetRequestsTable.user_id,
+            username: passwordResetRequestsTable.username,
+            new_password: passwordResetRequestsTable.new_password,
+            status: passwordResetRequestsTable.status,
+            requested_at: passwordResetRequestsTable.requested_at,
+            reviewed_at: passwordResetRequestsTable.reviewed_at,
+            reviewed_by: passwordResetRequestsTable.reviewed_by,
+            admin_note: passwordResetRequestsTable.admin_note,
+            user_role: roleTable.label,
+            account_status: useraccountTable.issuspended,
+            admin_name: passwordResetRequestsTable.admin_name,
+          })
+          .from(passwordResetRequestsTable)
+          .leftJoin(useraccountTable, eq(passwordResetRequestsTable.user_id, useraccountTable.id))
+          .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id));
       }
-      return requests;
+      // Map account_status to 'Active'/'Suspended' for frontend clarity
+      return requests.map(r => ({
+        ...r,
+        account_status: r.account_status ? 'Suspended' : 'Active',
+        user_role: r.user_role || '',
+      }));
     } catch (err) {
       console.error("Fetch password reset requests error:", err);
       return [];
@@ -295,7 +340,7 @@ public async deleteUser(id: number): Promise<boolean> {
   }
 
   // Approve a password reset request
-  async approvePasswordResetRequest(requestId: number, adminId: number) {
+  async approvePasswordResetRequest(requestId: number, adminId: number, adminName: string, note: string) {
     try {
       // 1. Get the request
       const [request] = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.id, requestId)).limit(1);
@@ -306,7 +351,7 @@ public async deleteUser(id: number): Promise<boolean> {
         .where(eq(useraccountTable.id, request.user_id));
       // 3. Update request status
       await db.update(passwordResetRequestsTable)
-        .set({ status: "Approved", reviewed_at: new Date(), reviewed_by: adminId })
+        .set({ status: "Approved", reviewed_at: new Date(), reviewed_by: adminId, admin_name: adminName, admin_note: note })
         .where(eq(passwordResetRequestsTable.id, requestId));
       // 4. Optionally log to audit table (not shown)
       return true;
@@ -317,10 +362,10 @@ public async deleteUser(id: number): Promise<boolean> {
   }
 
   // Reject a password reset request
-  async rejectPasswordResetRequest(requestId: number, adminId: number, reason?: string) {
+  async rejectPasswordResetRequest(requestId: number, adminId: number, adminName: string, note: string) {
     try {
       await db.update(passwordResetRequestsTable)
-        .set({ status: "Rejected", reviewed_at: new Date(), reviewed_by: adminId, rejection_reason: reason })
+        .set({ status: "Rejected", reviewed_at: new Date(), reviewed_by: adminId, admin_note: note, admin_name: adminName })
         .where(eq(passwordResetRequestsTable.id, requestId));
       // Optionally log to audit table (not shown)
       return true;

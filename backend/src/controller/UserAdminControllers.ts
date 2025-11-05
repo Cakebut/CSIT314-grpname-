@@ -1,4 +1,8 @@
 import { UserEntity } from "../entities/userAccount";
+import { db } from "../db/client";
+import { useraccountTable } from "../db/schema/aiodb";
+import { eq } from "drizzle-orm";
+
 export class ViewUserAccountController {
     private userAccount : UserEntity;
 
@@ -106,6 +110,42 @@ export class ExportUserAccountController {
   private userAccount = new UserEntity();
   public async exportUserAccountsCSV() {
     return await this.userAccount.exportUserAccountsCSV();
+  }
+}
+
+// Password Reset Request Controller
+export class PasswordResetRequestController {
+  private userEntity = new UserEntity();
+
+  // User submits a password reset request (accepts username)
+  public async submitPasswordResetRequest(username: string, newPassword: string) {
+    // Look up userId from username
+    const user = await db.select().from(useraccountTable).where(eq(useraccountTable.username, username)).limit(1);
+    if (!user || user.length === 0) {
+      return { success: false, status: 404, error: "User not found" };
+    }
+    const userId = user[0].id;
+    const request = await this.userEntity.createPasswordResetRequest(userId, username, newPassword);
+    if (request) {
+      return { success: true, status: 200, request };
+    } else {
+      return { success: false, status: 500, error: "Failed to submit request" };
+    }
+  }
+
+  // Admin fetches all password reset requests (optionally filter by status)
+  public async getPasswordResetRequests(status?: string) {
+    return await this.userEntity.getPasswordResetRequests(status);
+  }
+
+  // Admin approves a password reset request
+  public async approvePasswordResetRequest(requestId: number, adminId: number,  adminName: string, note: string) {
+    return await this.userEntity.approvePasswordResetRequest(requestId, adminId, adminName, note);
+  }
+
+  // Admin rejects a password reset request
+  public async rejectPasswordResetRequest(requestId: number, adminId: number,  adminName: string, note: string) {
+    return await this.userEntity.rejectPasswordResetRequest(requestId, adminId, adminName, note);
   }
 }
 
