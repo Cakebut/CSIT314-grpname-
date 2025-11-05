@@ -171,11 +171,11 @@ export class CSRRepEntity {
 
 						// Fetch feedback for these requests and this CSR
 						const feedbacks = await db.select().from(feedbackTable)
-							.where(inArray(feedbackTable.request_id, pinRequestIds));
+							.where(inArray(feedbackTable.requestId, pinRequestIds));
 						// Map feedback by requestId and pinId
 						const feedbackMap: Record<string, any> = {};
 						for (const fb of feedbacks) {
-							feedbackMap[`${fb.request_id}_${csrId}_${fb.pin_id}`] = fb;
+							feedbackMap[`${fb.requestId}_${csrId}_${fb.pin_id}`] = fb;
 						}
 
 						const serviceTypes = Object.fromEntries(

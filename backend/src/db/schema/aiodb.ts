@@ -1,6 +1,3 @@
-
-
-
 import { serial, pgTable, varchar, uniqueIndex, boolean, integer, text, timestamp } from 'drizzle-orm/pg-core';
 
  
@@ -150,7 +147,7 @@ export const feedbackTable = pgTable(
         id: serial().primaryKey(),
         pin_id: integer().notNull().references(() => useraccountTable.id), // PIN user
         csr_id: integer().notNull().references(() => useraccountTable.id), // CSR
-        request_id: integer().notNull().references(() => pin_requestsTable.id),
+        requestId: integer().notNull().references(() => pin_requestsTable.id),
         rating: integer().notNull(), // 1-5
         description: text(), // optional
         createdAt: timestamp().notNull().defaultNow(),

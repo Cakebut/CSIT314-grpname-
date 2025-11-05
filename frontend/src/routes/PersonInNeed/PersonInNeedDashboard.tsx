@@ -72,6 +72,16 @@ const PersonInNeedDashboard: React.FC = () => {
   const [editUrgencyLevelID, setEditUrgencyLevelID] = useState("");
   const [editStatusMsg, setEditStatusMsg] = useState("");
   const [selected, setSelected] = useState<Request | null>(null);
+  // Feedback modal state
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackRequestId, setFeedbackRequestId] = useState<number | null>(null);
+  const [feedbackCsrId, setFeedbackCsrId] = useState<number | null>(null);
+  const [feedbackCsrUsername, setFeedbackCsrUsername] = useState<string>('');
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState<number>(0);
+
+
   const [showMyRequests, setShowMyRequests] = useState(false);
   const [myRequests, setMyRequests] = useState<Request[]>([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -338,26 +348,75 @@ const PersonInNeedDashboard: React.FC = () => {
     }
   };
 
+  // Open feedback modal for a completed offer
+  function openFeedbackModal(requestId: number, csrId: number, csrUsername?: string) {
+    setShowMyOffers(false); // Close My Offers modal first
+    setFeedbackRequestId(requestId);
+    setFeedbackCsrId(csrId);
+    setFeedbackCsrUsername(csrUsername || 'CSR');
+    setFeedbackText('');
+    setShowFeedbackModal(true);
+  }
 
+  // Reset feedback modal state
+  function handleCancelFeedback() {
+    setShowFeedbackModal(false);
+    setFeedbackRequestId(null);
+    setFeedbackCsrId(null);
+    setFeedbackCsrUsername('');
+    setFeedbackText('');
+    setFeedbackRating(0);
+  }
+
+  // Submit feedback to backend
+  async function handleSubmitFeedback() {
+    if (!feedbackRequestId || !feedbackCsrId || feedbackRating === 0) return;
+    setFeedbackLoading(true);
+    const createdAt = new Date().toISOString();
+    try {
+      const res = await fetch(`${API_BASE}/api/pin/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: feedbackRequestId,
+          csrId: feedbackCsrId,
+          pinId: userId,
+          rating: feedbackRating,
+          description: feedbackText,
+          createdAt,
+        }),
+      });
+      if (res.ok) {
+        toast.success('Feedback submitted!');
+        handleCancelFeedback();
+      } else {
+        toast.error('Failed to submit feedback.');
+      }
+    } catch {
+      toast.error('Failed to submit feedback.');
+    }
+    setFeedbackLoading(false);
+  }
 
   return (
-  <>
-
-      {latestAnnouncement && showAnnouncementModal && (
-        <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, left: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-          <div style={{ background: "#fff", borderRadius: 14, padding: "20px 24px", width: "min(640px, 92vw)", boxShadow: "0 12px 32px rgba(0,0,0,0.25)" }}>
-            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Announcement</div>
-            <div style={{ whiteSpace: "pre-wrap", color: "#111827" }}>{latestAnnouncement.message}</div>
-            <div style={{ color: "#6b7280", fontSize: 12, marginTop: 6 }}>at {new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-              <button className="button" onClick={() => { localStorage.setItem("latestAnnouncementSeenAt", latestAnnouncement!.createdAt); setShowAnnouncementModal(false); }} style={{ background: "#2563eb", color: "#fff" }}>Close</button>
-            </div>
+    <>
+      {/* Latest Announcement Modal */}
+      {showAnnouncementModal && latestAnnouncement && (
+        <div className="modal" onClick={() => setShowAnnouncementModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+            <h3>Platform Announcement</h3>
+            <div style={{ marginBottom: 12, fontWeight: 600 }}>{latestAnnouncement.message}</div>
+            <div style={{ color: '#64748b', fontSize: 13, marginBottom: 18 }}>Posted: {latestAnnouncement.createdAt.slice(0, 10)}</div>
+            <button className="button primary" style={{ background: '#2563eb', color: '#fff' }}
+              onClick={() => {
+                setShowAnnouncementModal(false);
+                localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement.createdAt);
+              }}
+            >Dismiss</button>
           </div>
         </div>
       )}
-
-
-    <div className="container">
+      <div className="container">
       {/* Notification Button and Popover */}
       <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
         <button
@@ -471,6 +530,14 @@ const PersonInNeedDashboard: React.FC = () => {
                                     }}
                                   >Mark Completed</button>
                                 )}
+                                {/* Feedback button for completed offers, only for assigned CSR */}
+                                {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
+                                  <button
+                                    className="button"
+                                    style={{ backgroundColor: '#2563eb', color: 'white', marginLeft: 8 }}
+                                    onClick={() => openFeedbackModal(offer.requestId, csr.csr_id, csr.username)}
+                                  >Feedback</button>
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -482,6 +549,43 @@ const PersonInNeedDashboard: React.FC = () => {
               </table>
             )}
             <button className="button" onClick={() => setShowMyOffers(false)} style={{ marginTop: 16 }}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Modal - always rendered at root, independent of My Offers */}
+      {showFeedbackModal && (
+        <div className="modal" onClick={handleCancelFeedback}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+            <h3>Give Feedback to {feedbackCsrUsername}</h3>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontWeight: 600 }}>Rating:</label>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                {[1,2,3,4,5].map(star => (
+                  <span
+                    key={star}
+                    style={{ cursor: 'pointer', fontSize: 28, color: feedbackRating >= star ? '#f59e42' : '#e5e7eb' }}
+                    onClick={() => setFeedbackRating(star)}
+                    title={`${star} Star${star > 1 ? 's' : ''}`}
+                  >★</span>
+                ))}
+              </div>
+            </div>
+            <label style={{ fontWeight: 600 }}>Description (optional):</label>
+            <textarea
+              value={feedbackText}
+              onChange={e => setFeedbackText(e.target.value)}
+              rows={4}
+              style={{ width: '100%', marginBottom: 16, fontSize: 16, padding: 8, borderRadius: 8, border: '1px solid #e5e7eb' }}
+              placeholder="Enter your feedback here..."
+              disabled={feedbackLoading}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+              <button className="button" onClick={handleCancelFeedback} disabled={feedbackLoading}>Cancel</button>
+              <button className="button primary" style={{ background: '#2563eb', color: '#fff' }} onClick={handleSubmitFeedback} disabled={feedbackLoading || feedbackRating === 0}>
+                {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { eq } from 'drizzle-orm';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
+import { FeedbackController } from '../controller/FeedbackController';
 import { db } from "../db/client";
 import { urgency_levelTable, locationTable ,service_typeTable} from "../db/schema/aiodb";
 
@@ -252,3 +253,6 @@ router.post('/offers/:requestId/complete', async (req, res) => {
     return res.status(500).json({ success: false, error: 'Failed to mark request completed' });
   }
 });
+
+// Submit feedback
+router.post('/feedback', FeedbackController.addFeedback);
