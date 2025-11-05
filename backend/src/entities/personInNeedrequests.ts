@@ -230,10 +230,10 @@ export class PinRequestEntity {
     return (result.rowCount ?? 0) > 0;
   }
   /**
-   * Returns all requests as CSV string for download.
+   * Returns all requests for a specific PIN user as CSV string for download.
    */
-  static async getRequestsHistoryCSV(): Promise<string> {
-    // Get all requests with joined info
+  static async getRequestsHistoryCSVByPinId(pin_id: number): Promise<string> {
+    // Get all requests for this PIN user with joined info
     const requests = await db
       .select({
         id: pin_requestsTable.id,
@@ -257,7 +257,8 @@ export class PinRequestEntity {
       .leftJoin(useraccountTable, eq(pin_requestsTable.pin_id, useraccountTable.id))
       .leftJoin(service_typeTable, eq(pin_requestsTable.categoryID, service_typeTable.id))
       .leftJoin(locationTable, eq(pin_requestsTable.locationID, locationTable.id))
-      .leftJoin(urgency_levelTable, eq(pin_requestsTable.urgencyLevelID, urgency_levelTable.id));
+      .leftJoin(urgency_levelTable, eq(pin_requestsTable.urgencyLevelID, urgency_levelTable.id))
+      .where(eq(pin_requestsTable.pin_id, pin_id));
 
     // Convert to CSV with formatted date, custom id, and filtered columns
     if (!requests.length) return '';

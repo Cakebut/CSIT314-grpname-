@@ -164,8 +164,12 @@ export default router;
 
 // Download CSV history for a PIN user (BCE: router -> controller -> entity)
 router.get('/requests/history', async (req, res) => {
+	const pin_id = Number(req.query.pin_id);
+	if (!pin_id) {
+		return res.status(400).json({ success: false, error: 'Missing pin_id' });
+	}
 	try {
-		const csv = await controller.getRequestsHistoryCSV();
+		const csv = await controller.getRequestsHistoryCSVByPinId(pin_id);
 		res.setHeader('Content-Type', 'text/csv');
 		res.setHeader('Content-Disposition', 'attachment; filename="service-history.csv"');
 		return res.send(csv);

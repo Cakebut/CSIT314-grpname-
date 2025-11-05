@@ -44,9 +44,9 @@ export class PersonInNeedControllers {
   async deleteNotification(id: number) {
     await db.delete(notificationTable).where(eq(notificationTable.id, id));
   }
-  // Download CSV history for a PIN user (BCE: controller -> entity)
-  async getRequestsHistoryCSV(): Promise<string> {
-    return await PinRequestEntity.getRequestsHistoryCSV();
+  // Download CSV history for a specific PIN user
+  async getRequestsHistoryCSVByPinId(pin_id: number): Promise<string> {
+    return await PinRequestEntity.getRequestsHistoryCSVByPinId(pin_id);
   }
   async incrementViewCount(requestId: number): Promise<void> {
     await PinRequestEntity.incrementViewCount(requestId);

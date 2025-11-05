@@ -322,7 +322,7 @@ const PersonInNeedDashboard: React.FC = () => {
     // Download handler for past service history
   const handleDownloadHistory = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/pin/requests/history?userId=${userId}`);
+      const res = await fetch(`${API_BASE}/api/pin/requests/history?pin_id=${userId}`);
       if (!res.ok) throw new Error('Failed to download history');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
