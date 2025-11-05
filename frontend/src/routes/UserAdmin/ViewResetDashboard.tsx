@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ViewResetDashboard.css";
 import { toast } from 'react-toastify';
 
@@ -36,6 +37,8 @@ async function postData(url: string, data: object) {
 }
 
 export default function AdminPasswordResetDashboard() {
+   
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<PasswordResetRequest[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -115,8 +118,21 @@ export default function AdminPasswordResetDashboard() {
     fetchRequests();
   }
 
+
+  // Clear all password reset requests
+  async function handleClearLogs() {
+    const res = await postData("/api/userAdmin/password-reset-clear", {});
+    if (res.ok) {
+      toast.success("All password reset requests cleared.");
+      fetchRequests();
+    } else {
+      toast.error("Failed to clear logs.");
+    }
+  }
+
   return (
     <div className="password-reset-dashboard">
+                    <button className="dashboard-btn" onClick={() => navigate('/useradmin/')}>Return to Dashboard</button>
       <h2>Password Change Requests</h2>
       <p>Review and manage user password change requests</p>
       <div className="dashboard-controls">
@@ -133,6 +149,7 @@ export default function AdminPasswordResetDashboard() {
           <option value="Rejected">Rejected</option>
         </select>
         <button onClick={() => { setSearch(""); setStatusFilter(""); }}>Reset</button>
+        <button className="clear-logs-btn" onClick={handleClearLogs}>Clear Logs</button>
         <div className="pending-count">
           <span>🕒 {requests.filter(r => r.status === "Pending").length} Pending</span>
         </div>
@@ -221,6 +238,7 @@ export default function AdminPasswordResetDashboard() {
               </div>
             )}
             <div className="modal-actions">
+ 
               {selectedRequest.status === "Pending" ? (
                 <>
                   <button className="reject-btn" onClick={() => handleReject(selectedRequest)}>Reject Request</button>

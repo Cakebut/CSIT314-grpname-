@@ -1,5 +1,5 @@
 // User Entity Class
-import { useraccountTable, roleTable, passwordResetRequestsTable } from "../db/schema/aiodb";
+import { useraccountTable, roleTable, passwordResetRequestsTable, auditLogTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
 import { db } from "../db/client";
@@ -7,6 +7,7 @@ import { useraccountData } from "../shared/dataClasses";
  
 
 export class UserEntity {
+   
 
  
 
@@ -353,7 +354,14 @@ public async deleteUser(id: number): Promise<boolean> {
       await db.update(passwordResetRequestsTable)
         .set({ status: "Approved", reviewed_at: new Date(), reviewed_by: adminId, admin_name: adminName, admin_note: note })
         .where(eq(passwordResetRequestsTable.id, requestId));
-      // 4. Optionally log to audit table (not shown)
+      // 4. Log to audit table
+      await db.insert(auditLogTable).values({
+        actor: adminName,
+        action: "Approve Password Reset",
+        target: request.username,
+        details: note, //`RequestId:${requestId}, Note:${note}`,
+        timestamp: new Date(),
+      });
       return true;
     } catch (err) {
       console.error("Approve password reset request error:", err);
@@ -367,10 +375,31 @@ public async deleteUser(id: number): Promise<boolean> {
       await db.update(passwordResetRequestsTable)
         .set({ status: "Rejected", reviewed_at: new Date(), reviewed_by: adminId, admin_note: note, admin_name: adminName })
         .where(eq(passwordResetRequestsTable.id, requestId));
-      // Optionally log to audit table (not shown)
+      // Log to audit table
+      // Get the request to fetch username
+      const [request] = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.id, requestId)).limit(1);
+      await db.insert(auditLogTable).values({
+        actor: adminName,
+        action: "Reject Password Reset",
+        target: request.username,
+        details: note, //`RequestId:${requestId}, Note:${note}`,
+        timestamp: new Date(),
+      });
       return true;
     } catch (err) {
       console.error("Reject password reset request error:", err);
+      return false;
+    }
+  }
+
+
+  // Clear all password reset requests
+  async clearAllPasswordResetRequests(): Promise<boolean> {
+    try {
+      await db.delete(passwordResetRequestsTable);
+      return true;
+    } catch (err) {
+      console.error("Clear all password reset requests error:", err);
       return false;
     }
   }

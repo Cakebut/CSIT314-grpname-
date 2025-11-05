@@ -1,3 +1,4 @@
+ 
 import { UserEntity } from "../entities/userAccount";
 import { db } from "../db/client";
 import { useraccountTable } from "../db/schema/aiodb";
@@ -115,6 +116,11 @@ export class ExportUserAccountController {
 
 // Password Reset Request Controller
 export class PasswordResetRequestController {
+  
+  // Clear all password reset requests
+  public async clearAllPasswordResetRequests() {
+    return await this.userEntity.clearAllPasswordResetRequests();
+  }
   private userEntity = new UserEntity();
 
   // User submits a password reset request (accepts username)

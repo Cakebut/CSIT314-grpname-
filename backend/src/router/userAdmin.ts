@@ -13,6 +13,7 @@ import { AuditLogController } from "../controller/AuditLogController";
 
 
 //ROUTERS
+ 
 const router = Router();
 const createUserController = new CreateUserController();
 const viewUserAccountController = new ViewUserAccountController();
@@ -426,6 +427,18 @@ router.post("/userAdmin/password-reset-reject", async (req: Request, res: Respon
   }
 });
 
+
+
+// Clear all password reset requests (admin)
+router.post("/userAdmin/password-reset-clear", async (req: Request, res: Response) => {
+  // Optionally, you can require admin authentication here
+  const result = await passwordResetRequestController.clearAllPasswordResetRequests();
+  if (result) {
+    return res.status(200).json({ success: true });
+  } else {
+    return res.status(500).json({ success: false, error: "Failed to clear password reset requests" });
+  }
+});
 export { router };
 
 

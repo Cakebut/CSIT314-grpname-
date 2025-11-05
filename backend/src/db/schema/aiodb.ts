@@ -167,6 +167,5 @@ export const passwordResetRequestsTable = pgTable(
         reviewed_by: integer().references(() => useraccountTable.id), // Admin user id
         admin_name: varchar({ length: 64 }), // Store admin name directly
         admin_note: text(),
-    },
-    table => [ uniqueIndex().on(table.user_id, table.status) ]
+    }
 );
