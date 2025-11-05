@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 
 // LOGIN PAGE
 import Login from './routes/LoginPage';
+import ForgotPasswordPage from './routes/ForgotPasswordPage';
+
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
@@ -10,6 +12,7 @@ import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
 import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
 import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
 import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
+
 
 
 //Person In Need
@@ -39,6 +42,7 @@ function App() {
       <div className="app-wrapper">
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           {/* User Admin */}
           <Route path="/useradmin" element={<AdminDashboard />} />
           <Route path="/useradmin/ViewUserList" element={<ViewUserAccountPage />} />
