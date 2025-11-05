@@ -1,5 +1,3 @@
-
-
 import { Router } from 'express';
 import { eq } from 'drizzle-orm';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
@@ -232,4 +230,21 @@ router.delete('/notifications/:id', async (req, res) => {
 	} catch (err) {
 		return res.status(500).json({ success: false, error: 'Failed to delete notification' });
 	}
+});
+
+// My Offers: Mark a request as completed (PIN marks as completed)
+router.post('/offers/:requestId/complete', async (req, res) => {
+  const requestId = Number(req.params.requestId);
+  if (!requestId) {
+    return res.status(400).json({ success: false, error: 'Missing requestId' });
+  }
+  try {
+    const result = await controller.markRequestCompleted(requestId);
+    if (!result) {
+      return res.status(404).json({ success: false, error: 'Request not found or not updated' });
+    }
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Failed to mark request completed' });
+  }
 });

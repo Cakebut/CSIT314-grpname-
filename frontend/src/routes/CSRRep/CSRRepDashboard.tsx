@@ -453,37 +453,39 @@ function CSRAvailableRequests() {
         {requests.length === 0 ? (
           <div className="csr-empty">No requests found.</div>
         ) : (
-          // Filter out duplicate requests by requestId
-          Array.from(new Map(requests.map(r => [r.requestId, r])).values()).map((r) => (
-            <div
-              key={r.requestId}
-              className="csr-req-row"
-              onClick={() => setSelected(r)}
-              style={{
-                cursor: 'pointer',
-                background: r.urgencyLevel && r.urgencyLevel.toLowerCase() === 'high priority' ? '#fee2e2' : '#fff',
-              }}
-            >
-              <div className="csr-req-row-top">
-                <div className="csr-req-title">
-                  <span className="csr-req-title-text" style={{ fontSize: '1.45rem', fontWeight: 700, color: '#1e293b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{r.title || 'Untitled Request'}</span>
-                  <span className="csr-req-id">REQ-{String(r.requestId).padStart(3, "0")}</span>
-                  {r.urgencyLevel && (
-                    <span className={`csr-chip csr-chip-urgency${r.urgencyLevel.toLowerCase() === 'high priority' ? ' high' : r.urgencyLevel.toLowerCase() === 'low priority' ? ' low' : ''}`}
-                      style={{ backgroundColor: getUrgencyColor(r.urgencyLevel), color: 'white', fontWeight: 700 }}
-                    >
-                      {r.urgencyLevel}
-                    </span>
-                  )}
+          // Filter out duplicate requests by requestId, and hide completed
+          Array.from(new Map(requests.map(r => [r.requestId, r])).values())
+            .filter(r => r.status !== 'Completed')
+            .map((r) => (
+              <div
+                key={r.requestId}
+                className="csr-req-row"
+                onClick={() => setSelected(r)}
+                style={{
+                  cursor: 'pointer',
+                  background: r.urgencyLevel && r.urgencyLevel.toLowerCase() === 'high priority' ? '#fee2e2' : '#fff',
+                }}
+              >
+                <div className="csr-req-row-top">
+                  <div className="csr-req-title">
+                    <span className="csr-req-title-text" style={{ fontSize: '1.45rem', fontWeight: 700, color: '#1e293b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{r.title || 'Untitled Request'}</span>
+                    <span className="csr-req-id">REQ-{String(r.requestId).padStart(3, "0")}</span>
+                    {r.urgencyLevel && (
+                      <span className={`csr-chip csr-chip-urgency${r.urgencyLevel.toLowerCase() === 'high priority' ? ' high' : r.urgencyLevel.toLowerCase() === 'low priority' ? ' low' : ''}`}
+                        style={{ backgroundColor: getUrgencyColor(r.urgencyLevel), color: 'white', fontWeight: 700 }}
+                      >
+                        {r.urgencyLevel}
+                      </span>
+                    )}
+                  </div>
+                  <div className="csr-req-views" style={{ fontSize: '1.02rem', color: '#0ea5e9', fontWeight: 500 }}>{r.location || r.locationName || '-'}</div>
                 </div>
-                <div className="csr-req-views" style={{ fontSize: '1.02rem', color: '#0ea5e9', fontWeight: 500 }}>{r.location || r.locationName || '-'}</div>
+                <div className="csr-req-row-bottom">
+                  <div className="csr-muted" style={{ fontSize: '1.05rem', color: '#64748b', fontWeight: 500 }}>{r.categoryName}</div>
+                  <div className="csr-muted" style={{ fontWeight: 600, fontSize: '1.05rem', color: getStatusColor(r.status) }}>{r.status || '-'}</div>
+                </div>
               </div>
-              <div className="csr-req-row-bottom">
-                <div className="csr-muted" style={{ fontSize: '1.05rem', color: '#64748b', fontWeight: 500 }}>{r.categoryName}</div>
-                <div className="csr-muted" style={{ fontWeight: 600, fontSize: '1.05rem', color: getStatusColor(r.status) }}>{r.status || '-'}</div>
-              </div>
-            </div>
-          ))
+            ))
         )}
       </div>
       {selected && (

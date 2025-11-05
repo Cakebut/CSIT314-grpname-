@@ -287,4 +287,27 @@ export class PinRequestEntity {
     });
     return csvRows.join('\n');
   }
+
+  // Mark a PIN request and its assigned CSR request as Completed
+  static async markRequestCompleted(requestId: number): Promise<boolean> {
+    // 1. Update PIN request status to Completed
+    const [updatedPin] = await db
+      .update(pin_requestsTable)
+      .set({ status: 'Completed' })
+      .where(eq(pin_requestsTable.id, requestId))
+      .returning();
+    if (!updatedPin) return false;
+    // 2. Find assigned CSR for this request
+    const csrId = updatedPin.csr_id;
+    if (csrId) {
+      // 3. Update CSR request status to Completed
+      await db.update(require('../db/schema/aiodb').csr_requestsTable)
+        .set({ status: 'Completed' })
+        .where(and(
+          eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId),
+          eq(require('../db/schema/aiodb').csr_requestsTable.pin_request_id, requestId)
+        ));
+    }
+    return true;
+  }
 }

@@ -44,6 +44,7 @@ interface Request {
   urgencyColor?: string;
   view_count?: number;
   shortlist_count?: number;
+  csr_id?: number | null;
 }
 
 // --- My Offers types ---
@@ -440,13 +441,35 @@ const PersonInNeedDashboard: React.FC = () => {
                               <li key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span style={{ fontWeight: 600 }}>{csr.username || `CSR #${csr.csr_id}`}</span>
                                 <span style={{ color: '#64748b', fontSize: 13 }}>({new Date(csr.interestedAt).toLocaleDateString()})</span>
-                                {offer.assignedCsrId === csr.csr_id ? (
+                                {/* Only show Assigned if status is Pending */}
+                                {offer.assignedCsrId === csr.csr_id && offer.status === 'Pending' && (
                                   <span style={{ color: '#22c55e', fontWeight: 700, marginLeft: 8 }}>Assigned</span>
-                                ) : (
+                                )}
+                                {/* Accept/Cancel buttons for non-assigned CSRs */}
+                                {offer.assignedCsrId !== csr.csr_id && (
                                   <>
                                     <button className="button" style={{ backgroundColor: '#22c55e', color: 'white', marginLeft: 8 }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
                                     <button className="button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
                                   </>
+                                )}
+                                {/* Mark Completed button for pending requests with assigned CSR */}
+                                {offer.status === 'Pending' && offer.assignedCsrId === csr.csr_id && (
+                                  <button
+                                    className="button"
+                                    style={{ backgroundColor: '#6b7280', color: 'white', marginLeft: 8 }}
+                                    onClick={async () => {
+                                      if (window.confirm('Mark this request as completed?')) {
+                                        // FIX: Use correct backend endpoint for completion
+                                        const res = await fetch(`${API_BASE}/api/pin/offers/${offer.requestId}/complete`, { method: 'POST' });
+                                        if (res.ok) {
+                                          toast.success('Request marked as completed.');
+                                          openMyOffers();
+                                        } else {
+                                          toast.error('Failed to mark request as completed.');
+                                        }
+                                      }
+                                    }}
+                                  >Mark Completed</button>
                                 )}
                               </li>
                             ))}
@@ -479,12 +502,12 @@ const PersonInNeedDashboard: React.FC = () => {
         <div style={{ color: "#b91c1c", marginBottom: 12 }}>{error}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24, alignItems: 'center' }}>
-          {requests.length === 0 ? (
+          {requests.filter(r => r.status !== 'Completed').length === 0 ? (
             <div className="row-muted" style={{ fontSize: 18, color: '#64748b', padding: 32, borderRadius: 12, background: '#f3f4f6', width: '90%' }}>
               No requests found.
             </div>
           ) : (
-            requests.map((r) => (
+            requests.filter(r => r.status !== 'Completed').map((r) => (
               <div
                 key={r.id}
                 style={{
@@ -684,137 +707,22 @@ const PersonInNeedDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td>
-                        <button 
-                          className="button" 
-                          style={{ backgroundColor: '#22c55e', color: 'white', marginRight: 8 }}
-                          onClick={() => {
-                            setEditRequest(r);
-                            setEditTitle(r.title);
-                            setEditCategoryID(r.categoryID.toString());
-                            setEditMessage(r.message || "");
-                            setEditLocationID(r.locationID ? r.locationID.toString() : "");
-                            setEditUrgencyLevelID(r.urgencyLevelID ? r.urgencyLevelID.toString() : "");
-                            setEditStatusMsg("");
-                          }}
-                        >Edit</button>
-      {/* Edit Request Modal */}
-      {editRequest && (
-        <div className="modal" onClick={() => setEditRequest(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>Edit Request</h3>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              setEditStatusMsg("");
-              if (!editTitle.trim()) {
-                setEditStatusMsg("Please enter a request title.");
-                return;
-              }
-              if (!editCategoryID) {
-                setEditStatusMsg("Please select a request type.");
-                return;
-              }
-              if (!editLocationID) {
-                setEditStatusMsg("Please select a location.");
-                return;
-              }
-              if (!editUrgencyLevelID) {
-                setEditStatusMsg("Please select an urgency level.");
-                return;
-              }
-              // Assume PUT /api/pin/requests/:id exists
-              const res = await fetch(`${API_BASE}/api/pin/requests/${editRequest.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  title: editTitle,
-                  categoryID: Number(editCategoryID),
-                  message: editMessage,
-                  locationID: Number(editLocationID),
-                  urgencyLevelID: Number(editUrgencyLevelID),
-                }),
-              });
-              if (res.ok) {
-                toast.success("Request updated successfully!");
-                setEditRequest(null);
-                openMyRequests();
-                fetchAllRequests(); // Refresh all requests table
-              } else {
-                toast.error("Failed to update request.");
-              }
-            }}>
-              <div>
-                <label>Title:</label>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={e => setEditTitle(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: 5, border: '1px solid #d1d5db', marginTop: '0.2rem', fontSize: '1rem' }}
-                />
-              </div>
-              <div style={{ marginTop: 12 }}>
-                <label>Request Type:</label>
-                <select value={editCategoryID} onChange={e => setEditCategoryID(e.target.value)} required>
-                  <option value="">Select type</option>
-                  {serviceTypes.map(type => (
-                    <option key={type.id} value={type.id}>{type.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ marginTop: 12 }}>
-                <label>Description (optional):</label>
-                <textarea
-                  value={editMessage}
-                  onChange={e => setEditMessage(e.target.value)}
-                  rows={4}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div style={{ marginTop: 12 }}>
-                <label>Location:</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 6 }}>
-                  {locations.map(loc => (
-                    <label key={loc.id} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontWeight: editLocationID === loc.id.toString() ? 600 : 400 }}>
-                      <input
-                        type="radio"
-                        name="edit-location"
-                        value={loc.id}
-                        checked={editLocationID === loc.id.toString()}
-                        onChange={() => setEditLocationID(loc.id.toString())}
-                        style={{ marginRight: 6 }}
-                      />
-                      {loc.name} {loc.line ? `(${loc.line})` : ''}
-                    </label>
-                  ))}
-                </div>
-                {!editLocationID && <div style={{ color: '#b91c1c', marginTop: 4, fontSize: 13 }}>Please select a location</div>}
-              </div>
-              <div style={{ marginTop: 12 }}>
-                <label>Urgency Level:</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 6 }}>
-                  {urgencyLevels.map(u => (
-                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontWeight: editUrgencyLevelID === u.id.toString() ? 600 : 400 }}>
-                      <input
-                        type="radio"
-                        name="edit-urgency"
-                        value={u.id}
-                        checked={editUrgencyLevelID === u.id.toString()}
-                        onChange={() => setEditUrgencyLevelID(u.id.toString())}
-                        style={{ marginRight: 6 }}
-                      />
-                      {u.label}
-                    </label>
-                  ))}
-                </div>
-                {!editUrgencyLevelID && <div style={{ color: '#b91c1c', marginTop: 4, fontSize: 13 }}>Please select an urgency level</div>}
-              </div>
-              <button className="button primary" type="submit" style={{ marginTop: 16 }}>Update</button>
-              {editStatusMsg && <div style={{ marginTop: 12 }}>{editStatusMsg}</div>}
-            </form>
-            <button className="button" onClick={() => setEditRequest(null)} style={{ marginTop: 16 }}>Cancel</button>
-          </div>
-        </div>
-      )}
+                        {/* Only show Edit button if not completed */}
+                        {r.status !== 'Completed' && (
+                          <button 
+                            className="button" 
+                            style={{ backgroundColor: '#22c55e', color: 'white', marginRight: 8 }}
+                            onClick={() => {
+                              setEditRequest(r);
+                              setEditTitle(r.title);
+                              setEditCategoryID(r.categoryID.toString());
+                              setEditMessage(r.message || "");
+                              setEditLocationID(r.locationID ? r.locationID.toString() : "");
+                              setEditUrgencyLevelID(r.urgencyLevelID ? r.urgencyLevelID.toString() : "");
+                              setEditStatusMsg("");
+                            }}
+                          >Edit</button>
+                        )}
                         <button 
                           className="button" 
                           style={{ backgroundColor: '#ef4444', color: 'white' }}
@@ -919,6 +827,104 @@ const PersonInNeedDashboard: React.FC = () => {
               {statusMsg && <div style={{ marginTop: 12 }}>{statusMsg}</div>}
             </form>
             <button className="button" onClick={() => setShowCreate(false)} style={{ marginTop: 16 }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {editRequest && (
+        <div className="modal" onClick={() => setEditRequest(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>Edit Request</h3>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setEditStatusMsg("");
+              if (!editTitle.trim()) {
+                setEditStatusMsg("Please enter a request title.");
+                return;
+              }
+              if (!editCategoryID) {
+                setEditStatusMsg("Please select a request type.");
+                return;
+              }
+              if (!editLocationID) {
+                setEditStatusMsg("Please select a location.");
+                return;
+              }
+              if (!editUrgencyLevelID) {
+                setEditStatusMsg("Please select an urgency level.");
+                return;
+              }
+              // Assume PUT /api/pin/requests/:id exists
+              const res = await fetch(`${API_BASE}/api/pin/requests/${editRequest.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  title: editTitle,
+                  categoryID: Number(editCategoryID),
+                  message: editMessage,
+                  locationID: Number(editLocationID),
+                  urgencyLevelID: Number(editUrgencyLevelID),
+                }),
+              });
+              if (res.ok) {
+                toast.success("Request updated successfully!");
+                setEditRequest(null);
+                openMyRequests();
+                fetchAllRequests(); // Refresh all requests table
+              } else {
+                toast.error("Failed to update request.");
+              }
+            }}>
+              <div>
+                <label>Title:</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 5, border: '1px solid #d1d5db', marginTop: '0.2rem', fontSize: '1rem' }}
+                />
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <label>Request Type:</label>
+                <select value={editCategoryID} onChange={e => setEditCategoryID(e.target.value)} required>
+                  <option value="">Select type</option>
+                  {serviceTypes.map(type => (
+                    <option key={type.id} value={type.id}>{type.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <label>Description (optional):</label>
+                <textarea
+                  value={editMessage}
+                  onChange={e => setEditMessage(e.target.value)}
+                  rows={4}
+                  style={{ width: '100%' }}
+                />
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <label>Location:</label>
+                <select value={editLocationID} onChange={e => setEditLocationID(e.target.value)} required>
+                  <option value="">Select location</option>
+                  {locations.map(loc => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <label>Urgency Level:</label>
+                <select value={editUrgencyLevelID} onChange={e => setEditUrgencyLevelID(e.target.value)} required>
+                  <option value="">Select urgency</option>
+                  {urgencyLevels.map(u => (
+                    <option key={u.id} value={u.id}>{u.label}</option>
+                  ))}
+                </select>
+              </div>
+              <button className="button primary" type="submit" style={{ marginTop: 16 }}>Save Changes</button>
+              {editStatusMsg && <div style={{ marginTop: 12 }}>{editStatusMsg}</div>}
+            </form>
+            <button className="button" onClick={() => setEditRequest(null)} style={{ marginTop: 16 }}>Cancel</button>
           </div>
         </div>
       )}

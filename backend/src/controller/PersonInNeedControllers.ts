@@ -1,5 +1,3 @@
-
-
 import { notificationTable, useraccountTable, pin_requestsTable } from '../db/schema/aiodb';
 import { db } from '../db/client';
 import { eq, desc } from 'drizzle-orm';
@@ -74,5 +72,9 @@ export class PersonInNeedControllers {
   }
   async deleteRequest(id: number): Promise<boolean> {
     return await PinRequestEntity.deleteRequest(id);
+  }
+  // Mark a PIN request and its assigned CSR request as Completed
+  async markRequestCompleted(requestId: number): Promise<boolean> {
+    return await PinRequestEntity.markRequestCompleted(requestId);
   }
 }
