@@ -47,6 +47,17 @@ router.get('/:csrId/interested', async (req, res) => {
 	}
 });
 
+// OFFERS: GET /api/csr/:csrId/offers
+router.get('/:csrId/offers', async (req, res) => {
+	try {
+		const csrId = Number(req.params.csrId);
+		const offers = await controller.getInterested(csrId);
+		res.json({ offers });
+	} catch (err) {
+		res.status(500).json({ error: 'Failed to fetch offers' });
+	}
+});
+
 // POST /api/csr/:csrId/shortlist/:requestId
 router.post('/:csrId/shortlist/:requestId', async (req, res) => {
        try {

@@ -40,15 +40,14 @@ export const service_typeTable = pgTable(
 export const csr_requestsTable = pgTable(
     'csr_requests', //PIN ACCEPT CSR REQUESTS TABLE
     {
-        id: serial('id').primaryKey(),
-        pin_id: integer().notNull().references(() => useraccountTable.id),
+        pin_request_id: integer().notNull().references(() => pin_requestsTable.id),
         csr_id: integer().notNull().references(() => useraccountTable.id),
-        categoryID: integer().notNull().references(() => service_typeTable.id),
         message: text().notNull(),
         requestedAt: timestamp().notNull().defaultNow(),
+        interestedAt: timestamp().notNull().defaultNow(),
         status: varchar({ length: 32 }).notNull().default('Pending'), // e.g., Pending, In Progress, Completed
     },
-    // table => [ uniqueIndex().on(table.label) ]
+    table => [ uniqueIndex().on(table.csr_id, table.pin_request_id) ]
 )
 
 

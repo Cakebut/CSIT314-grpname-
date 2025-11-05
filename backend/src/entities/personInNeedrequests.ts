@@ -87,32 +87,41 @@ export class PinRequestEntity {
       .set({ status: 'Accepted' })
       .where(and(
         eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId),
-        eq(require('../db/schema/aiodb').csr_requestsTable.pin_id, updated.pin_id)
+        eq(require('../db/schema/aiodb').csr_requestsTable.pin_request_id, requestId)
       ));
     // Reject all other interested CSRs for this request
     await db.update(require('../db/schema/aiodb').csr_requestsTable)
       .set({ status: 'Rejected' })
       .where(and(
         not(eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId)),
-        eq(require('../db/schema/aiodb').csr_requestsTable.pin_id, updated.pin_id)
+        eq(require('../db/schema/aiodb').csr_requestsTable.pin_request_id, requestId)
       ));
 
-    // 3. Remove all other interested CSRs for this request (except accepted)
-    await db.delete(csr_interestedTable)
-      .where(
-        and(
-          eq(csr_interestedTable.pin_request_id, requestId),
-          not(eq(csr_interestedTable.csr_id, csrId))
-        )
-      );
+    // Delete all other CSR entries for this request from csr_interestedTable
+    await db.delete(require('../db/schema/aiodb').csr_interestedTable)
+      .where(and(
+        eq(require('../db/schema/aiodb').csr_interestedTable.pin_request_id, requestId),
+        not(eq(require('../db/schema/aiodb').csr_interestedTable.csr_id, csrId))
+      ));
 
     return updated;
   }
 
   // Cancel a CSR's interest for a request
   static async cancelCsrInterest(requestId: number, csrId: number) {
-    await db.delete(csr_interestedTable)
-      .where(and(eq(csr_interestedTable.pin_request_id, requestId), eq(csr_interestedTable.csr_id, csrId)));
+    // Delete from csr_interestedTable
+    await db.delete(require('../db/schema/aiodb').csr_interestedTable)
+      .where(and(
+        eq(require('../db/schema/aiodb').csr_interestedTable.pin_request_id, requestId),
+        eq(require('../db/schema/aiodb').csr_interestedTable.csr_id, csrId)
+      ));
+    // Update status in csr_requestsTable
+    await db.update(require('../db/schema/aiodb').csr_requestsTable)
+      .set({ status: 'Rejected' })
+      .where(and(
+        eq(require('../db/schema/aiodb').csr_requestsTable.pin_request_id, requestId),
+        eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId)
+      ));
     return true;
   }
   static async getAllRequests(): Promise<any[]> {

@@ -674,17 +674,17 @@ function CSROffers() {
         return;
       }
       try {
-        // Fetch all offers the CSR is interested in
-        const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
+        // Fetch all offers from csr_requests table for this CSR
+        const res = await fetch(`http://localhost:3000/api/csr/${csrId}/offers`);
         const json = await res.json();
-        const requests = json.interestedRequests || [];
+        const requests = json.offers || [];
         // Map backend data to OfferItem[]
         const data = requests.map((r: any) => ({
-          id: r.requestId,
+          id: r.requestId ?? r.pin_request_id,
           title: r.title || 'Untitled Request',
-          reqNo: `REQ-${String(r.requestId).padStart(3, "0")}`,
-          pinId: r.pinId ? `PIN-${String(r.pinId).padStart(3, "0")}` : '—',
-          pinUsername: r.pinUsername || '',
+          reqNo: `REQ-${String(r.requestId ?? r.pin_request_id).padStart(3, "0")}`,
+          pinId: r.pinId ? `PIN-${String(r.pinId).padStart(3, "0")}` : (r.pin_id ? `PIN-${String(r.pin_id).padStart(3, "0")}` : '—'),
+          pinUsername: r.pinUsername || r.pin_username || '',
           date: r.interestedAt ? r.interestedAt.slice(0, 10) : (r.createdAt ? r.createdAt.slice(0, 10) : '-'),
           status: r.status || '-',
           feedbackRating: r.feedbackRating,
@@ -699,40 +699,12 @@ function CSROffers() {
     fetchOffers();
   }, [csrId]);
   // --- Fetch offer counters from csr_requests ---
-  const [offerCounters, setOfferCounters] = useState({
-    total: 0,
-    pending: 0,
-    accepted: 0,
-    rejected: 0,
-    completed: 0,
-  });
-  useEffect(() => {
-    const fetchCounters = async () => {
-      const csrId = getCSRId();
-      if (!csrId) return;
-      try {
-        const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
-        const json = await res.json();
-        // Expect json.interestedRequests to be an array of offers
-        const requests = json.interestedRequests || [];
-        setOfferCounters({
-          total: requests.length,
-          pending: requests.filter((r: any) => r.status === "Pending").length,
-          accepted: requests.filter((r: any) => r.status === "Accepted").length,
-          rejected: requests.filter((r: any) => r.status === "Rejected").length,
-          completed: requests.filter((r: any) => r.status === "Completed").length,
-        });
-      } catch (e) {
-        setOfferCounters({ total: 0, pending: 0, accepted: 0, rejected: 0, completed: 0 });
-      }
-    };
-    fetchCounters();
-  }, []);
-  const total = offerCounters.total;
-  const pending = offerCounters.pending;
-  const accepted = offerCounters.accepted;
-  const rejected = offerCounters.rejected;
-  const completed = offerCounters.completed;
+  // Show all offers, including rejected and duplicates
+  const total = offers.length;
+  const pending = offers.filter(o => o.status === "Pending").length;
+  const accepted = offers.filter(o => o.status === "Accepted").length;
+  const rejected = offers.filter(o => o.status === "Rejected").length;
+  const completed = offers.filter(o => o.status === "Completed").length;
   const filtered = useMemo(() => {
     if (tab === "All") return offers;
     return offers.filter(o => o.status === tab);
@@ -775,7 +747,7 @@ function CSROffers() {
         ))}
       </div>
       <div className="csr-list">
-        {filtered.map((o) => (
+  {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).map((o) => (
           <div key={o.id} className="csr-req-row">
             <div className="csr-req-row-top">
               <div className="csr-req-title">
@@ -819,7 +791,7 @@ function CSROffers() {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div className="csr-empty">No items.</div>}
+        {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).length === 0 && <div className="csr-empty">No items.</div>}
       </div>
     </div>
   );

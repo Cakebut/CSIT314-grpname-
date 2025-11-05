@@ -138,17 +138,21 @@ export class CSRRepEntity {
 
 				static async getInterested(csrId: number) {
 					try {
-						// Get all interested pin_request_ids for this CSR
-						const interestedRows = await db
-							.select({ pin_request_id: csr_interestedTable.pin_request_id, interestedAt: csr_interestedTable.interestedAt })
-							.from(csr_interestedTable)
-							.where(eq(csr_interestedTable.csr_id, csrId));
+						// Query csr_requestsTable directly for all offers for this CSR
+						const csrRows = await db
+							.select({
+								pin_request_id: csr_requestsTable.pin_request_id,
+								status: csr_requestsTable.status,
+								interestedAt: csr_requestsTable.interestedAt
+							})
+							.from(csr_requestsTable)
+							.where(eq(csr_requestsTable.csr_id, csrId));
 
-						const pinRequestIds = interestedRows.map(row => row.pin_request_id);
+						const pinRequestIds = csrRows.map(row => row.pin_request_id);
 						if (pinRequestIds.length === 0) return [];
 
 						const { inArray } = require('drizzle-orm');
-						// Join pin_requestsTable with csr_requestsTable and useraccountTable to get CSR-specific status
+						// Join pin_requestsTable with useraccountTable to get request details
 						const rows = await db
 							.select({
 								requestId: pin_requestsTable.id,
@@ -156,18 +160,12 @@ export class CSRRepEntity {
 								categoryID: pin_requestsTable.categoryID,
 								locationID: pin_requestsTable.locationID,
 								urgencyLevelID: pin_requestsTable.urgencyLevelID,
-								status: csr_requestsTable.status, // Use CSR-specific status
 								pinId: pin_requestsTable.pin_id,
 								pinUsername: useraccountTable.username,
 								createdAt: pin_requestsTable.createdAt,
 								message: pin_requestsTable.message,
 							})
 							.from(pin_requestsTable)
-							.innerJoin(csr_requestsTable, and(
-								eq(csr_requestsTable.csr_id, csrId),
-								eq(csr_requestsTable.pin_id, pin_requestsTable.pin_id),
-								eq(csr_requestsTable.categoryID, pin_requestsTable.categoryID)
-							))
 							.leftJoin(useraccountTable, eq(pin_requestsTable.pin_id, useraccountTable.id))
 							.where(inArray(pin_requestsTable.id, pinRequestIds));
 
@@ -177,7 +175,7 @@ export class CSRRepEntity {
 						// Map feedback by requestId and pinId
 						const feedbackMap: Record<string, any> = {};
 						for (const fb of feedbacks) {
-							feedbackMap[`${fb.request_id}_${fb.csr_id}_${fb.pin_id}`] = fb;
+							feedbackMap[`${fb.request_id}_${csrId}_${fb.pin_id}`] = fb;
 						}
 
 						const serviceTypes = Object.fromEntries(
@@ -190,8 +188,9 @@ export class CSRRepEntity {
 							(await db.select().from(urgency_levelTable)).map(u => [u.id, u.label])
 						);
 
-						// Map interestedAt from join table
-						const interestedAtMap = Object.fromEntries(interestedRows.map(r => [r.pin_request_id, r.interestedAt]));
+						// Map interestedAt and status from csr_requestsTable
+						const interestedAtMap = Object.fromEntries(csrRows.map(r => [r.pin_request_id, r.interestedAt]));
+						const statusMap = Object.fromEntries(csrRows.map(r => [r.pin_request_id, r.status]));
 
 						return rows.map(r => {
 							const feedback = feedbackMap[`${r.requestId}_${csrId}_${r.pinId}`];
@@ -201,7 +200,7 @@ export class CSRRepEntity {
 								categoryName: serviceTypes[r.categoryID] || '',
 								location: r.locationID ? (locations[r.locationID] || '') : '',
 								urgencyLevel: r.urgencyLevelID ? (urgencies[r.urgencyLevelID] || null) : null,
-								status: r.status,
+								status: statusMap[r.requestId] || null,
 								pinId: r.pinId,
 								pinUsername: r.pinUsername,
 								createdAt: r.createdAt,
@@ -251,32 +250,33 @@ export class CSRRepEntity {
 			// Already interested, return success
 			return { alreadyInterested: true };
 		}
-		// Insert interest
-		const result = await db.insert(csr_interestedTable).values({ csr_id: csrId, pin_request_id: requestId }).execute();
+	// Insert interest and get interestedAt timestamp
+	const now = new Date();
+	const result = await db.insert(csr_interestedTable).values({ csr_id: csrId, pin_request_id: requestId, interestedAt: now }).execute();
 		// Get pin_request details
+		const { and, eq } = require('drizzle-orm');
 		const pinReq = await db.select({
-			pin_id: pin_requestsTable.pin_id,
-			categoryID: pin_requestsTable.categoryID,
+			id: pin_requestsTable.id,
 			message: pin_requestsTable.message
 		}).from(pin_requestsTable).where(eq(pin_requestsTable.id, requestId)).limit(1);
-		if (pinReq && pinReq[0]) {
-			// Check if csr_requests already exists for this csr/request (use csr_id and requestId for uniqueness)
-			const { and, eq } = require('drizzle-orm');
-			const existingReq = await db.select().from(require('../db/schema/aiodb').csr_requestsTable)
-				.where(and(
-					eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId),
-					eq(require('../db/schema/aiodb').csr_requestsTable.id, requestId)
-				));
-			if (!existingReq || existingReq.length === 0) {
-				await db.insert(require('../db/schema/aiodb').csr_requestsTable).values({
-					id: requestId,
-					pin_id: pinReq[0].pin_id,
-					csr_id: csrId,
-					categoryID: pinReq[0].categoryID,
-					message: pinReq[0].message,
-					status: 'Pending'
-				}).execute();
-			}
+		if (!pinReq || !pinReq[0] || pinReq[0].id === undefined) {
+			console.error('[addToInterested] Failed to find pin_request_id for requestId', requestId, pinReq);
+			return { error: 'Failed to find pin_request_id for requestId ' + requestId };
+		}
+		// Check if csr_requests already exists for this csr/request (use csr_id, pin_request_id for uniqueness)
+		const existingReq = await db.select().from(require('../db/schema/aiodb').csr_requestsTable)
+			.where(and(
+				eq(require('../db/schema/aiodb').csr_requestsTable.csr_id, csrId),
+				eq(require('../db/schema/aiodb').csr_requestsTable.pin_request_id, pinReq[0].id)
+			));
+		if (!existingReq || existingReq.length === 0) {
+			await db.insert(require('../db/schema/aiodb').csr_requestsTable).values({
+				pin_request_id: pinReq[0].id,
+				csr_id: csrId,
+				message: pinReq[0].message,
+				status: 'Pending',
+				interestedAt: now
+			}).execute();
 		}
 		// Notification logic unchanged
 		const req = await db.select({ pin_id: pin_requestsTable.pin_id }).from(pin_requestsTable).where(eq(pin_requestsTable.id, requestId)).limit(1);
@@ -305,15 +305,14 @@ export class CSRRepEntity {
 
 	// INTERESTED: Remove from interested and also delete from csr_requestsTable
 	static async removeFromInterested(csrId: number, requestId: number) {
-		// Delete from csr_interestedTable
-		await db.delete(csr_interestedTable)
+		// Do NOT delete from csr_interestedTable; keep the record for history
+		// Only update status to 'Rejected' in csr_requestsTable
+		await db.update(csr_requestsTable)
+			.set({ status: 'Rejected' })
 			.where(and(
-				eq(csr_interestedTable.csr_id, csrId),
-				eq(csr_interestedTable.pin_request_id, requestId)
+				eq(csr_requestsTable.csr_id, csrId),
+				eq(csr_requestsTable.pin_request_id, requestId)
 			));
-		// Delete from csr_requestsTable using serial id
-		await db.delete(csr_requestsTable)
-			.where(eq(csr_requestsTable.id, requestId));
 		return { removed: true };
 	}
 }

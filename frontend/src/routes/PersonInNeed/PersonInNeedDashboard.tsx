@@ -255,9 +255,10 @@ const PersonInNeedDashboard: React.FC = () => {
     });
     if (res.ok) {
       toast.success("CSR accepted for this request.");
-      openMyOffers();
+      // Refetch offers after a short delay to ensure backend updates are reflected
+      setTimeout(openMyOffers, 300);
     } else {
-        toast.error("Failed to accept CSR.");
+      toast.error("Failed to accept CSR.");
     }
   };
 
@@ -270,9 +271,9 @@ const PersonInNeedDashboard: React.FC = () => {
     });
     if (res.ok) {
       toast.success("CSR interest cancelled.");
-      openMyOffers();
+      setTimeout(openMyOffers, 300);
     } else {
-        toast.error("Failed to cancel CSR interest.");
+      toast.error("Failed to cancel CSR interest.");
     }
   };
 

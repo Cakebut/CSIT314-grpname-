@@ -84,11 +84,12 @@ export class PlatformManagerEntity {
       .where(eq(service_typeTable.id, toId));
     if (!targetExists.length) throw new Error("Target service type not found");
 
-    // Reassign references
-    await this.db
-      .update(csr_requestsTable)
-      .set({ categoryID: toId })
-      .where(eq(csr_requestsTable.categoryID, fromId));
+    // Reassign references in csr_requestsTable is no longer possible (categoryID removed)
+    // If you need to reassign service type, update pin_requestsTable only:
+    // await this.db
+    //   .update(pin_requestsTable)
+    //   .set({ categoryID: toId })
+    //   .where(eq(pin_requestsTable.categoryID, fromId));
     await this.db
       .update(pin_requestsTable)
       .set({ categoryID: toId })
