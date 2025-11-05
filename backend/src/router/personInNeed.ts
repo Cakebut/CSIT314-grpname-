@@ -1,3 +1,4 @@
+
 import { Router } from 'express';
 import { eq } from 'drizzle-orm';
 import { PersonInNeedControllers } from '../controller/PersonInNeedControllers';
@@ -256,3 +257,17 @@ router.post('/offers/:requestId/complete', async (req, res) => {
 
 // Submit feedback
 router.post('/feedback', FeedbackController.addFeedback);
+
+// Get notifications for a CSR user
+router.get('/notifications/csr/:csr_id', async (req, res) => {
+	const csr_id = Number(req.params.csr_id);
+	if (!csr_id) {
+		return res.status(400).json({ success: false, error: 'Missing csr_id' });
+	}
+	try {
+		const notifications = await controller.getNotificationsForCsr(csr_id);
+		return res.json({ success: true, data: notifications });
+	} catch (err) {
+		return res.status(500).json({ success: false, error: 'Failed to fetch notifications' });
+	}
+});

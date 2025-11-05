@@ -19,6 +19,15 @@ export class FeedbackEntity {
       description,
       createdAt: new Date(createdAt),
     });
+    // Insert notification for CSR
+    await db.insert(require('../db/schema/aiodb').notificationTable).values({
+      pin_id,
+      csr_id,
+      pin_request_id: requestId,
+      type: 'feedback',
+      createdAt: new Date(createdAt),
+      read: 0,
+    });
     return { success: true };
   }
 }

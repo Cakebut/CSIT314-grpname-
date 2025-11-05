@@ -5,6 +5,27 @@ import { eq, desc } from 'drizzle-orm';
 import { PinRequestEntity, PinRequest } from '../entities/personInNeedrequests';
 
 export class PersonInNeedControllers {
+  // Fetch notifications for a CSR user
+  async getNotificationsForCsr(csr_id: number) {
+    // Join notificationTable with useraccountTable (PIN) and pin_requestsTable for username and title
+    return await db
+      .select({
+        id: notificationTable.id,
+        pin_id: notificationTable.pin_id,
+        type: notificationTable.type,
+        csr_id: notificationTable.csr_id,
+        pin_request_id: notificationTable.pin_request_id,
+        createdAt: notificationTable.createdAt,
+        read: notificationTable.read,
+        pinUsername: useraccountTable.username,
+        requestTitle: pin_requestsTable.title,
+      })
+      .from(notificationTable)
+      .leftJoin(useraccountTable, eq(notificationTable.pin_id, useraccountTable.id))
+      .leftJoin(pin_requestsTable, eq(notificationTable.pin_request_id, pin_requestsTable.id))
+      .where(eq(notificationTable.csr_id, csr_id))
+      .orderBy(desc(notificationTable.read), desc(notificationTable.createdAt));
+  }
   // My Offers: Get all requests for a PIN user, with interested CSRs for each
   async getOffersByPinId(pin_id: number) {
     return await PinRequestEntity.getOffersByPinId(pin_id);
