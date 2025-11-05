@@ -6,7 +6,7 @@ export class AuditLogController {
 
   async exportAuditLogsCSV(limit?: number) {
     // Call entity function to get CSV string
-    return await this.auditLogsEntity.AuditLogsCSV(limit);
+    return await this.auditLogsEntity.exportAuditLogsCSV(limit);
   }
   async createAuditLog(actor: string, action: string, target: string, details?: string) {
     try {

@@ -5,7 +5,7 @@ import { desc } from "drizzle-orm";
 export class AuditLogs {
 
 // public audit logs as CSV
-public async  AuditLogsCSV(limit?: number): Promise<string> {
+public async exportAuditLogsCSV(limit?: number): Promise<string> {
   const logs = await this.fetchAuditLogs(limit);
   const headers = ['id', 'actor', 'action', 'target', 'timestamp', 'details'];
   function escapeCsv(val: any) {
@@ -45,6 +45,8 @@ public async  createAuditLog({ actor, action, target, details }: {
     details,
     timestamp: new Date(),
   });
+
+  return true;
 }
 
 //Fetch audit logs with optional limit
