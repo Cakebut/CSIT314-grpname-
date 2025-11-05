@@ -256,8 +256,8 @@ public async deleteUser(id: number): Promise<boolean> {
       u.userProfile,
       u.isSuspended ? 'Suspended' : 'Active'
     ]);
-    const csv = [headers.join(','), ...rows.map(r => r.map(escapeCsv).join(','))].join('\n');
-    return csv;
+    const csvData = [headers.join(','), ...rows.map(r => r.map(escapeCsv).join(','))].join('\n');
+    return csvData;
 }
 }
 

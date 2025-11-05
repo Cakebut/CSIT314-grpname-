@@ -164,6 +164,34 @@ export default function ViewUserAccountPage() {
     }
   };
 
+  // Export user data as CSV
+  const handleExportUserDataClick = async () => {
+    try {
+      // Fetch CSV first to count records
+      const res = await fetch("/api/userAdmin/users/export");
+      if (!res.ok) throw new Error("Failed to export");
+      const csvData = await res.text();
+      // Count records (lines minus header)
+      const lines = csvData.split("\n");
+      const recordCount = Math.max(0, lines.length - 1);
+      // Download CSV
+      const blob = new Blob([csvData], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "users.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success(
+        `User data successfully exported. [${recordCount}] records included.`
+      );
+    } catch {
+      toast.error("Failed to export user data.");
+    }
+  };
+
   return (
     <div className="view-user-account-container">
       <button className="back-btn" onClick={() => navigate("/useradmin")}>
@@ -257,32 +285,7 @@ export default function ViewUserAccountPage() {
             boxShadow: "0 1px 4px rgba(44,62,80,0.10)",
             cursor: "pointer",
           }}
-          onClick={async () => {
-            try {
-              // Fetch CSV first to count records
-              const res = await fetch("/api/userAdmin/users/export");
-              if (!res.ok) throw new Error("Failed to export");
-              const csv = await res.text();
-              // Count records (lines minus header)
-              const lines = csv.split("\n");
-              const recordCount = Math.max(0, lines.length - 1);
-              // Download CSV
-              const blob = new Blob([csv], { type: "text/csv" });
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "users.csv";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(url);
-              toast.success(
-                `User data successfully exported. [${recordCount}] records included.`
-              );
-            } catch {
-              toast.error("Failed to export user data.");
-            }
-          }}
+          onClick={handleExportUserDataClick}
         >
           Export User Data
         </button>

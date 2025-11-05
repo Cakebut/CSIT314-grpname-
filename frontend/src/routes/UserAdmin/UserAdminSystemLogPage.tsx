@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaSearch, FaFilter } from 'react-icons/fa';
+import { toast } from "react-toastify";
 import "./UserAdminSystemLogPage.css";
 
 interface AuditLogEntry {
@@ -60,6 +61,35 @@ export default function UserAdminSystemLogPage() {
       setError("Failed to clear logs");
     } finally {
       setClearing(false);
+    }
+  };
+
+  // Export audit log data as CSV
+  const handleExportAuditLogData = async () => {
+    try {
+      const url = `/api/userAdmin/audit-log/export${limit && limit > 0 ? `?limit=${limit}` : ''}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to export");
+      const csv = await res.text();
+      const lines = csv.split("\n");
+      const recordCount = Math.max(0, lines.length - 1);
+      if (recordCount === 0) {
+        toast.error("No audit log data to export.");
+        return;
+      }
+      // Download CSV
+      const blob = new Blob([csv], { type: "text/csv" });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'audit-log.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      toast.success(`Audit log successfully exported. [${recordCount}] records included.`);
+    } catch {
+      toast.error("Failed to export audit log data.");
     }
   };
 
@@ -132,15 +162,7 @@ export default function UserAdminSystemLogPage() {
             <button
               className="export-csv-btn"
               style={{ background: '#22c55e', color: 'white', borderRadius: 8, padding: '0.5em 1.2em', fontWeight: 600, fontSize: '1em', border: 'none', boxShadow: '0 1px 4px rgba(44,62,80,0.10)', cursor: 'pointer' }}
-              onClick={() => {
-                const url = `/api/userAdmin/audit-log/export${limit && limit > 0 ? `?limit=${limit}` : ''}`;
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'audit-log.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
+              onClick={handleExportAuditLogData}
             >
               Export User Data CSV
             </button>
