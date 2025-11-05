@@ -120,49 +120,53 @@ const Available: React.FC = () => {
 
   return (
     <div className="available-container">
-      <header className="header">
-        <h1>Available Requests</h1>
-        <p>Browse and offer assistance to Persons in Need</p>
-        <div className="actions">
-          <input
-            type="text"
-            placeholder="Search by request title, description, or PIN name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-          <select
-            value={filterLocation}
-            onChange={(e) => setFilterLocation(e.target.value)}
-            className="filter-select"
-          >
-            <option>All Locations</option>
-            <option>North Region</option>
-            <option>South Region</option>
-            <option>East Region</option>
-            <option>West Region</option>
-            <option>Central Region</option>
-          </select>
+      <div className="available-top">
+        <div>
+        <header className="available-header"></header>
+          <h1>Available Requests</h1>
+          <p>Browse and offer assistance to different Persons in Need</p>
         </div>
-      </header>
+      </div>
 
-      <div className="request-list">
+      <div className="roles-actions">
+        <input
+          type="text"
+          placeholder="Search by request title, description, or PIN name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-available"
+        />
+        <select
+          value={filterLocation}
+          onChange={(e) => setFilterLocation(e.target.value)}
+          className="filter-available"
+        >
+          <option>All Locations</option>
+          <option>North Region</option>
+          <option>South Region</option>
+          <option>East Region</option>
+          <option>West Region</option>
+          <option>Central Region</option>
+        </select>
+      </div>
+
+      <div className="available-request-list">
         {filteredRequests.map((request) => (
           <div key={request.id} className="request-card">
-            <div className="request-header">
+            <div className="available-request-header">
               <h3>{request.title}</h3>
-              <span className={`priority ${request.priority === "High Priority" ? "high-priority" : "low-priority"}`}>
+              <span className={`available-priority ${request.priority === "High Priority" ? "high-priority" : "low-priority"}`}>
                 {request.priority}
               </span>
             </div>
-            <div className="request-details">
+            <div className="available-request-details">
               <p>
                 <strong>PIN:</strong> {request.pinName} ({request.pinId})
               </p>
               <p><MapPin className="icon" /> {request.region}</p>
               <p><Eye className="icon" /> {request.views} views</p>
             </div>
-            <button className="view-btn">View Request</button>
+            <button className="view-available">View Request</button>
           </div>
         ))}
       </div>

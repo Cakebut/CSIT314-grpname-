@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Bell, Check, X, Eye, Edit } from "lucide-react";
+import { Eye, Edit } from "lucide-react";
 import ReviewPasswordRequest from "./ReviewPasswordRequests"; // Import the modal component
+import ViewPasswordRequest from "./ViewPasswordRequests"; // View-only modal
 import "./AdminPasswordRequests.css";
 
 interface PasswordRequest {
@@ -19,14 +20,20 @@ const initialRequests: PasswordRequest[] = [
 ];
 
 const AdminPasswordRequests: React.FC = () => {
-  const [requests, setRequests] = useState<PasswordRequest[]>(initialRequests);
+  const [requests] = useState<PasswordRequest[]>(initialRequests);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All Status");
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the review modal visibility
   const [currentRequest, setCurrentRequest] = useState<PasswordRequest | null>(null); // Store the current request to be reviewed
+  const [isViewOpen, setIsViewOpen] = useState(false); // State to control the view modal visibility
+  const [currentViewRequest, setCurrentViewRequest] = useState<PasswordRequest | null>(null); // Store request for view-only modal
 
   const handleViewDetails = (id: string) => {
-    alert(`View details for request ID: ${id}`);
+    const requestToView = requests.find((r) => r.id === id);
+    if (requestToView) {
+      setCurrentViewRequest(requestToView);
+      setIsViewOpen(true);
+    }
   };
 
   const handleReviewRequest = (id: string) => {
@@ -44,45 +51,45 @@ const AdminPasswordRequests: React.FC = () => {
     return matchesUsername && matchesStatus;
   });
 
-  const statusCounts = {
-    Pending: requests.filter((r) => r.status === "Pending").length,
-    Approved: requests.filter((r) => r.status === "Approved").length,
-    Rejected: requests.filter((r) => r.status === "Rejected").length,
-  };
+  // Split into Pending and Processed (Approved + Rejected)
+  const pendingRequests = filteredRequests.filter((r) => r.status === "Pending");
+  const processedRequests = filteredRequests.filter((r) => r.status !== "Pending");
 
   return (
     <div className="password-requests-container">
-      <header className="header">
-        <h1>Password Change Requests</h1>
-        <p>Review and manage user password change requests</p>
-        <div className="actions">
+
+        <div className="password-requests-top">
+          <div>
+          <header className="password-requests-header"></header>
+            <h1>Password Change Requests</h1>
+            <p>Review and manage user password change requests</p>
+          </div>
+        </div>
+        <div className="password-requests-actions">
           <input
             type="text"
             placeholder="Search by username"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
+            className="search-password-requests"
           />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
+            className="filter-password-requests"
           >
             <option>All Status</option>
             <option>Pending</option>
             <option>Approved</option>
             <option>Rejected</option>
           </select>
-          <button className="reset-btn" onClick={() => { setSearchQuery(""); setFilterStatus("All Status"); }}>
+          <button className="reset-password-requests btn" onClick={() => { setSearchQuery(""); setFilterStatus("All Status"); }}>
             Reset
           </button>
-          <div className="status-badge-container">
-            <span className="status-badge pending">{statusCounts.Pending} Pending</span>
-          </div>
         </div>
-      </header>
 
-      <table className="requests-table">
+      <h2 style={{ marginTop: 20 }}>Pending Requests</h2>
+      <table className="password-requests-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -93,23 +100,51 @@ const AdminPasswordRequests: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredRequests.map((request) => (
+          {pendingRequests.map((request) => (
             <tr key={request.id}>
               <td>{request.id}</td>
               <td>{request.username}</td>
               <td>{request.requestDate}</td>
               <td>
-                <span className={`status ${request.status.toLowerCase()}`}>{request.status}</span>
+                <span className={`password-requests-status ${request.status.toLowerCase()}`}>{request.status}</span>
               </td>
               <td>
-                <button className="view-btn" onClick={() => handleViewDetails(request.id)}>
+                {/* <button className="view-password-requests" onClick={() => handleViewDetails(request.id)}>
+                  <Eye className="icon" /> View Details
+                </button> */}
+                <button className="review-password-requests" onClick={() => handleReviewRequest(request.id)}>
+                  <Edit className="icon" /> Review
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2 style={{ marginTop: 28 }}>Processed Requests</h2>
+      <table className="password-requests-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Request Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {processedRequests.map((request) => (
+            <tr key={request.id}>
+              <td>{request.id}</td>
+              <td>{request.username}</td>
+              <td>{request.requestDate}</td>
+              <td>
+                <span className={`password-requests-status ${request.status.toLowerCase()}`}>{request.status}</span>
+              </td>
+              <td>
+                <button className="view-password-requests" onClick={() => handleViewDetails(request.id)}>
                   <Eye className="icon" /> View Details
                 </button>
-                {request.status === "Pending" && (
-                  <button className="review-btn" onClick={() => handleReviewRequest(request.id)}>
-                    <Edit className="icon" /> Review
-                  </button>
-                )}
               </td>
             </tr>
           ))}
@@ -122,6 +157,14 @@ const AdminPasswordRequests: React.FC = () => {
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           request={currentRequest}
+        />
+      )}
+      {/* View-only modal for details */}
+      {isViewOpen && currentViewRequest && (
+        <ViewPasswordRequest
+          open={isViewOpen}
+          onClose={() => setIsViewOpen(false)}
+          request={currentViewRequest}
         />
       )}
     </div>

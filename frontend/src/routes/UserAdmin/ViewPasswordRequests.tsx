@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import "./ReviewPasswordRequests.css";
+import "./ViewPasswordRequests.css";
 
 // Mock request data for demonstration
 interface ViewPasswordRequestProps {
@@ -53,13 +53,13 @@ function ViewPasswordRequest({ open, onClose, request }: ViewPasswordRequestProp
   if (!open) return null;  // Don't render if the modal isn't open
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h3>Review Password Change Request</h3>
-        <p><strong>Request ID:</strong> #{request.id}</p>
+    <div className="view-modal-overlay" onClick={onClose}>
+      <div className="view-modal-content" onClick={e => e.stopPropagation()}>
+        <h3>View Details</h3>
+        <p style={{ marginBottom: 20 }}><strong>Request ID:</strong> #{request.id}</p>
         <p><strong>Status:</strong> {getStatusBadge(request.status)}</p>
 
-        <div className="user-info">
+        <div className="view-user-info">
           <h4>User Information</h4>
           <p><strong>Username:</strong> {request.username}</p>
           {request.email && <p><strong>Email:</strong> {request.email}</p>}
@@ -68,37 +68,25 @@ function ViewPasswordRequest({ open, onClose, request }: ViewPasswordRequestProp
           {request.lastLogin && <p><strong>Last Login:</strong> {request.lastLogin}</p>}
         </div>
 
-        <div className="request-details">
+        <div className="view-request-details">
           <h4>Request Details</h4>
           <p><strong>Request Date:</strong> {request.requestDate}</p>
-          <p><strong>Request Type:</strong> Password Change</p>
           {request.reason && <p><strong>Reason:</strong> {request.reason}</p>}
 
-          <div className="password-section">
-            <div className="password-field">
+          <div className="view-password-section">
+            <div className="view-password-field">
               <span>New Password:</span>
               <span>{showPassword ? "SecurePass123!" : "••••••••••••"}</span>
-              <button onClick={() => setShowPassword(!showPassword)} className="show-password">
-                {showPassword ? <EyeOff className="icon" /> : <Eye className="icon" />}
+              <button onClick={() => setShowPassword(!showPassword)} className="view-show-password">
+                {showPassword ? <EyeOff className="view-icon" /> : <Eye className="view-icon" />}
                 {showPassword ? "Hide" : "Show"}
               </button>
-            </div>
-            <div className="password-strength">
-              <span>Password Strength:</span>
-              <div className="progress-bar">
-                <div className="strength" style={{ width: "85%" }}></div>
-              </div>
-              <span>Strong</span>
-            </div>
-            <div className="password-check">
-              <Check className="icon" />
-              <span>Meets all security requirements</span>
             </div>
           </div>
         </div>
 
-        <div className="modal-actions">
-          <button onClick={onClose}>Close</button>
+        <div className="view-modal-actions">
+          <button onClick={onClose} className="view-cancel-btn">Close</button>
         </div>
       </div>
     </div>

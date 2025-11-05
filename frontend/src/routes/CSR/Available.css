@@ -1,50 +1,59 @@
 /* Container for Available Requests */
+
 .available-container {
   padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto; /* To center */
+}
+
+.available-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
 }
 
 /* Header section styling */
-.header {
+.available-header {
   margin-bottom: 20px;
 }
 
-.header h1 {
+.available-header h1 {
   font-size: 2rem;
   font-weight: bold;
 }
 
-.header p {
+.available-header p {
   font-size: 1rem;
   color: #555;
 }
 
-.actions {
+.available-actions {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
 
-.search-input {
+.search-available {
   padding: 5px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
   width: 250px;
 }
 
-.filter-select {
+.filter-available {
   padding: 5px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
 
-.request-list {
+.available-request-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.request-card {
+.available-request-card {
   background-color: #fff;
   padding: 15px;
   border-radius: 8px;
@@ -52,13 +61,13 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.request-header {
+.available-request-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.request-header h3 {
+.available-request-header h3 {
   font-size: 1.25rem;
   font-weight: bold;
 }
@@ -75,11 +84,11 @@
 }
 
 .low-priority {
-  background-color: #34d399;
+  background-color: #34d399;available
   color: white;
 }
 
-.request-details p {
+.available-request-details p {
   font-size: 1rem;
   margin: 5px 0;
 }
@@ -90,7 +99,7 @@
   margin-right: 5px;
 }
 
-.view-btn {
+.view-available {
   padding: 8px 16px;
   background-color: #007bff;
   color: white;
@@ -99,6 +108,6 @@
   cursor: pointer;
 }
 
-.view-btn:hover {
+.view-available:hover {
   background-color: #0056b3;
 }

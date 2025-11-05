@@ -1,102 +1,205 @@
-Main Container
+/* Main Container --------------------------------------------- */
+
 .activity-logs-container {
   padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto; /* To center */
 }
 
-/* Header Section */
-.header {
+.activity-logs-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* Header CSS --------------------------------------------- */
+
+.activity-logs-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.header h1 {
+.activity-logs-header h1 {
   font-size: 24px;
   font-weight: bold;
 }
 
-.header p {
+.activity-logs-header p {
   color: #555;
 }
 
-.actions {
+/* Filters CSS --------------------------------------------- */
+
+.activity-logs-actions {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 1px black;
+  background-color: #F9FAFB;
+  margin-top: 30px;
 }
 
-.search-input {
+.search-activity-logs {
   padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  border-radius: 10px;
+  height: 50px;
+  width: 400px;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
 }
 
-.filter-select {
-  padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.filter-activity-logs {
+  padding: 5px 40px;
+  border-radius: 10px;
+  height: 50px;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
+  text-align: left;
 }
 
-.reset-btn {
+.reset-activity-logs {
   padding: 6px 12px;
-  background-color: #f1f1f1;
-  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+}
+
+.export-activity-logs {
+  width: 140px;
+  height: 50px;
   border-radius: 4px;
   cursor: pointer;
+  margin-left: auto;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
 }
 
-.reset-btn:hover {
-  background-color: #ddd;
-}
-
-/* .export-btn {
-  background-color: #007bff;
-  color: white;
-} */
-
-.export-btn .icon {
+.export-activity-logs .icon {
   width: 16px;
   height: 16px;
   margin-right: 8px;
 }
 
-/* Table Section */
+/* Table Section --------------------------------------------- */
+
 .activity-logs-table {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+  border-spacing: 0;
+  margin-top: 40px;
+  border: 1px solid black;
+  overflow: hidden;
+  table-layout: fixed;
+  border-collapse: separate;
+  background-color: #F9FAFB;
+  background-clip: padding-box;
+  border-radius: 5px;
 }
 
 .activity-logs-table th, .activity-logs-table td {
   padding: 12px;
-  border: 1px solid #ddd;
-  text-align: left;
+  border: none;
+  text-align: center;
 }
 
 .activity-logs-table th {
-  background-color: #f8f9fa;
+  background-color: #F9FAFB;
+  border-bottom: 1px solid black;
 }
 
-/* Account Status */
-.status {
-  padding: 4px 8px;
-  border-radius: 4px;
+.activity-logs-table tbody tr + tr td {
+  border-top: 1px solid #000;
 }
 
-.status.active {
-  background-color: #28a745;
-  color: white;
+.activity-logs-table th:nth-child(1), 
+.activity-logs-table td:nth-child(1) { 
+  width: 18%;
 }
 
-.status.suspended {
-  background-color: #dc3545;
-  color: white;
+.activity-logs-table th:nth-child(2), 
+.activity-logs-table td:nth-child(2) { 
+  width: 16%; 
 }
 
-/* Actions */
+.activity-logs-table th:nth-child(3), 
+.activity-logs-table td:nth-child(3) { 
+  width: 14%; 
+}
+
+.activity-logs-table th:nth-child(4), 
+.activity-logs-table td:nth-child(4) { 
+  width: 28%; 
+}
+
+.activity-logs-table th:nth-child(5), 
+.activity-logs-table td:nth-child(5) { 
+  width: 24%; text-align: left; 
+}
+
+/* .activity-logs-table th:nth-child(5) {
+  text-align: center;
+}
+
+.activity-logs-table td:nth-child(5) {
+  text-align: left; 
+} */
+
+/* Details CSS --------------------------------------------- */
+
+
+
+.activity-logs-details {
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action Button CSS --------------------------------------------- */
 .icon {
   width: 16px;
   height: 16px;
   margin-right: 8px;
 }
+
+.activity-logs-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #000;
+  color: #fff;
+  font-size: 13px;
+  text-transform: none;
+  width: 150px;
+}
+
+/* .activity-logs-action.login {
+  background-color: #155224; 
+}
+.activity-logs-action.password_change {
+  background-color: #c5500d; 
+}
+.activity-logs-action.logout {
+  background-color: #374151;
+}
+.activity-logs-action.suspended {
+  background-color: #b41928; 
+}
+.activity-logs-action.account_deleted {
+  background-color: #6b7280; 
+}
+.activity-logs-action.account_activated {
+  background-color: #155224;
+}
+.activity-logs-action.account_created {
+  background-color: #1d4ed8; 
+} */

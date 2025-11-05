@@ -20,19 +20,10 @@ interface ReviewPasswordRequestProps {
 }
 
 function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequestProps) {
-  const [decision, setDecision] = useState<"approve" | "reject" | "">("");
-  const [adminNotes, setAdminNotes] = useState("");
+  const [adminNotes, _setAdminNotes] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-
-  const handleSubmit = () => {
-    if (decision) {
-      // Handle submission logic here
-      console.log("Decision:", decision, "Notes:", adminNotes);
-      onClose();
-    }
-  };
 
   const handleApprove = () => {
     setShowConfirmDialog(true);
@@ -84,7 +75,7 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <h3>Review Password Change Request</h3>
-        <p><strong>Request ID:</strong> #{request.id}</p>
+        <p style={{ marginBottom: 20 }}><strong>Request ID:</strong> #{request.id}</p>
         <p><strong>Status:</strong> {getStatusBadge(request.status || "pending")}</p>
 
         <div className="user-info">
@@ -99,7 +90,6 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
         <div className="request-details">
           <h4>Request Details</h4>
           <p><strong>Request Date:</strong> {request.requestDate}</p>
-          <p><strong>Request Type:</strong> Password Change</p>
           {request.reason && <p><strong>Reason:</strong> {request.reason}</p>}
 
           <div className="password-section">
@@ -111,57 +101,32 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
-            <div className="password-strength">
-              <span>Password Strength:</span>
-              <div className="progress-bar">
-                <div className="strength" style={{ width: "85%" }}></div>
-              </div>
-              <span>Strong</span>
-            </div>
-            <div className="password-check">
-              <Check className="icon" />
-              <span>Meets all security requirements</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Decision */}
-        <div className="decision-section">
-          <label>Decision:</label>
-          <div className="radio-group">
-            <input
-              type="radio"
-              value="approve"
-              checked={decision === "approve"}
-              onChange={() => setDecision("approve")}
-            />
-            <label>Approve - Update password and notify user</label>
-
-            <input
-              type="radio"
-              value="reject"
-              checked={decision === "reject"}
-              onChange={() => setDecision("reject")}
-            />
-            <label>Reject - Deny request and notify user</label>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="actions">
-          <button onClick={onClose}>Cancel</button>
-          <button
-            onClick={() => {
-              setDecision("reject");
-              setTimeout(handleSubmit, 100);
-            }}
-            className="reject-btn"
-          >
-            Reject Request
-          </button>
-          <button onClick={handleApprove} className="approve-btn">
-            ✓ Approve
-          </button>
+          <div className="actions-left">
+            <button onClick={onClose} className="cancel-btn">Cancel</button>
+          </div>
+          <div className="actions-right">
+            <button
+              onClick={() => {
+                setTimeout(() => {
+                  console.log('Reject action');
+                  onClose();
+                }, 100);
+              }}
+              className="reject-btn"
+            >
+              <X className="icon" /> 
+              Reject
+            </button>
+            <button onClick={handleApprove} className="approve-btn">
+              <Check className="icon" />
+              Approve
+            </button>
+          </div>
         </div>
       </div>
 
@@ -189,7 +154,6 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
             <p>Password change request approved</p>
             <ul>
               <li>User's password has been updated</li>
-              <li>Confirmation email sent to user</li>
               <li>Request marked as approved</li>
             </ul>
             <button onClick={handleBackToDashboard}>Back to Dashboard</button>

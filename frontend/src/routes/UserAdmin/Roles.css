@@ -1,4 +1,5 @@
-/* Main Container */
+/* Container CSS ---------------------------------------------------------------------------------------------- */
+
 .roles-container {
   padding: 20px;
   max-width: 100%;
@@ -12,7 +13,8 @@
   margin-bottom: 18px;
 }
 
-/* Header Section */
+/* Header  CSS ---------------------------------------------------------------------------------------------- */
+
 .roles-header {
   display: flex;
   justify-content: space-between;
@@ -28,6 +30,8 @@
 .roles-header p {
   color: #555;
 }
+
+/* Filters CSS ---------------------------------------------------------------------------------------------- */
 
 .roles-actions {
   display: flex;
@@ -70,7 +74,7 @@
   box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
 }
 
-.export-roles {
+.create-roles {
   width: 130px;
   height: 50px;
   border-radius: 4px;
@@ -79,86 +83,123 @@
   box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
 }
 
-.export-roles .icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-}
+/* Table CSS ---------------------------------------------------------------------------------------------- */
 
-/* Table Section */
 .roles-table {
   width: 100%;
   border-spacing: 0;
   margin-top: 40px;
   border: 1px solid black;
-  border-radius: 10px; 
   overflow: hidden;
+  table-layout: fixed;
+}
+
+.roles-table {
+  border-collapse: separate;
+  background-color: #F9FAFB;
+  border: 1px solid black;
+  background-clip: padding-box;
 }
 
 .roles-table th, .roles-table td {
   padding: 20px 15px;
-  text-align: left;
+  text-align: center;
   border: none;
 }
 
-.roles-table tr {
-  border: 1px solid black;
+.roles-table th:nth-child(1),
+.roles-table td:nth-child(1) {
+  width: 10%;
+  padding-left: 15px;
+  padding-right: 8px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.roles-table th:nth-child(2),
+.roles-table td:nth-child(2) {
+  width: 40%;
+}
+
+.roles-table th:nth-child(3),
+.roles-table td:nth-child(3) {
+  width: 25%;
+}
+
+.roles-table th:nth-child(4),
+.roles-table td:nth-child(4) {
+  width: 25%;
+  gap: 10px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.roles-table {
+  /* keep this selector present for future table-wide overrides (no collapse override here) */
+  border-radius: 5px;
+}
+.roles-table tbody tr + tr td {
+  border-top: 1px solid #000;
 }
 
 .roles-table th {
-  background-color: #f8f9fa;
-  border: none;
+  background-color: #F9FAFB;
+  border-bottom: 1px solid black;
 }
 
-.status {
-  padding: 4px 8px;
-  border-radius: 4px;
+.roles-status {
+  padding: 5px 8px;
+  border-radius: 5px;
+  display: inline-block; /* allow width to apply */
+  box-sizing: border-box; /* include padding in width calculation */
+  width: 105px;
+  height: 30px;
+  text-align: center;
 }
 
-.status.active {
-  background-color: #28a745;
+.roles-status.active {
+  background-color: #155224;
   color: white;
+  font-size: 14px;
 }
 
-.status.inactive {
-  background-color: #dc3545;
+.roles-status.inactive {
+  background-color: #b41928;
   color: white;
+  font-size: 14px;
 }
 
-/* Action Buttons */
-.edit-roles, .delete-roles {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
+.roles-table tbody tr.inactive{
+  background-color: rgba(255, 0, 0, 0.08);
+}
+
+/* Action Buttons CSS ---------------------------------------------------------------------------------------------- */
+
+.disable-roles, .delete-roles {
+  border-radius: 5px;
   cursor: pointer;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 85px;
+  height: 30px;
+  font-size: 14px;
 }
 
-.edit-roles {
-  background-color: #007bff;
+.disable-roles.disable {
+  /* background-color: #b41928; */
+  background-color: black;
+  color: white;
+}
+
+.disable-roles.enable {
+  /* background-color: #155224; */
+  background-color: black;
   color: white;
 }
 
 .delete-roles {
-  background-color: #dc3545;
+  background-color: black;
   color: white;
-}
-
-.edit-roles:hover {
-  background-color: #0056b3;
-}
-
-.delete-roles-:hover {
-  background-color: #c82333;
-}
-
-.create-roles {
-  height: 60px;
-  width: 145px;
-  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
-}
-
-.create-text {
-  font-size: 15px;
 }
 
 
@@ -188,3 +229,66 @@ button {
   color: black;
   border: 1px solid black;
 }
+
+/* Modal CSS ---------------------------------------------------------------------------------------------- */
+
+.roles-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.roles-modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  width: 420px;
+  max-width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.roles-modal h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.roles-modal-form label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.roles-modal-form input,
+.roles-modal-form select {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+.roles-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+.roles-modal-cancel {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.roles-modal-create {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.roles-modal-create:hover { opacity: 0.95 }
+.roles-modal-cancel:hover { background: #f4f4f4 }
