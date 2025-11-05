@@ -42,7 +42,13 @@ function App() {
 
   // ProtectedRoute component for all actors
 function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, allowedRole: string }) {
-  const role = localStorage.getItem('currentRole');
+  const [role, setRole] = React.useState(localStorage.getItem('currentRole'));
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRole(localStorage.getItem('currentRole'));
+    }, 2000); // check every 2 seconds
+    return () => clearInterval(interval);
+  }, []);
   if (role === allowedRole) {
     return <>{children}</>;
   } else {

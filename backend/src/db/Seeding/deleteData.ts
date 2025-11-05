@@ -1,6 +1,8 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { service_typeTable , locationTable , urgency_levelTable , useraccountTable, csr_requestsTable,pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable } from '../schema/aiodb';
+import { passwordResetRequestsTable } from '../schema/aiodb';
+ 
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,6 +10,18 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 const db = drizzle(pool);
+
+
+// Delete all password reset requests
+async function deleteResetPasswordRequests() {
+  try {
+    console.log('🗑️ Deleting Password Reset Requests...');
+    const result = await db.delete(passwordResetRequestsTable);
+    console.log('✅ All password reset requests deleted! Result:', result);
+  } catch (err) {
+    console.error('❌ Error deleting password reset requests:', err);
+  }
+}
 
 //delete all users
 async function deleteAllUsers(count?: number) {
@@ -122,6 +136,7 @@ async function deleteAllData() {
   await deleteAllUsers();
   await deleteServiceTypes();
   await deleteLocations();
+  await deleteResetPasswordRequests();
   await deleteUrgencyLevels();
   console.log('✅ All data deleted in correct order!');
   await pool.end(); // Only close pool once, at the end

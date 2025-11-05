@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
           </ul>
         </div>
         <div className="form-actions">
-          <button type="button" onClick={() => navigate("/login")}>Cancel</button>
+          <button type="button" onClick={() => navigate("/")}>Cancel</button>
           <button type="submit" disabled={loading || !username || !newPassword || !confirmPassword || !validatePassword(newPassword)}>
             {loading ? "Submitting..." : "Reset Password"}
           </button>
