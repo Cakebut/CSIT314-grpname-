@@ -98,6 +98,21 @@ public async getAllUserAccounts(): Promise<useraccountData[]> {
   }
 }
 
+  // Get a single user by username
+  public async getUserByUsername(username: string): Promise<{ id: number; username: string } | null> {
+    try {
+      const [user] = await db
+        .select({ id: useraccountTable.id, username: useraccountTable.username })
+        .from(useraccountTable)
+        .where(eq(useraccountTable.username, username))
+        .limit(1);
+      return user ?? null;
+    } catch (err) {
+      console.error('getUserByUsername error:', err);
+      return null;
+    }
+  }
+
 
 
 // Update user info by id
@@ -267,7 +282,7 @@ public async deleteUser(id: number): Promise<boolean> {
 //==================================================
 // Password Reset Request Entity Methods
   // Create a new password reset request
-  async createPasswordResetRequest(userId: number, username: string, newPassword: string) {
+  async submitPasswordResetRequest(userId: number, username: string, newPassword: string) {
     try {
       const [request] = await db.insert(passwordResetRequestsTable).values({
         user_id: userId,

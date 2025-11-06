@@ -26,6 +26,8 @@ export class UpdateUserController {
     const result = await this.userEntity.updateUser(id, username, roleid, issuspended);
     return result;
   }
+
+  
   public async deleteUserById(id: number, actor: string) {
     // Get username for logging
     const users = await this.userEntity.getAllUserAccounts();
@@ -116,29 +118,32 @@ export class ExportUserAccountController {
 
 // Password Reset Request Controller
 export class PasswordResetRequestController {
-  
+   private userEntity = new UserEntity();
+
   // Clear all password reset requests
   public async clearAllPasswordResetRequests() {
     return await this.userEntity.clearAllPasswordResetRequests();
   }
-  private userEntity = new UserEntity();
-
+  
+  //USER -> Admin Password Reset Request Flow
   // User submits a password reset request (accepts username)
   public async submitPasswordResetRequest(username: string, newPassword: string) {
-    // Look up userId from username
-    const user = await db.select().from(useraccountTable).where(eq(useraccountTable.username, username)).limit(1);
-    if (!user || user.length === 0) {
+    // Look up userId from username using entity
+    const user = await this.userEntity.getUserByUsername(username);
+    if (!user) {
       return { success: false, status: 404, error: "User not found" };
     }
-    const userId = user[0].id;
-    const request = await this.userEntity.createPasswordResetRequest(userId, username, newPassword);
-    if (request) {
+    const userId = user.id;
+    const request = await this.userEntity.submitPasswordResetRequest(userId, username, newPassword);
+    if (request) {  
       return { success: true, status: 200, request };
     } else {
       return { success: false, status: 500, error: "Failed to submit request" };
     }
   }
 
+
+  //ADMIN
   // Admin fetches all password reset requests (optionally filter by status)
   public async getPasswordResetRequests(status?: string) {
     return await this.userEntity.getPasswordResetRequests(status);

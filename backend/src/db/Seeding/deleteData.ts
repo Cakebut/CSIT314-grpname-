@@ -133,10 +133,10 @@ async function deleteAllData() {
   await deleteCSR_Req();
   await deletePIN_Req();
   await deleteNotifications();
+  await deleteResetPasswordRequests();   // remove dependent password-reset records before deleting users to avoid FK violations
   await deleteAllUsers();
   await deleteServiceTypes();
   await deleteLocations();
-  await deleteResetPasswordRequests();
   await deleteUrgencyLevels();
   console.log('✅ All data deleted in correct order!');
   await pool.end(); // Only close pool once, at the end
