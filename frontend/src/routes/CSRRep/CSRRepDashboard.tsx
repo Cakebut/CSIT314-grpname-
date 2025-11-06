@@ -1,3 +1,8 @@
+import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import "./CSRRepDashboard.css";
+import "./CSRRepDashboard.extra.css";
+
 // Modal component for CSR Rep to increment view count on open
 interface CSRRequestDetailsModalProps {
   request: any;
@@ -194,10 +199,7 @@ function CSRRequestDetailsModal({ request, onClose, csrId, shortlistedIds, inter
   );
 }
  
-import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import "./CSRRepDashboard.css";
-import "./CSRRepDashboard.extra.css";
+
 
 
 // --- Auth Utilities ---
@@ -264,20 +266,20 @@ function CSRHeader() {
       </div>
       <div className="csr-header-right">
         <div className="csr-noti" style={{ position: 'relative' }}>
-          <button className="csr-icon-btn" onClick={() => setShowNoti(s => !s)} aria-label="Notifications" style={{ position: 'relative', fontSize: 24 }}>
-            <span style={{ position: 'relative' }}>
-              🔔
+          <button className="csr-icon-btn" onClick={() => setShowNoti(s => !s)} aria-label="Notifications" style={{ position: 'relative', fontSize: 24, background: '#e0e7ef', borderRadius: 24, width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }}>
+            <span style={{ position: 'relative', display: 'inline-block' }}>
+              <span role="img" aria-label="bell">🔔</span>
               {hasUnread && (
                 <span style={{
                   position: 'absolute',
-                  top: -2,
-                  right: -6,
-                  width: 12,
-                  height: 12,
+                  top: 2,
+                  right: 2,
+                  width: 9,
+                  height: 9,
                   background: '#ef4444',
                   borderRadius: '50%',
-                  border: '2px solid #fff',
-                  boxShadow: '0 0 4px #ef4444',
+                  border: '1.5px solid #fff',
+                  boxShadow: '0 0 2px #ef4444',
                   display: 'inline-block',
                 }} />
               )}
@@ -374,91 +376,28 @@ function NavBar({ setPage }: { setPage: (page: string) => void }) {
   );
 }
 
-// --- RequestCard ---
-type RequestCardProps = {
-  title: string;
-  location: string;
-  urgencyLevel?: string | null;
-  specialNeeds?: string | null;
-  categoryName?: string;
-  status?: string;
-  onRemove?: () => void;
-  loading?: boolean;
-};
-function RequestCard({ title, location, urgencyLevel, specialNeeds, categoryName, status, onRemove, loading }: RequestCardProps) {
-  // Determine background color for high priority
-  const isHighPriority = urgencyLevel && urgencyLevel.toLowerCase() === 'high priority';
-  // Determine status chip color
-  let statusBg = '#f1f5f9';
-  let statusColor = '#64748b';
-  if (status && status.toLowerCase() === 'available') {
-    statusBg = '#22c55e';
-    statusColor = 'white';
-  }
-  return (
-    <div className="csr-card csr-card-shortlisted" style={{ minWidth: 340, maxWidth: 440, fontSize: '1.08rem', background: isHighPriority ? '#fee2e2' : '#fff', boxShadow: '0 2px 8px #e0e7ef', borderRadius: 14 }}>
-      <div className="csr-card-top" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span className="csr-card-title" style={{ fontWeight: 700, fontSize: '1.22rem', color: '#1e293b' }}>{title}</span>
-          {categoryName && <span className="csr-chip csr-chip-category" style={{ background: '#e0e7ef', color: '#334155', fontWeight: 600 }}>{categoryName}</span>}
-          {status && <span className="csr-chip csr-chip-status" style={{ background: statusBg, color: statusColor, fontWeight: 600 }}>{status}</span>}
-          {urgencyLevel && <span className="csr-chip csr-chip-urgency" style={{ background: urgencyLevel.toLowerCase() === 'high priority' ? '#ef4444' : urgencyLevel.toLowerCase() === 'low priority' ? '#22c55e' : '#6b7280', color: 'white', fontWeight: 700 }}>{urgencyLevel}</span>}
-        </div>
-      </div>
-      <div className="csr-card-body" style={{ fontSize: '1.08rem' }}>
-        <div><strong>Location:</strong> {location}</div>
-        {specialNeeds && <div><strong>Needs:</strong> {specialNeeds}</div>}
-      </div>
-      {onRemove && (
-        <div className="csr-card-actions">
-          <button className="csr-btn-danger" onClick={onRemove} disabled={!!loading}>
-            {loading ? "Removing..." : "Remove from Shortlist"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// --- RequestRow ---
-type RequestListItem = {
-  requestId: number;
-  title?: string;
-  categoryName?: string;
-  location: string;
-  urgencyLevel?: string | null;
-  status?: string;
-};
-function RequestRow({ item, onClick }: { item: RequestListItem; onClick?: () => void }) {
-  return (
-    <div className="csr-req-row" onClick={onClick} role="button">
-      <div className="csr-req-row-top">
-        <div className="csr-req-title">
-          <span className="csr-req-title-text">{item.categoryName}</span>
-          <span className="csr-req-id">REQ-{String(item.requestId).padStart(3, "0")}</span>
-          {item.urgencyLevel && <span className="csr-chip csr-chip-urgency">{item.urgencyLevel}</span>}
-        </div>
-        <div className="csr-req-views">{item.location}</div>
-      </div>
-      <div className="csr-req-row-bottom">
-        <div className="csr-muted">Region shown via location</div>
-      </div>
-    </div>
-  );
-}
-
-// --- SummaryCard ---
-function SummaryCard({ label, value, onClick }: { label: string; value: number | string; onClick?: () => void }) {
-  return (
-    <div className="csr-summary-card" onClick={onClick} role={onClick ? "button" : undefined}>
-      <div className="csr-summary-label">{label}</div>
-      <div className="csr-summary-value">{value}</div>
-    </div>
-  );
-}
 
 // --- CSRAvailableRequests ---
 function CSRAvailableRequests() {
+  // Filter and search state for Requests
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterUrgency, setFilterUrgency] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [searchTitle, setSearchTitle] = useState("");
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [urgencyOptions, setUrgencyOptions] = useState<string[]>(["High Priority", "Low Priority"]);
+  useEffect(() => {
+    fetch('/api/csr/service-types')
+      .then(res => res.json())
+      .then(data => setCategoryOptions(data.serviceTypes || []))
+      .catch(() => setCategoryOptions([]));
+    fetch('/api/csr/locations')
+      .then(res => res.json())
+      .then(data => setLocationOptions(data.locations || []))
+      .catch(() => setLocationOptions([]));
+  }, []);
   // Color logic for status and urgency
   function getStatusColor(status: string | undefined) {
     switch ((status || '').toLowerCase()) {
@@ -530,45 +469,85 @@ function CSRAvailableRequests() {
   return (
     <div className="csr-page">
       <h2 className="csr-section-title big">All Person-In-Need Requests</h2>
+      {/* Filter and Search Bar UI */}
+  <div style={{ display: 'flex', gap: 14, margin: '18px 0 8px 0', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={searchTitle}
+          onChange={e => setSearchTitle(e.target.value)}
+          style={{ width: 220, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}
+        />
+        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}>
+          <option value="">All Categories</option>
+          {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        <select value={filterLocation} onChange={e => setFilterLocation(e.target.value)} style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}>
+          <option value="">All Locations</option>
+          {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        <select value={filterUrgency} onChange={e => setFilterUrgency(e.target.value)} style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}>
+          <option value="">All Urgency</option>
+          {urgencyOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}>
+          <option value="">All Status</option>
+          <option value="Available">Available</option>
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <button className="csr-btn-outline" style={{ minWidth: 110, height: 38 }} onClick={() => { setFilterCategory(""); setFilterLocation(""); setFilterUrgency(""); setFilterStatus(""); setSearchTitle(""); }}>Clear Filter</button>
+      </div>
       <p className="csr-muted">Browse all requests from Persons in Need</p>
       <div className="csr-list">
-        {requests.length === 0 ? (
-          <div className="csr-empty">No requests found.</div>
-        ) : (
-          // Filter out duplicate requests by requestId, and hide completed
-          Array.from(new Map(requests.map(r => [r.requestId, r])).values())
-            .filter(r => r.status !== 'Completed')
-            .map((r) => (
-              <div
-                key={r.requestId}
-                className="csr-req-row"
-                onClick={() => setSelected(r)}
-                style={{
-                  cursor: 'pointer',
-                  background: r.urgencyLevel && r.urgencyLevel.toLowerCase() === 'high priority' ? '#fee2e2' : '#fff',
-                }}
-              >
-                <div className="csr-req-row-top">
-                  <div className="csr-req-title">
-                    <span className="csr-req-title-text" style={{ fontSize: '1.45rem', fontWeight: 700, color: '#1e293b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{r.title || 'Untitled Request'}</span>
-                    <span className="csr-req-id">REQ-{String(r.requestId).padStart(3, "0")}</span>
-                    {r.urgencyLevel && (
-                      <span className={`csr-chip csr-chip-urgency${r.urgencyLevel.toLowerCase() === 'high priority' ? ' high' : r.urgencyLevel.toLowerCase() === 'low priority' ? ' low' : ''}`}
-                        style={{ backgroundColor: getUrgencyColor(r.urgencyLevel), color: 'white', fontWeight: 700 }}
-                      >
-                        {r.urgencyLevel}
-                      </span>
-                    )}
+        {Array.from(new Map(requests.map(r => [r.requestId, r])).values())
+          .filter(r => r.status !== 'Completed')
+          .filter(r => !filterCategory || r.categoryName === filterCategory)
+          .filter(r => !filterLocation || (r.location === filterLocation || r.locationName === filterLocation))
+          .filter(r => !filterUrgency || r.urgencyLevel === filterUrgency)
+          .filter(r => !filterStatus || r.status === filterStatus)
+          .filter(r => !searchTitle || (r.title && r.title.toLowerCase().includes(searchTitle.toLowerCase())))
+          .length === 0 ? (
+            <div className="csr-empty">No requests found.</div>
+          ) : (
+            Array.from(new Map(requests.map(r => [r.requestId, r])).values())
+              .filter(r => r.status !== 'Completed')
+              .filter(r => !filterCategory || r.categoryName === filterCategory)
+              .filter(r => !filterLocation || (r.location === filterLocation || r.locationName === filterLocation))
+              .filter(r => !filterUrgency || r.urgencyLevel === filterUrgency)
+              .filter(r => !filterStatus || r.status === filterStatus)
+              .filter(r => !searchTitle || (r.title && r.title.toLowerCase().includes(searchTitle.toLowerCase())))
+              .map((r) => (
+                <div
+                  key={r.requestId}
+                  className="csr-req-row"
+                  onClick={() => setSelected(r)}
+                  style={{
+                    cursor: 'pointer',
+                    background: r.urgencyLevel && r.urgencyLevel.toLowerCase() === 'high priority' ? '#fee2e2' : '#fff',
+                  }}
+                >
+                  <div className="csr-req-row-top">
+                    <div className="csr-req-title">
+                      <span className="csr-req-title-text" style={{ fontSize: '1.45rem', fontWeight: 700, color: '#1e293b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{r.title || 'Untitled Request'}</span>
+                      <span className="csr-req-id">REQ-{String(r.requestId).padStart(3, "0")}</span>
+                      {r.urgencyLevel && (
+                        <span className={`csr-chip csr-chip-urgency${r.urgencyLevel.toLowerCase() === 'high priority' ? ' high' : r.urgencyLevel.toLowerCase() === 'low priority' ? ' low' : ''}`}
+                          style={{ backgroundColor: getUrgencyColor(r.urgencyLevel), color: 'white', fontWeight: 700 }}
+                        >
+                          {r.urgencyLevel}
+                        </span>
+                      )}
+                    </div>
+                    <div className="csr-req-views" style={{ fontSize: '1.02rem', color: '#0ea5e9', fontWeight: 500 }}>{r.location || r.locationName || '-'}</div>
                   </div>
-                  <div className="csr-req-views" style={{ fontSize: '1.02rem', color: '#0ea5e9', fontWeight: 500 }}>{r.location || r.locationName || '-'}</div>
+                  <div className="csr-req-row-bottom">
+                    <div className="csr-muted" style={{ fontSize: '1.05rem', color: '#64748b', fontWeight: 500 }}>{r.categoryName}</div>
+                    <div className="csr-muted" style={{ fontWeight: 600, fontSize: '1.05rem', color: getStatusColor(r.status) }}>{r.status || '-'}</div>
+                  </div>
                 </div>
-                <div className="csr-req-row-bottom">
-                  <div className="csr-muted" style={{ fontSize: '1.05rem', color: '#64748b', fontWeight: 500 }}>{r.categoryName}</div>
-                  <div className="csr-muted" style={{ fontWeight: 600, fontSize: '1.05rem', color: getStatusColor(r.status) }}>{r.status || '-'}</div>
-                </div>
-              </div>
-            ))
-        )}
+              ))
+          )}
       </div>
       {selected && (
         <CSRRequestDetailsModal
@@ -595,25 +574,46 @@ function CSRDashboard() {
 // --- CSRHistory ---
 function CSRHistory() {
   type Status = "Pending" | "Completed";
-  type ServiceType = "Food Distribution" | "Elder Care" | "Environmental" | "Education" | "Healthcare";
   type HistoryRow = {
     name: string;
     date: string;
-    duration: string;
     location: string;
-    type: ServiceType;
+    type: string;
     status: Status;
   };
-  const DATA: HistoryRow[] = [
-    { name: "Meal delivery for senior",     date: "2025-10-20", duration: "1h",  location: "Downtown Community Center", type: "Food Distribution", status: "Completed" },
-    { name: "Computer setup for PIN",       date: "2025-10-22", duration: "2h",  location: "Lincoln High School",       type: "Education",         status: "Completed" },
-    { name: "Park cleanup activity",        date: "2025-10-24", duration: "1.5h",location: "Greenfields Park",          type: "Environmental",     status: "Pending"   },
-    { name: "Wheelchair escort",            date: "2025-10-25", duration: "1h",  location: "Central Medical Wing",      type: "Healthcare",        status: "Completed" },
-  ];
-  const TYPES: ("All Types" | ServiceType)[] = ["All Types", "Food Distribution", "Elder Care", "Environmental", "Education", "Healthcare"];
-  const [svcType, setSvcType] = useState<(typeof TYPES)[number]>("All Types");
+  const [DATA, setDATA] = useState<HistoryRow[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<string[]>(["All Types"]);
+  const [svcType, setSvcType] = useState<string>("All Types");
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
+
+  // Fetch service types from backend
+  useEffect(() => {
+    fetch('/api/csr/service-types')
+      .then(res => res.json())
+      .then(data => {
+        setServiceTypes(["All Types", ...(data.serviceTypes || [])]);
+      })
+      .catch(() => setServiceTypes(["All Types"]));
+  }, []);
+
+  // Fetch real history from backend
+  useEffect(() => {
+    (async () => {
+      const csrId = getCSRId();
+      if (!csrId) return;
+      try {
+        const res = await fetch(`/api/csr/${csrId}/history`);
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const json = await res.json();
+        setDATA(json.history || []);
+      } catch (e) {
+        console.error("Failed to load CSR history", e);
+        setDATA([]);
+      }
+    })();
+  }, []);
+
   const filtered = useMemo(() => {
     return DATA.filter(row => {
       const itype = svcType === "All Types" || row.type === svcType;
@@ -621,7 +621,7 @@ function CSRHistory() {
       const iend = !end || row.date <= end;
       return itype && istart && iend;
     });
-  }, [svcType, start, end]);
+  }, [DATA, svcType, start, end]);
   const totals = {
     total: filtered.length,
     pending: filtered.filter(r => r.status === "Pending").length,
@@ -634,8 +634,8 @@ function CSRHistory() {
   };
   const downloadCsv = () => {
     const rows = [
-      ["Service Name", "Date", "Duration", "Location", "Service Type", "Status"],
-      ...filtered.map(r => [r.name, r.date, r.duration, r.location, r.type, r.status]),
+      ["Service Name", "Date", "Location", "Service Type", "Status"],
+      ...filtered.map(r => [r.name, r.date, r.location, r.type, r.status]),
     ];
     const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -668,11 +668,29 @@ function CSRHistory() {
       </div>
       <h3 className="csr-subtitle">Filter Options</h3>
       <div className="csr-filters">
-        <select className="csr-select" value={svcType} onChange={e => setSvcType(e.target.value as any)}>
-          {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        <select className="csr-select" value={svcType} onChange={e => setSvcType(e.target.value)}>
+          {serviceTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
-        <input type="date" className="csr-input" value={start} onChange={e => setStart(e.target.value)} />
-        <input type="date" className="csr-input" value={end} onChange={e => setEnd(e.target.value)} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label htmlFor="csr-history-start" style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: 500, marginBottom: 2 }}>Start Date</label>
+          <input
+            id="csr-history-start"
+            type="date"
+            className="csr-input"
+            value={start}
+            onChange={e => setStart(e.target.value)}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label htmlFor="csr-history-end" style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: 500, marginBottom: 2 }}>End Date</label>
+          <input
+            id="csr-history-end"
+            type="date"
+            className="csr-input"
+            value={end}
+            onChange={e => setEnd(e.target.value)}
+          />
+        </div>
         <button className="csr-btn" onClick={() => { /* live filtering */ }}>Apply Filter</button>
         <button className="csr-btn-outline" onClick={clear}>Clear Filter</button>
       </div>
@@ -681,7 +699,6 @@ function CSRHistory() {
         <div className="csr-thead">
           <div>Service Name</div>
           <div>Date</div>
-          <div>Duration</div>
           <div>Location</div>
           <div>Service Type</div>
           <div>Status</div>
@@ -690,7 +707,6 @@ function CSRHistory() {
           <div key={i} className="csr-trow">
             <div>{r.name}</div>
             <div>{r.date}</div>
-            <div>{r.duration}</div>
             <div>{r.location}</div>
             <div>{r.type}</div>
             <div>{r.status}</div>
@@ -718,10 +734,17 @@ function CSROffers() {
   feedbackRating?: number;
   feedbackDescription?: string;
   feedbackCreatedAt?: string;
+  categoryName?: string;
+  location?: string;
   };
   const TABS: OfferStatus[] = ["All", "Pending", "Accepted", "Rejected", "Completed"];
   const [tab, setTab] = useState<OfferStatus>("All");
   const [offers, setOffers] = useState<OfferItem[]>([]);
+  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterLocation, setFilterLocation] = useState<string>("");
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [filterStatus, setFilterStatus] = useState<OfferStatus | "">("");
   const csrId = getCSRId();
   useEffect(() => {
     const fetchOffers = async () => {
@@ -746,6 +769,8 @@ function CSROffers() {
           feedbackRating: r.feedbackRating,
           feedbackDescription: r.feedbackDescription,
           feedbackCreatedAt: r.feedbackCreatedAt,
+          categoryName: r.categoryName || r.category_name || '-',
+          location: r.location || r.locationName || r.location_name || '-',
         }));
         setOffers(data);
       } catch (e) {
@@ -754,17 +779,38 @@ function CSROffers() {
     };
     fetchOffers();
   }, [csrId]);
+
+  // Fetch category and location options from backend
+  useEffect(() => {
+    fetch('/api/csr/service-types')
+      .then(res => res.json())
+      .then(data => setCategoryOptions(data.serviceTypes || []))
+      .catch(() => setCategoryOptions([]));
+    fetch('/api/csr/locations')
+      .then(res => res.json())
+      .then(data => setLocationOptions(data.locations || []))
+      .catch(() => setLocationOptions([]));
+  }, []);
   // --- Fetch offer counters from csr_requests ---
   // Show all offers, including rejected and duplicates
   const total = offers.length;
-  const pending = offers.filter(o => o.status === "Pending").length;
-  const accepted = offers.filter(o => o.status === "Accepted").length;
-  const rejected = offers.filter(o => o.status === "Rejected").length;
-  const completed = offers.filter(o => o.status === "Completed").length;
+  // --- Filtering logic ---
   const filtered = useMemo(() => {
-    if (tab === "All") return offers;
-    return offers.filter(o => o.status === tab);
-  }, [tab, offers]);
+    let result = offers;
+    if (tab !== "All") {
+      result = result.filter(o => o.status === tab);
+    }
+    if (filterCategory.trim()) {
+      result = result.filter(o => o.categoryName?.toLowerCase().includes(filterCategory.trim().toLowerCase()));
+    }
+    if (filterLocation.trim()) {
+      result = result.filter(o => o.location?.toLowerCase().includes(filterLocation.trim().toLowerCase()));
+    }
+    if (filterStatus && filterStatus !== "All") {
+      result = result.filter(o => o.status === filterStatus);
+    }
+    return result;
+  }, [tab, offers, filterCategory, filterLocation, filterStatus]);
   const handleCancelInterest = async (requestId: number) => {
     const csrId = getCSRId();
     if (!csrId) return;
@@ -788,22 +834,36 @@ function CSROffers() {
     <div className="csr-page">
       <h2 className="csr-section-title big">My Offers</h2>
       <p className="csr-muted">Track and manage your offers</p>
-      <div className="csr-offer-counters">
-        <div className="csr-offer-counter">Total Offers <span>{total}</span></div>
-        <div className="csr-offer-counter">Pending <span>{pending}</span></div>
-        <div className="csr-offer-counter">Accepted <span>{accepted}</span></div>
-        <div className="csr-offer-counter">Rejected <span>{rejected}</span></div>
-        <div className="csr-offer-counter">Completed <span>{completed}</span></div>
-      </div>
-      <div className="csr-tabs">
+      <div style={{ display: 'flex', gap: 14, margin: '18px 0 8px 0', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
         {TABS.map((t) => (
           <button key={t} className={`csr-tab ${tab === t ? "active" : ""}`} onClick={() => setTab(t)}>
             {t === "All" ? `All (${total})` : `${t} (${offers.filter(o => o.status === t).length})`}
           </button>
         ))}
+        <select
+          id="offer-filter-category"
+          className="csr-select"
+          value={filterCategory}
+          onChange={e => setFilterCategory(e.target.value)}
+          style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}
+        >
+          <option value="">Any Category</option>
+          {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        <select
+          id="offer-filter-location"
+          className="csr-select"
+          value={filterLocation}
+          onChange={e => setFilterLocation(e.target.value)}
+          style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}
+        >
+          <option value="">Any Location</option>
+          {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        <button className="csr-btn-outline" style={{ minWidth: 110, height: 38 }} onClick={() => { setFilterCategory(""); setFilterLocation(""); }}>Clear Filter</button>
       </div>
       <div className="csr-list">
-  {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).map((o) => (
+        {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).map((o) => (
           <div key={o.id} className="csr-req-row">
             <div className="csr-req-row-top">
               <div className="csr-req-title">
@@ -815,7 +875,8 @@ function CSROffers() {
             </div>
             <div className="csr-req-row-bottom" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <div className="csr-req-pin"><strong>PIN User:</strong> {o.pinUsername ? o.pinUsername : o.pinId}</div>
-              <div className="csr-req-interested-date"><strong>Interested On:</strong> {o.date}</div>
+              <div className="csr-req-category"><strong>Category:</strong> {o.categoryName ?? '-'}</div>
+              <div className="csr-req-location"><strong>Location:</strong> {o.location ?? '-'}</div>
               {/* Feedback section: show only if feedback exists, else show 'No feedback yet.' */}
               {(o.feedbackRating || o.feedbackDescription || o.feedbackCreatedAt) ? (
                 <div className="csr-rating" style={{ marginTop: 8 }}>
@@ -858,6 +919,12 @@ function CSRShortlist() {
   const [shortlist, setShortlist] = useState<any[]>([]);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [selected, setSelected] = useState<any | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterUrgency, setFilterUrgency] = useState<string>("");
+  const [filterLocation, setFilterLocation] = useState<string>("");
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
   const csrId = getCSRId();
   const load = async () => {
     if (!csrId) {
@@ -880,26 +947,130 @@ function CSRShortlist() {
     await load();
   };
   useEffect(() => { load(); }, [csrId]);
+  // Fetch category and location options from backend
+  useEffect(() => {
+    fetch('/api/csr/service-types')
+      .then(res => res.json())
+      .then(data => setCategoryOptions(data.serviceTypes || []))
+      .catch(() => setCategoryOptions([]));
+    fetch('/api/csr/locations')
+      .then(res => res.json())
+      .then(data => setLocationOptions(data.locations || []))
+      .catch(() => setLocationOptions([]));
+  }, []);
+  // Filtering logic
+  const filtered = React.useMemo(() => {
+    let result = shortlist;
+    if (filterCategory) result = result.filter(s => s.categoryName === filterCategory);
+    if (filterStatus) result = result.filter(s => s.status === filterStatus);
+    if (filterUrgency) result = result.filter(s => (s.urgencyLevel || '').toLowerCase() === filterUrgency.toLowerCase());
+    if (filterLocation) result = result.filter(s => s.location === filterLocation);
+    return result;
+  }, [shortlist, filterCategory, filterStatus, filterUrgency, filterLocation]);
   return (
     <div className="csr-page">
       <h2 className="csr-section-title big">My Shortlist</h2>
-      <div className="csr-grid">
-        {shortlist.map((s) => (
-          <div key={s.requestId} style={{ cursor: 'pointer' }} onClick={() => setSelected(s)}>
-            <RequestCard
-              title={s.title}
-              location={s.location}
-              urgencyLevel={s.urgencyLevel}
-              specialNeeds={s.specialNeeds}
-              categoryName={s.categoryName}
-              status={s.status}
-              onRemove={() => remove(s.requestId)}
-              loading={loadingId === s.requestId}
-            />
+      {/* Filter UI */}
+      <div className="csr-filters" style={{ display: 'flex', gap: 16, margin: '18px 0 8px 0', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label htmlFor="shortlist-filter-category" style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: 500 }}>Category</label>
+          <select
+            id="shortlist-filter-category"
+            className="csr-select"
+            value={filterCategory}
+            onChange={e => setFilterCategory(e.target.value)}
+            style={{ minWidth: 120 }}
+          >
+            <option value="">Any</option>
+            {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label htmlFor="shortlist-filter-status" style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: 500 }}>Status</label>
+          <select
+            id="shortlist-filter-status"
+            className="csr-select"
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+            style={{ minWidth: 120 }}
+          >
+            <option value="">Any</option>
+            <option value="Available">Available</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label htmlFor="shortlist-filter-urgency" style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: 500 }}>Urgency</label>
+          <select
+            id="shortlist-filter-urgency"
+            className="csr-select"
+            value={filterUrgency}
+            onChange={e => setFilterUrgency(e.target.value)}
+            style={{ minWidth: 120 }}
+          >
+            <option value="">Any</option>
+            <option value="High Priority">High Priority</option>
+            <option value="Low Priority">Low Priority</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label htmlFor="shortlist-filter-location" style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: 500 }}>Location</label>
+          <select
+            id="shortlist-filter-location"
+            className="csr-select"
+            value={filterLocation}
+            onChange={e => setFilterLocation(e.target.value)}
+            style={{ minWidth: 120 }}
+          >
+            <option value="">Any</option>
+            {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
+        <button className="csr-btn-outline" style={{ minWidth: 90 }} onClick={() => { setFilterCategory(""); setFilterStatus(""); setFilterUrgency(""); setFilterLocation(""); }}>Clear Filter</button>
+      </div>
+      <div className="csr-table" style={{ marginTop: 24, borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 12px #e0e7ef' }}>
+        <div className="csr-thead" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: '#f1f5f9', fontWeight: 700, fontSize: '1.08rem', color: '#334155', padding: '12px 0' }}>
+          <div style={{ paddingLeft: 18 }}>Title</div>
+          <div>Category</div>
+          <div>Status</div>
+          <div>Urgency</div>
+          <div>Location</div>
+          <div></div>
+        </div>
+        {filtered.length === 0 && <div className="csr-empty" style={{ padding: 24 }}>No items shortlisted yet.</div>}
+        {filtered.map(s => (
+          <div key={s.requestId} className="csr-trow" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', alignItems: 'center', borderBottom: '1px solid #e5e7eb', background: s.urgencyLevel && s.urgencyLevel.toLowerCase() === 'high priority' ? '#fff5f5' : '#fff', fontSize: '1.08rem', transition: 'background 0.2s', cursor: 'pointer', minHeight: 56 }} onClick={() => setSelected(s)}>
+            <div style={{ paddingLeft: 18, fontWeight: 700, color: '#1e293b', fontSize: '1.12rem', letterSpacing: 0.5 }}>{s.title}</div>
+            <div>{s.categoryName && <span className="csr-chip csr-chip-category" style={{ background: '#e0e7ef', color: '#334155', fontWeight: 600, borderRadius: 12, padding: '4px 14px', fontSize: '0.98rem' }}>{s.categoryName}</span>}</div>
+            <div>{s.status && <span className="csr-chip csr-chip-status" style={{ background: s.status.toLowerCase() === 'available' ? '#22c55e' : '#f1f5f9', color: s.status.toLowerCase() === 'available' ? 'white' : '#64748b', fontWeight: 600, borderRadius: 12, padding: '4px 14px', fontSize: '0.98rem' }}>{s.status}</span>}</div>
+            <div>{s.urgencyLevel && <span className="csr-chip csr-chip-urgency" style={{ background: s.urgencyLevel.toLowerCase() === 'high priority' ? '#ef4444' : s.urgencyLevel.toLowerCase() === 'low priority' ? '#22c55e' : '#6b7280', color: 'white', fontWeight: 700, borderRadius: 12, padding: '4px 14px', fontSize: '0.98rem' }}>{s.urgencyLevel}</span>}</div>
+            <div style={{ color: '#0ea5e9', fontWeight: 600 }}>{s.location}</div>
+            <div>
+              <button
+                className="csr-btn-danger"
+                onClick={e => { e.stopPropagation(); remove(s.requestId); }}
+                disabled={loadingId === s.requestId}
+                style={{
+                  minWidth: 110,
+                  fontWeight: 700,
+                  fontSize: '1.08rem',
+                  borderRadius: 10,
+                  padding: '8px 0',
+                  boxShadow: '0 2px 8px #ef4444',
+                  border: 'none',
+                  background: loadingId === s.requestId ? '#fca5a5' : '#ef4444',
+                  color: '#fff',
+                  transition: 'background 0.2s',
+                  cursor: loadingId === s.requestId ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {loadingId === s.requestId ? "Removing..." : "Remove"}
+              </button>
+            </div>
           </div>
         ))}
       </div>
-      {shortlist.length === 0 && <p className="csr-empty">No items shortlisted yet.</p>}
       {selected && (
         <div className="modal" onClick={() => setSelected(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14, position: 'relative' }}>
@@ -979,7 +1150,7 @@ function CSRShortlist() {
 
 // --- Main Combined CSRRep Page ---
 export default function CSRRepDashboard() {
-  const [page, setPage] = useState("dashboard");
+  const [page, setPage] = useState("requests");
   // Announcement modal state
   const [latestAnnouncement, setLatestAnnouncement] = React.useState<{ message: string; createdAt: string } | null>(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = React.useState(false);

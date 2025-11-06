@@ -3,6 +3,57 @@ import { pin_requestsTable, service_typeTable, locationTable, urgency_levelTable
 import { eq, and } from 'drizzle-orm';
 
 export class CSRRepEntity {
+	// Get CSR history: all requests assigned to this CSR, with service type and location names, and filter by type
+	static async getCSRHistory(csrId: number, type?: string) {
+		// Get all requests assigned to this CSR
+		let query = db
+			.select({
+				requestId: pin_requestsTable.id,
+				title: pin_requestsTable.title,
+				categoryID: pin_requestsTable.categoryID,
+				locationID: pin_requestsTable.locationID,
+				status: pin_requestsTable.status,
+				createdAt: pin_requestsTable.createdAt,
+			})
+			.from(pin_requestsTable)
+			.where(eq(pin_requestsTable.csr_id, csrId));
+
+		// If type is specified and not "All Types", filter by service_type name
+		if (type && type !== "All Types") {
+			// Get service_type id for the given name
+			const typeRow = await db.select().from(service_typeTable).where(eq(service_typeTable.name, type)).limit(1);
+			if (typeRow && typeRow[0] && typeRow[0].id) {
+				query = db
+					.select({
+						requestId: pin_requestsTable.id,
+						title: pin_requestsTable.title,
+						categoryID: pin_requestsTable.categoryID,
+						locationID: pin_requestsTable.locationID,
+						status: pin_requestsTable.status,
+						createdAt: pin_requestsTable.createdAt,
+					})
+					.from(pin_requestsTable)
+					.where(and(eq(pin_requestsTable.csr_id, csrId), eq(pin_requestsTable.categoryID, typeRow[0].id)));
+			}
+		}
+
+		const rows = await query;
+		const serviceTypes = Object.fromEntries(
+			(await db.select().from(service_typeTable)).map(st => [st.id, st.name])
+		);
+		const locations = Object.fromEntries(
+			(await db.select().from(locationTable)).map(l => [l.id, l.name])
+		);
+
+		return rows.map(r => ({
+			requestId: r.requestId,
+			name: r.title,
+			date: r.createdAt ? r.createdAt.toISOString().slice(0, 10) : '',
+			location: r.locationID ? (locations[r.locationID] || '') : '',
+			type: serviceTypes[r.categoryID] || '',
+			status: r.status,
+		}));
+	}
 	// ...existing code...
 
 // ...existing code...

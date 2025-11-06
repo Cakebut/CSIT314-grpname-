@@ -118,4 +118,48 @@ router.delete('/:csrId/interested/:requestId', async (req, res) => {
 	}
 });
 
+// GET /api/csr/:csrId/history?type=ServiceTypeName
+router.get('/:csrId/history', async (req, res) => {
+	try {
+		const csrId = Number(req.params.csrId);
+		const type = req.query.type as string | undefined;
+		const history = await controller.getHistory(csrId, type);
+		res.json({ history });
+	} catch (err) {
+		res.status(500).json({ error: 'Failed to fetch CSR history' });
+	}
+});
+
+
+
+// GET /api/service-types
+router.get('/service-types', async (req, res) => {
+	try {
+		// Import Drizzle ORM client and service_typeTable
+		const { db } = require('../db/client');
+		const { service_typeTable } = require('../db/schema/aiodb');
+		// Query only non-deleted service types
+			const serviceTypes: any[] = await db
+				.select()
+				.from(service_typeTable)
+				.where(service_typeTable.deleted === false);
+			// Return only the names
+			res.json({ serviceTypes: serviceTypes.map((st: any) => st.name) });
+	} catch (err) {
+		res.status(500).json({ error: 'Failed to fetch service types' });
+	}
+});
+
+// GET /api/csr/locations
+router.get('/locations', async (req, res) => {
+	try {
+		const { db } = require('../db/client');
+		const { locationTable } = require('../db/schema/aiodb');
+		const locations = await db.select().from(locationTable);
+		res.json({ locations: locations.map((loc: any) => loc.name) });
+	} catch (err) {
+		res.status(500).json({ error: 'Failed to fetch locations' });
+	}
+});
+
 export default router;

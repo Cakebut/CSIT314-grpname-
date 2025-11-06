@@ -2,6 +2,10 @@
 import { CSRRepEntity } from '../entities/CSRRepEntity';
 
 export class CSRRepControllers {
+	// Get CSR history with filter
+	async getHistory(csrId: number, type?: string) {
+		return await CSRRepEntity.getCSRHistory(csrId, type);
+	}
 	async getAvailableRequests() {
 		return await CSRRepEntity.getAvailableRequests();
 	}
