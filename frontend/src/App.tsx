@@ -16,7 +16,7 @@ import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
 import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
 import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
 import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
-import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboard';
+import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboardPage';
 
 //Person In Need
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
