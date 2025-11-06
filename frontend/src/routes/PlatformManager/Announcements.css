@@ -1,0 +1,81 @@
+.announcements-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.announcement-header {
+  margin-bottom: 30px;
+}
+
+.announcement-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.announcement-header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.announcement-form {
+  background-color: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.announcement-textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: none;
+  margin-bottom: 15px;
+}
+
+.announcement-info {
+  font-size: 0.875rem;
+  color: #888;
+  margin-bottom: 15px;
+}
+
+.send-announcement-button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+}
+
+.send-announcement-button:hover {
+  background-color: #0056b3;
+}
+
+.send-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.announcement-info-box {
+  background-color: #f3f4f6;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 30px;
+}
+
+.announcement-info-box h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.announcement-info-box p {
+  font-size: 1rem;
+  color: #555;
+}

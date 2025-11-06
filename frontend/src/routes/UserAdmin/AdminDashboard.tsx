@@ -1,20 +1,30 @@
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './AdminDashboard.css';
+import { useState, useEffect } from "react";
+import * as Popover from "@radix-ui/react-popover";
+import { LogOut, Users, Key, FileText, Tags, Bell } from "lucide-react";
 
-function AdminDashboard() {
-  const navigate = useNavigate();
-  const username = localStorage.getItem('currentUsername');
-  const role = localStorage.getItem('currentRole');
+import UserAccounts from "./UserAccounts";
+import AdminPasswordRequests from "./AdminPasswordRequests";
+import SystemActivityLogs from "./SystemActivityLogs";
+import Roles from "./Roles";
+
+import "./AdminDashboard.css";
+
+interface AdminDashboardProps {
+  onLogout?: () => void;
+}
+
+type ActiveSection = "userAccounts" | "roles" | "passwordRequests" | "activityLogs";
+
+export function AdminDashboard({ onLogout }: AdminDashboardProps) {
+  const [activeSection, setActiveSection] = useState<ActiveSection>("userAccounts");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
-  const [showNotiPop, setShowNotiPop] = useState(false);
-  const notiBtnRef = useRef<HTMLButtonElement | null>(null);
-  const notiPopRef = useRef<HTMLDivElement | null>(null);
   const [adminNotifs, setAdminNotifs] = useState<Array<{ id: number; user_id: number; username: string; message: string; createdAt: string; read: number }>>([]);
+  const unreadCount = adminNotifs.filter((n) => n.read === 0).length;
 
+  // Load platform announcements
   useEffect(() => {
-    // Load the latest platform announcement
     fetch('/api/pm/announcements/latest')
       .then(res => res.json())
       .then(data => {
@@ -30,49 +40,36 @@ function AdminDashboard() {
       .catch(() => {});
   }, []);
 
-  // click-away for popover
-  useEffect(() => {
-    if (!showNotiPop) return;
-    function onDocClick(e: MouseEvent) {
-      const btn = notiBtnRef.current;
-      const pop = notiPopRef.current;
-      if (!(e.target instanceof Node)) return;
-      if (btn && btn.contains(e.target)) return;
-      if (pop && pop.contains(e.target)) return;
-      setShowNotiPop(false);
-    }
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [showNotiPop]);
-
   // Fetch admin notifications when the popover is opened
   useEffect(() => {
-    if (!showNotiPop) return;
+    if (!notificationsOpen) return;
     fetch('/api/userAdmin/admin-notifications')
       .then(r => r.json())
       .then(data => {
         if (data && data.success) setAdminNotifs(data.notifications || []);
       })
       .catch(err => console.error('Failed to fetch admin notifications', err));
-  }, [showNotiPop]);
+  }, [notificationsOpen]);
 
-  // Add a logout handler
   const handleLogout = async () => {
     try {
       await fetch('/api/userAdmin/logout', { method: 'POST', credentials: 'include' });
-      } catch {
-        console.error("Logout error:");
-        // Optionally handle error
+    } catch {
+      console.error("Logout error:");
     }
-    localStorage.removeItem('dummyUsers'); // Clear dummy users
+    localStorage.removeItem('dummyUsers');
     localStorage.removeItem('currentUsername');
     localStorage.removeItem('currentRole');
-    navigate('/'); // Redirect to login
+    if (onLogout) {
+      onLogout();
+    } else {
+      window.location.replace("/");
+    }
   };
 
   return (
-    <div className="admin-bg">
-      {/* notification bell will be rendered inside the card so it's positioned relative to it */}
+    <div className="admin-dashboard-container">
+      {/* Announcement modal */}
       {latestAnnouncement && showAnnouncementModal && (
         <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', width: 'min(640px, 92vw)', boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
@@ -85,89 +82,138 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-      <div className="admin-container admin-card">
-        {/* Inline notification bell (top-right of card) */}
-        <div style={{ position: 'absolute', top: 16, right: 16 }}>
-          <button ref={notiBtnRef} className="admin-bell" aria-label="Notifications" title="Notifications" onClick={() => setShowNotiPop(s => !s)}>
-            🔔
-            {/* unread dot for latest announcement OR admin notifications */}
-            {(latestAnnouncement && latestAnnouncement.createdAt !== localStorage.getItem('latestAnnouncementSeenAt')) || adminNotifs.some(n => n.read === 0) ? (
-              <span className="admin-bell-dot" />
-            ) : null}
-          </button>
-          {showNotiPop && (
-            <div ref={notiPopRef} className="admin-noti-popover">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ fontWeight: 700 }}>Notifications</div>
-                <button className="button" onClick={() => { if (latestAnnouncement) localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement.createdAt); setShowNotiPop(false); setShowAnnouncementModal(false); }} style={{ padding: '4px 8px' }}>Close</button>
-              </div>
-              {/* Render admin notifications first if present */}
-              {adminNotifs.length > 0 ? (
-                <div className="admin-noti-list">
-                  {adminNotifs.map(n => (
-                    <button key={n.id} className="admin-notif-item" aria-read={n.read === 0 ? 'false' : 'true'} onClick={async () => {
-                      try {
-                        // Delete notification when clicked (as requested)
-                        const resp = await fetch(`/api/userAdmin/admin-notifications/${n.id}`, { method: 'DELETE' });
-                        if (resp.ok) {
-                          setAdminNotifs(prev => prev.filter(x => x.id !== n.id));
-                        } else {
-                          console.error('Failed to delete admin notification');
-                        }
-                      } catch (err) {
-                        console.error('Delete admin notification error', err);
-                      }
-                    }}>
-                      <div className="notif-title">{n.username}</div>
-                      <div className="notif-message">{n.message}</div>
-                      <div className="notif-meta">{new Date(n.createdAt).toLocaleString()}</div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                // Fallback to platform announcement if no admin notifications
-                (latestAnnouncement ? (
-                  <div>
-                    <div style={{ fontSize: 13, color: '#64748b', marginBottom: 6 }}>{new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
-                    <div style={{ fontSize: 14, color: '#111827', whiteSpace: 'pre-wrap' }}>{latestAnnouncement.message}</div>
-                  </div>
-                ) : (
-                  <div className="pm-noti-empty">No announcements</div>
-                ))
-              )}
-            </div>
-          )}
+
+      {/* Sidebar */}
+      <div className="sidebar">
+        {/* Header */}
+        <div className="sidebar-header">
+          <h1 className="sidebar-title">User Admin's Dashboard</h1>
+          <p className="sidebar-subtitle">Management Panel</p>
         </div>
-        <div className="admin-logo">
-          <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="27" cy="27" r="27" fill="#6C63FF"/>
-            <text x="50%" y="54%" textAnchor="middle" fill="#fff" fontSize="24" fontFamily="Arial" dy=".3em">A</text>
-          </svg>
-        </div>
-        <h1 style={{ color: '#2d3748', fontWeight: 700, fontSize: '2.2rem', marginBottom: '0.5rem' }}>Admin Dashboard</h1>
-        {username && role && (
-          <div className="welcome-message" style={{marginBottom: '32px', fontSize: '1.25rem', color: '#333', fontWeight: 500}}>
-            Welcome, <span style={{color:'#6C63FF'}}>{username}</span>!<br />Role: <span style={{color:'#764ba2'}}>{role}</span>
+
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          <div className="nav-links">
+            <button
+              onClick={() => setActiveSection("userAccounts")}
+              className={`nav-button ${activeSection === "userAccounts" ? "active" : ""}`}
+            >
+              <Users className="icon" />
+              <span>User Accounts</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection("roles")}
+              className={`nav-button ${activeSection === "roles" ? "active" : ""}`}
+            >
+              <Tags className="icon" />
+              <span>Roles</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveSection("passwordRequests")}
+              className={`nav-button ${activeSection === "passwordRequests" ? "active" : ""}`}
+            >
+              <Key className="icon" />
+              <span>Password Requests</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection("activityLogs")}
+              className={`nav-button ${activeSection === "activityLogs" ? "active" : ""}`}
+            >
+              <FileText className="icon" />
+              <span>Activity Logs</span>
+            </button>
           </div>
-        )}
-        
-        <div className="bubble-options">
-          <div className="bubble" onClick={() => navigate('/useradmin/ViewUserList')}>
-            View User Dashboard
-          </div>
-          <div className="bubble" onClick={() => navigate('/useradmin/ViewUserRoles')}>
-            View Roles Dashboard
-          </div>
-          <div className="bubble" onClick={() => navigate('/useradmin/SystemLog')}>
-            View System Log
-          </div>
-          <div className="bubble" onClick={() => navigate('/useradmin/PasswordResetRequests')}>
-            View Password Reset Dashboard
-          </div>
-          <div className="bubble logout-bubble" onClick={handleLogout}>
+        </nav>
+
+        {/* Logout Button */}
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            <LogOut className="icon" />
             Logout
-          </div>
+          </button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="main-content">
+        {activeSection === "userAccounts" && <UserAccounts />}
+        {activeSection === "roles" && <Roles />}
+        {activeSection === "passwordRequests" && <AdminPasswordRequests />}
+        {activeSection === "activityLogs" && <SystemActivityLogs />}
+      </div>
+
+      {/* Notification popover */}
+      <div className="user-admin-notification-popover-wrapper">
+        <Popover.Root open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+          <Popover.Trigger asChild>
+            <button
+              className="user-admin-notification-button"
+              aria-haspopup="true"
+              aria-expanded={notificationsOpen}
+              title="Notifications"
+            >
+              <Bell className="icon" />
+              {unreadCount > 0 && (
+                <span className="user-admin-badge" aria-hidden>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </Popover.Trigger>
+
+          <Popover.Portal>
+            <Popover.Content className="user-admin-notification-popover" sideOffset={8} align="end">
+              <div className="user-admin-notification-popover-header">
+                <h3>Notifications</h3>
+              </div>
+
+              <div className="user-admin-notification-popover-body">
+                {adminNotifs.length === 0 ? (
+                  latestAnnouncement ? (
+                    <div>
+                      <div style={{ fontSize: 13, color: '#64748b', marginBottom: 6 }}>{new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
+                      <div style={{ fontSize: 14, color: '#111827', whiteSpace: 'pre-wrap' }}>{latestAnnouncement.message}</div>
+                    </div>
+                  ) : (
+                    <div className="user-admin-notification-empty">
+                      <Bell className="user-admin-empty-icon" />
+                      <div className="user-admin-empty-text">No notifications yet</div>
+                    </div>
+                  )
+                ) : (
+                  <ul className="user-admin-notification-list">
+                    {adminNotifs.map((n) => (
+                      <li
+                        key={n.id}
+                        className={`user-admin-notification-item ${n.read === 0 ? "unread" : "read"}`}
+                        onClick={async () => {
+                          try {
+                            const resp = await fetch(`/api/userAdmin/admin-notifications/${n.id}`, { method: 'DELETE' });
+                            if (resp.ok) {
+                              setAdminNotifs(prev => prev.filter(x => x.id !== n.id));
+                            } else {
+                              console.error('Failed to delete admin notification');
+                            }
+                          } catch (err) {
+                            console.error('Delete admin notification error', err);
+                          }
+                        }}
+                      >
+                        <div className="user-admin-notification-title">{n.username}</div>
+                        <div className="user-admin-notification-message">{n.message}</div>
+                        <div className="user-admin-notification-time">{new Date(n.createdAt).toLocaleString()}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <Popover.Close />
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
       </div>
     </div>
   );

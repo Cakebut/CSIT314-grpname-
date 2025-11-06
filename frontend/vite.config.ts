@@ -1,11 +1,9 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-const codespaceUrl = process.env.VITE_API_URL_CODESPACE;
-const localUrl = 'http://localhost:3000';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss(),],
   server: {
     proxy: {
       '/api': {

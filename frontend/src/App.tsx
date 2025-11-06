@@ -7,6 +7,8 @@ import React from 'react';
 import Login from './routes/LoginPage';
 import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
+// FORGET PASSWORD PAGE
+//import Forget from './routes/ForgetPage';
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
@@ -15,7 +17,6 @@ import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
 import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
 import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
 import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboardPage';
-
 
 //Person In Need
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
@@ -78,7 +79,7 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
           {/* CSR Rep */}
           <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRRepDashboard /></ProtectedRoute>} />
 
-
+            
           {/* Platform Manager (Dashboard + nested pages) */}
           <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PlatformManagerHome /></ProtectedRoute>}>
             <Route index element={<Navigate to="reports" replace />} />

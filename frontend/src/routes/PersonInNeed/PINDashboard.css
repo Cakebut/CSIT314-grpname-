@@ -1,7 +1,8 @@
-/* Container for the entire Admin Dashboard */
-.admin-dashboard-container {
+/* Container for the entire PIN Dashboard */
+.PIN-dashboard-container {
   display: flex;
   min-height: 100vh;
+  position: relative; /* To allow positioning of the notification button */
 }
 
 /* Sidebar styling */
@@ -110,7 +111,7 @@
 }
 
 /* Notification popover (fixed top-right) */
-.user-admin-notification-popover-wrapper {
+.PIN-notification-popover-wrapper {
   position: fixed;
   top: 50px;
   right: 50px;
@@ -119,7 +120,7 @@
   align-items: flex-start;
 }
 
-.user-admin-notification-button {
+.PIN-notification-button {
   background: #ffffff;
   border: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 6px 18px rgba(2,6,23,0.12);
@@ -134,21 +135,21 @@
   position: relative;
 }
 
-.user-admin-notification-button:hover {
+.PIN-notification-button:hover {
   background: #fbfbfd;
 }
 
-.user-admin-notification-button:focus {
+.PIN-notification-button:focus {
   outline: none;
   /* subtle neutral focus ring instead of a blue one */
   box-shadow: 0 0 0 4px rgba(2,6,23,0.06);
 }
 
-.user-admin-notification-button:active {
+.PIN-notification-button:active {
   background: #ffffff;
 }
 
-.user-admin-notification-popover {
+.PIN-notification-popover {
   margin-top: 10px;
   margin-right: 0;
   width: 1000px;
@@ -159,18 +160,18 @@
   overflow: hidden;
 }
 
-.user-admin-notification-popover-header {
+.PIN-notification-popover-header {
   padding: 14px 16px;
   border-bottom: 1px solid #eef2f6;
 }
 
-.user-admin-notification-popover-header h3 {
+.PIN-notification-popover-header h3 {
   margin: 0;
   font-size: 1rem;
   color: #0f172a;
 }
 
-.user-admin-notification-popover-body {
+.PIN-notification-popover-body {
   padding: 28px 16px 20px 16px;
   min-height: 120px;
   display: flex;
@@ -178,7 +179,7 @@
   justify-content: center;
 }
 
-.user-admin-notification-empty {
+.PIN-notification-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -186,19 +187,19 @@
   color: #9ca3af;
 }
 
-.user-admin-notification-empty .user-admin-empty-icon {
+.PIN-notification-empty .PIN-empty-icon {
   width: 44px;
   height: 44px;
   color: #d1d5db;
 }
 
-.user-admin-notification-empty .user-admin-empty-text {
+.PIN-notification-empty .PIN-empty-text {
   font-size: 0.95rem;
   color: #9ca3af;
 }
 
 
-.user-admin-notification-button .icon {
+.PIN-notification-button .icon {
   width: 18px;
   height: 18px;
   color: #000000;
@@ -207,7 +208,7 @@
 }
 
 /* unread badge */
-.user-admin-badge {
+.PIN-badge {
   position: absolute;
   top: -10px;
   right: -13px;
@@ -225,7 +226,7 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-.user-admin-notification-list {
+.PIN-notification-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -235,7 +236,7 @@
   width: 95%;
 }
 
-.user-admin-notification-item {
+.PIN-notification-item {
   padding: 10px 30px;
   border-radius: 6px;
   background: #ffffff;
@@ -245,23 +246,23 @@
   border: 1px solid black;
 }
 
-.user-admin-notification-item.unread {
+.PIN-notification-item.unread {
   background: #f8fafc;
 }
 
-.user-admin-notification-title {
+.PIN-notification-title {
   font-weight: 600;
   font-size: 0.95rem;
   color: #0f172a;
 }
 
-.user-admin-notification-time {
+.PIN-notification-time {
   font-size: 0.8rem;
   color: #6b7280;
 }
 
 @media (max-width: 640px) {
-  .user-admin-notification-popover {
+  .PIN-notification-popover {
     right: 10px;
     width: 280px;
   }
