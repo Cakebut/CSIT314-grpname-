@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 import './ViewUserRolesPage.css';
 
 type Role = {
@@ -10,7 +9,7 @@ type Role = {
 };
 
 function ViewUserRoles() {
-  const navigate = useNavigate();
+  
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [newRoleLabel, setNewRoleLabel] = useState("");
@@ -118,9 +117,6 @@ function ViewUserRoles() {
 
   return (
     <div className="roles-container" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #e3e6f3 100%)', minHeight: '100vh' }}>
-      <button className="back-btn" onClick={() => navigate('/useradmin')}>
-        ← Back to Dashboard
-      </button>
       <div className="roles-header">
         <h2 style={{ fontWeight: 700, fontSize: '2rem', color: '#2d3a4a', marginBottom: '0.5rem' }}>Roles Dashboard</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

@@ -121,7 +121,7 @@ function Login() {
               <label htmlFor="check">Remember Me</label>
             </section>
             <section>
-              <a className="forgot-text" href="/forget">
+              <a className="forgot-text" href="/forgot-password">
                 Forgot Password?
               </a>
             </section>

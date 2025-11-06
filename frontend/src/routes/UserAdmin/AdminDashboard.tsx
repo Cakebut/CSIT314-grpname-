@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { LogOut, Users, Key, FileText, Tags, Bell } from "lucide-react";
 
-import UserAccounts from "./UserAccounts";
-import AdminPasswordRequests from "./AdminPasswordRequests";
+import ViewUserAccountPage from "./UserAccounts";
+import ViewResetDashboardPage from "./ViewResetDashboardPage";
 import SystemActivityLogs from "./SystemActivityLogs";
 import Roles from "./Roles";
 
@@ -139,10 +139,12 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       {/* Main Content */}
       <div className="main-content">
-        {activeSection === "userAccounts" && <UserAccounts />}
-        {activeSection === "roles" && <Roles />}
-        {activeSection === "passwordRequests" && <AdminPasswordRequests />}
-        {activeSection === "activityLogs" && <SystemActivityLogs />}
+        <div className="content-inner">
+          {activeSection === "userAccounts" && <ViewUserAccountPage  />}
+          {activeSection === "roles" && <Roles />}
+            {activeSection === "passwordRequests" && <ViewResetDashboardPage />}
+          {activeSection === "activityLogs" && <SystemActivityLogs />}
+        </div>
       </div>
 
       {/* Notification popover */}

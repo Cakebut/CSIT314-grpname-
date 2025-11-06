@@ -194,9 +194,6 @@ export default function ViewUserAccountPage() {
 
   return (
     <div className="view-user-account-container">
-      <button className="back-btn" onClick={() => navigate("/useradmin")}>
-        ← Back to Dashboard
-      </button>
 
       <div className="user-list-header">
         <h2>User Accounts</h2>

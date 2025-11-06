@@ -20,7 +20,7 @@ interface ReviewPasswordRequestProps {
 }
 
 function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequestProps) {
-  const [adminNotes, _setAdminNotes] = useState("");
+  // admin notes not used in the mock review component
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -31,15 +31,12 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
 
   const confirmApprove = () => {
     // Handle approval logic here
-    console.log("Approved", "Notes:", adminNotes);
+  console.log("Approved");
     setShowConfirmDialog(false);
     setShowSuccessDialog(true);
   };
 
-  const handleBackToDashboard = () => {
-    setShowSuccessDialog(false);
-    onClose();
-  };
+  // Removed 'Back to Dashboard' action — success dialog will just close the modal
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -156,7 +153,7 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
               <li>User's password has been updated</li>
               <li>Request marked as approved</li>
             </ul>
-            <button onClick={handleBackToDashboard}>Back to Dashboard</button>
+            <button onClick={() => { setShowSuccessDialog(false); onClose(); }}>Close</button>
           </div>
         </div>
       )}

@@ -1,268 +1,391 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { /* useNavigate */ } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./UserAccounts.css";
 
-interface User {
-  id: string;
-  username: string;
-  password?: string;
-  role: string;
-  status: "Active" | "Suspended";
-}
+type Role = {
+  id: number;
+  label: string;
+  issuspended?: boolean;
+};
 
-const initialUsers: User[] = [
-  { id: "001", username: "john_doe", role: "User Admin", status: "Active" },
-  { id: "002", username: "jane_smith", role: "Person In Need", status: "Suspended" },
-  { id: "003", username: "bob_wilson", role: "User Admin", status: "Suspended" },
-  { id: "004", username: "alice_jones", role: "Person In Need", status: "Active" },
-  { id: "005", username: "mike_brown", role: "CSR Representative", status: "Suspended" },
-  { id: "006", username: "smith_tan", role: "Platform Manager", status: "Suspended" },
-];
+// Backend shapes
+type BackendUser = {
+  id: number;
+  username: string;
+  userProfile?: string; // role label
+  isSuspended?: boolean;
+};
+
+type BackendRole = {
+  id: number;
+  label: string;
+  issuspended?: boolean;
+};
+
+type User = {
+  id: string | number;
+  username: string;
+  roleId?: number;
+  roleLabel?: string;
+  issuspended?: boolean;
+};
 
 const UserAccounts: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("All Roles");
   const [filterStatus, setFilterStatus] = useState("All Status");
-  const [showModal, setShowModal] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newRole, setNewRole] = useState<string>("User Admin");
-  const [newStatus, setNewStatus] = useState<User['status']>("Active");
 
-  const handleDelete = (id: string) => {
-    setUsers(users.filter(user => user.id !== id));
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newRoleId, setNewRoleId] = useState<number | undefined>(undefined);
+  const [newStatus, setNewStatus] = useState("Active");
+  const [editId, setEditId] = useState<string | number>("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editRoleId, setEditRoleId] = useState<number | undefined>(undefined);
+  const [editIsSuspended, setEditIsSuspended] = useState(false);
+
+  const [loadingId, setLoadingId] = useState<string | number | null>(null);
+
+  // const navigate = useNavigate(); // not used here anymore
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoadingId("create");
+      const body = { username: newUsername, password: newPassword, roleid: newRoleId, status: newStatus };
+      const res = await fetch('/api/userAdmin/createUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`Create failed: ${res.status}`);
+      toast.success('Account created');
+      setShowCreateModal(false);
+      setNewUsername('');
+      setNewPassword('');
+      setNewRoleId(undefined);
+      setNewStatus('Active');
+      await fetchUsers();
+    } catch (err) {
+      console.error(err);
+      toast.error('Account creation failed');
+    } finally {
+      setLoadingId(null);
+    }
   };
 
-  // Open edit modal with user data
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editOriginalId, setEditOriginalId] = useState<string | null>(null);
-  const [editId, setEditId] = useState("");
-  const [editUsername, setEditUsername] = useState("");
-  const [editRole, setEditRole] = useState("");
+  // Fetch users and roles
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("/api/users");
+      if (!res.ok) throw new Error(`Fetch users failed: ${res.status}`);
+      const data = (await res.json()) as BackendUser[];
+      const mapped: User[] = data.map((u) => ({
+        id: u.id,
+        username: u.username,
+        roleLabel: u.userProfile ?? "",
+        issuspended: !!u.isSuspended,
+      }));
+      setUsers(mapped);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load users");
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const res = await fetch("/api/roles");
+      if (!res.ok) throw new Error(`Fetch roles failed: ${res.status}`);
+      const data = (await res.json()) as BackendRole[];
+      const mapped: Role[] = data.map((r) => ({ id: r.id, label: r.label, issuspended: !!r.issuspended }));
+      setRoles(mapped);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load roles");
+    }
+  };
+
+  useEffect(() => {
+  fetchUsers();
+  fetchRoles();
+  }, []);
 
   const openEditModal = (user: User) => {
-    setEditOriginalId(user.id);
     setEditId(user.id);
     setEditUsername(user.username);
-    setEditRole(user.role);
+    setEditRoleId(typeof user.roleId === "number" ? user.roleId : roles.find(r => r.label === user.roleLabel)?.id);
+    setEditIsSuspended(!!user.issuspended);
     setShowEditModal(true);
   };
 
-  const closeEditModal = () => {
-    setShowEditModal(false);
-    setEditOriginalId(null);
-  };
+  const closeEditModal = () => setShowEditModal(false);
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editOriginalId) return;
-    setUsers(users.map(u => {
-      if (u.id === editOriginalId) {
-        return { ...u, id: editId, username: editUsername, role: editRole };
-      }
-      return u;
-    }));
-    closeEditModal();
+    if (!editId) return;
+    try {
+      setLoadingId(editId);
+      const body: { username: string; roleid?: number; issuspended: boolean } = {
+        username: editUsername,
+        roleid: editRoleId,
+        issuspended: editIsSuspended,
+      };
+      const res = await fetch(`/api/users/${editId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+      toast.success("User updated");
+      closeEditModal();
+      await fetchUsers();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update user");
+    } finally {
+      setLoadingId(null);
+    }
   };
 
-  const handleSuspend = (id: string) => {
-    setUsers(users.map(user => {
-      if (user.id === id) {
-        let newStatus: "Active" | "Suspended" = user.status === "Suspended" ? "Active" : "Suspended";
-        return { ...user, status: newStatus };
-      }
-      return user;
-    }));
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("Delete this user?")) return;
+    try {
+      setLoadingId(id);
+      const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+      toast.success("User deleted");
+      await fetchUsers();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete user");
+    } finally {
+      setLoadingId(null);
+    }
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesUsername = user.username.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = filterRole === "All Roles" || user.role === filterRole;
-    const matchesStatus = filterStatus === "All Status" || user.status === filterStatus;
+  const handleSuspend = async (user: User) => {
+    try {
+      setLoadingId(user.id);
+      const body = {
+        username: user.username,
+        roleid: user.roleId ?? roles.find(r => r.label === user.roleLabel)?.id,
+        issuspended: !user.issuspended,
+      };
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`Suspend toggle failed: ${res.status}`);
+      toast.success(user.issuspended ? "User activated" : "User suspended");
+      await fetchUsers();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to change user status");
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
+  const handleExport = async () => {
+    try {
+      const res = await fetch(`/api/userAdmin/users/export`);
+      if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+      const csv = await res.text();
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `users_export_${new Date().toISOString()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("Export started");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to export users");
+    }
+  };
+
+  const filteredUsers = users.filter(u => {
+    const matchesUsername = u.username.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = filterRole === "All Roles" || (u.roleLabel ?? "").toLowerCase() === filterRole.toLowerCase();
+    const matchesStatus = filterStatus === "All Status" || (filterStatus === "Active" ? !u.issuspended : u.issuspended);
     return matchesUsername && matchesRole && matchesStatus;
   });
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowModal(false);
-    };
-    if (showModal) document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [showModal]);
-
-  const openModal = () => {
-    setNewName("");
-    setNewPassword("");
-    setNewRole("User Admin");
-    setNewStatus("Active");
-    setShowModal(true);
-  };
-
-  const closeModal = () => setShowModal(false);
-
-  const handleCreateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const nextId = (users.length + 1).toString().padStart(3, "0");
-    const newUser: User = { id: nextId, username: newName || `user_${nextId}`, password: newPassword || undefined, role: newRole, status: newStatus };
-    setUsers([newUser, ...users]);
-    setShowModal(false);
-  };
-
   return (
     <div className="user-accounts-container">
+      <div className="user-accounts-top">
+        <div>
+          <header className="user-accounts-header"></header>
+          <h1>User Accounts</h1>
+          <p>Manage user accounts and permissions</p>
+        </div>
+      </div>
 
-        <div className="user-accounts-top">
-          <div>
-            <header className="user-accounts-header"></header>
-              <h1>User Accounts</h1>
-              <p>Manage user accounts and permissions</p>
+      <div className="user-accounts-actions">
+        <input
+          type="text"
+          placeholder="Search by username"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-user-accounts"
+        />
+
+        <select
+          value={filterRole}
+          onChange={(e) => setFilterRole(e.target.value)}
+          className="filter-user-accounts"
+        >
+          <option>All Roles</option>
+          {roles.map(r => (
+            <option key={r.id}>{r.label}</option>
+          ))}
+        </select>
+
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="filter-user-accounts"
+        >
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Suspended</option>
+        </select>
+
+        <button className="reset-user-accounts btn" onClick={() => { setSearchQuery(""); setFilterRole("All Roles"); setFilterStatus("All Status"); }}>
+          Reset
+        </button>
+
+        <button className="create-user-accounts btn" type="button" onClick={() => setShowCreateModal(true)}>
+          <span className="create-text">Create Account</span>
+        </button>
+
+        <button className="export-user-accounts btn" type="button" onClick={handleExport}>
+          Export CSV
+        </button>
+      </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="user-accounts-modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="user-accounts-modal" role="dialog" aria-modal="true" aria-labelledby="create-modal-title" onClick={(e) => e.stopPropagation()}>
+            <h2 id="create-modal-title">Create Account</h2>
+            <form className="user-accounts-modal-form" onSubmit={handleCreateSubmit}>
+              <label>
+                Name
+                <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder="Full name or username" required />
+              </label>
+              <label>
+                Password
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Password" required />
+              </label>
+              <label>
+                Role
+                <select value={newRoleId ?? ""} onChange={(e) => setNewRoleId(e.target.value ? Number(e.target.value) : undefined)} required>
+                  <option value="">Select Role</option>
+                  {roles.filter(r => !r.issuspended).map((r) => (
+                    <option key={r.id} value={r.id}>{r.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Status
+                <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} required>
+                  <option value="Active">Active</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </label>
+              <div className="user-accounts-modal-actions">
+                <button type="button" className="user-accounts-modal-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                <button type="submit" className="user-accounts-modal-create" disabled={!!loadingId}>{loadingId === "create" ? "Creating..." : "Create"}</button>
+              </div>
+            </form>
           </div>
         </div>
+      )}
 
-          <div className="user-accounts-actions">
-            <input
-              type="text"
-              placeholder="Search by username"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-user-accounts"
-            />
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              className="filter-user-accounts"
-            >
-              <option>All Roles</option>
-              <option>User Admin</option>
-              <option>Person In Need</option>
-              <option>CSR Representative</option>
-              <option>Platform Manager</option>
-            </select>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="filter-user-accounts"
-            >
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Suspended</option>
-            </select>
-            <button className="reset-user-accounts btn" onClick={() => { setSearchQuery(""); setFilterRole("All Roles"); setFilterStatus("All Status"); }}>
-              Reset
-            </button>
-            
-            <button className="create-user-accounts btn" type="button" onClick={openModal}>
-              <span className="create-text">Create Account</span>
-            </button>
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="user-accounts-modal-overlay" onClick={closeEditModal}>
+          <div className="user-accounts-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" onClick={(e) => e.stopPropagation()}>
+            <h2 id="edit-modal-title">Edit Account</h2>
+            <form className="user-accounts-modal-form" onSubmit={handleEditSubmit}>
+              <label>
+                Username
+                <input value={editUsername} onChange={(e) => setEditUsername(e.target.value)} required />
+              </label>
+              <label>
+                Role
+                <select value={editRoleId} onChange={(e) => setEditRoleId(Number(e.target.value))}>
+                  <option value={0}>-- select role --</option>
+                  {roles.map(r => (
+                    <option key={r.id} value={r.id}>{r.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Status
+                <select value={editIsSuspended ? "Suspended" : "Active"} onChange={(e) => setEditIsSuspended(e.target.value === "Suspended")}>
+                  <option>Active</option>
+                  <option>Suspended</option>
+                </select>
+              </label>
+              <div className="user-accounts-modal-actions">
+                <button type="button" className="user-accounts-modal-cancel" onClick={closeEditModal}>Cancel</button>
+                <button type="submit" className="user-accounts-modal-create" disabled={!!loadingId}>{loadingId ? "Saving..." : "Save"}</button>
+              </div>
+            </form>
           </div>
+        </div>
+      )}
 
-          {/* Modal */}
-          {showModal && (
-            <div className="user-accounts-modal-overlay" onClick={closeModal}>
-              <div className="user-accounts-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onClick={(e) => e.stopPropagation()}>
-                <h2 id="modal-title">Create Account</h2>
-                <form className="user-accounts-modal-form" onSubmit={handleCreateSubmit}>
-                  <label>
-                    Name
-                    <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Full name or username" required />
-                  </label>
-                  <label>
-                    Password
-                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Password" />
-                  </label>
-                  <label>
-                    Role
-                    <select value={newRole} onChange={(e) => setNewRole(e.target.value)}>
-                      <option>User Admin</option>
-                      <option>Person In Need</option>
-                      <option>CSR Representative</option>
-                      <option>Platform Manager</option>
-                    </select>
-                  </label>
-                  <label>
-                    Status
-                    <select value={newStatus} onChange={(e) => setNewStatus(e.target.value as User['status'])}>
-                      <option>Active</option>
-                      <option>Suspended</option>
-                    </select>
-                  </label>
-                  <div className="user-accounts-modal-actions">
-                    <button type="button" className="user-accounts-modal-cancel" onClick={closeModal}>Cancel</button>
-                    <button type="submit" className="user-accounts-modal-create">Create</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Edit Modal */}
-          {showEditModal && (
-            <div className="user-accounts-modal-overlay" onClick={closeEditModal}>
-              <div className="user-accounts-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" onClick={(e) => e.stopPropagation()}>
-                <h2 id="edit-modal-title">Edit Account</h2>
-                <form className="user-accounts-modal-form" onSubmit={handleEditSubmit}>
-                  <label>
-                    ID
-                    <input value={editId} onChange={(e) => setEditId(e.target.value)} required />
-                  </label>
-                  <label>
-                    Username
-                    <input value={editUsername} onChange={(e) => setEditUsername(e.target.value)} required />
-                  </label>
-                  <label>
-                    Role
-                    <select value={editRole} onChange={(e) => setEditRole(e.target.value)}>
-                      <option>User Admin</option>
-                      <option>Person In Need</option>
-                      <option>CSR Representative</option>
-                      <option>Platform Manager</option>
-                    </select>
-                  </label>
-                  <div className="user-accounts-modal-actions">
-                    <button type="button" className="user-accounts-modal-cancel" onClick={closeEditModal}>Cancel</button>
-                    <button type="submit" className="user-accounts-modal-create">Save</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-        <table className="user-accounts-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Role Name</th>
-              <th>Status</th>
-              <th>Actions</th>
+      <table className="user-accounts-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredUsers.map((user) => (
+            <tr key={String(user.id)} className={(user.issuspended ? "suspended" : "active") }>
+              <td>{user.id}</td>
+              <td>{user.username}</td>
+              <td>{user.roleLabel ?? roles.find(r => r.id === user.roleId)?.label ?? "-"}</td>
+              <td>
+                <span className={`user-accounts-status ${user.issuspended ? 'suspended' : 'active'}`}>{user.issuspended ? 'Suspended' : 'Active'}</span>
+              </td>
+              <td>
+                <button
+                  className={`suspend-user-accounts ${user.issuspended ? 'activate' : 'suspend'}`}
+                  onClick={() => handleSuspend(user)}
+                  disabled={!!loadingId}
+                >
+                  {loadingId === user.id ? '...' : (user.issuspended ? 'Activate' : 'Suspend')}
+                </button>
+                <button className="edit-user-accounts" onClick={() => openEditModal(user)} disabled={!!loadingId}>Edit</button>
+                <button className="delete-user-accounts" onClick={() => handleDelete(user.id)} disabled={!!loadingId}>{loadingId === user.id ? '...' : 'Delete'}</button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className={user.status.toLowerCase()}>
-                <td>{user.id}</td>
-                <td>{user.username}</td>
-                <td>{user.role}</td>
-                <td>
-                  <span className={`user-accounts-status ${user.status.toLowerCase()}`}>{user.status}</span>
-                </td>
-                <td>
-                  <button
-                    className={`suspend-user-accounts ${user.status === 'Suspended' ? 'activate' : 'suspend'}`}
-                    onClick={() => handleSuspend(user.id)}
-                  >
-                    {user.status === "Suspended" ? "Activate" : "Suspend"}
-                  </button>
-                  <button className="edit-user-accounts" onClick={() => openEditModal(user)}>Edit</button>
-                  <button className="delete-user-accounts" onClick={() => handleDelete(user.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
 export default UserAccounts;
+ 

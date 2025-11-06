@@ -109,6 +109,34 @@
   background-color: #f3f4f6;
 }
 
+/* Centered inner container to match dashboard layout */
+.main-content .content-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Optional top header area wrapper used by AdminDashboard when embedding content */
+.dashboard-header {
+  background: #ffffff;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.create-account-btn {
+  background: #000;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
 /* Notification popover (fixed top-right) */
 .user-admin-notification-popover-wrapper {
   position: fixed;

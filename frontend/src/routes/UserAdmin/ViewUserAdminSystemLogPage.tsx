@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+// navigation removed: no Back to Dashboard button
 import { FaSearch, FaFilter } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "./ViewUserAdminSystemLogPage.css";
@@ -21,7 +21,7 @@ export default function ViewUserAdminSystemLogPage() {
   const [clearing, setClearing] = useState(false);
   const [actionFilter, setActionFilter] = useState<string>("");
   const [actionSearch, setActionSearch] = useState<string>("");
-  const navigate = useNavigate();
+  
 
   useEffect(() => {
     let isMounted = true;
@@ -111,25 +111,7 @@ export default function ViewUserAdminSystemLogPage() {
 
   return (
     <div className="system-log-container modern-log">
-      <button
-        onClick={() => navigate("/useradmin")}
-        style={{
-          background: "#0077cc",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          padding: "0.5rem 1.2rem",
-          fontWeight: 700,
-          fontSize: "1rem",
-          boxShadow: "0 1px 4px rgba(44,62,80,0.10)",
-          cursor: "pointer",
-          letterSpacing: "0.01em",
-          marginBottom: "1.2rem",
-          display: "inline-block",
-        }}
-      >
-        ← Back to Dashboard
-      </button>
+      {/* Back to Dashboard button removed */}
       <div className="log-header">
         <h2>User Admin System Log</h2>
         <div
