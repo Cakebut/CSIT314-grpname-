@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import React from 'react';
+import { Toaster } from 'sonner';
 
 // COMPONENT
 
@@ -25,14 +27,31 @@ import PMDashboard from './routes/PlatformManager/PMDashboard';
 // CSS
 import './App.css';
 
+
 function App() {
   useEffect (() => {
     document.title = "Volunteering Service in Singapore"
   })
 
+function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, allowedRole: string }) {
+  const [role, setRole] = React.useState(localStorage.getItem('currentRole'));
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRole(localStorage.getItem('currentRole'));
+    }, 2000); // check every 2 seconds
+    return () => clearInterval(interval);
+  }, []);
+  if (role === allowedRole) {
+    return <>{children}</>;
+  } else {
+    return <Navigate to="/" replace />;
+  }
+}
+
   return (
     <Router>
       <div className="app-wrapper">
+        <Toaster />
         <Routes>
 
             {/* Login */}
@@ -42,16 +61,16 @@ function App() {
             <Route path="/forget" element={<Forget />} />
         
             {/* User Admin */}
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<ProtectedRoute allowedRole="User Admin"><AdminDashboard /></ProtectedRoute>} />
 
             {/* Person-in-Need */}
-            <Route path="/pin" element={<PINDashboard />} />
+            <Route path="/pin" element={<ProtectedRoute allowedRole="Person In Need"><PINDashboard /></ProtectedRoute>} />
 
             {/* CSR */}
-            <Route path="/csr" element={<CSRDashboard />} />
+            <Route path="/csr" element={<ProtectedRoute allowedRole="CSR Rep"><CSRDashboard /></ProtectedRoute>} />
 
             {/* PM */}
-            <Route path="/pm" element={<PMDashboard />} />            
+            <Route path="/pm" element={<ProtectedRoute allowedRole="Platform Manager"><PMDashboard /></ProtectedRoute>} /> 
 
         </Routes>
       </div>

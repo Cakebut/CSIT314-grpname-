@@ -9,4 +9,14 @@ export default defineConfig({
     tailwindcss(),
   ],
   base: "",
+  server: {
+    proxy: {
+      // Forward API requests to the backend during development
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

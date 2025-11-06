@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { MapPin } from "lucide-react"; // Importing icons for location
 import "./Offers.css";
 import CSRRequestDetails from "./CSRRequestDetails";
@@ -17,41 +18,53 @@ interface Request {
   details?: string;
 }
 
-const initialRequests: Request[] = [
-  {
-    id: "REQ-009",
-    title: "Medical Appointment Companion",
-    priority: "High Priority",
-    requestType: "Medical",
-    pinName: "Iris Lim",
-    pinId: "PIN-8901",
-    region: "Central Region",
-    views: 18,
-    status: "Pending",
-  },
-  {
-    id: "REQ-010",
-    title: "Technology Tutoring",
-    priority: "Low Priority",
-    requestType: "Tutoring",
-    pinName: "Jack Wong",
-    pinId: "PIN-4568",
-    region: "South Region",
-    views: 6,
-    status: "Pending",
-  },
-];
+// We'll fetch real offers from the backend for the current CSR
 
 const Offers: React.FC = () => {
-  const [offersRequests, setOffersRequests] = useState<Request[]>(initialRequests);
+  const [offersRequests, setOffersRequests] = useState<Request[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [interestedIds, setInterestedIds] = useState<Record<string, boolean>>(() => {
     // mark all currently-offered requests as interested by default
     const map: Record<string, boolean> = {};
-    initialRequests.forEach((r) => { map[r.id] = true; });
+    offersRequests.forEach((r) => { map[r.id] = true; });
     return map;
   });
   const [awaitingIds, setAwaitingIds] = useState<Record<string, boolean>>({});
+
+  const normalize = (r: any): Request => ({
+    id: String(r.requestId || r.request_id || r.id),
+    title: r.title || r.name || 'Untitled',
+    priority: r.urgencyLevel ? (String(r.urgencyLevel).toLowerCase().includes('urgent') || String(r.urgencyLevel).toLowerCase().includes('high') ? 'High Priority' : 'Low Priority') : 'Low Priority',
+    requestType: r.categoryName || r.requestType || 'General',
+    pinName: r.pinName || r.pinUsername || '',
+    pinId: String(r.pinId || r.pin_id || ''),
+    region: r.location || r.region || '',
+    views: r.view_count || 0,
+    status: r.status || 'Pending',
+    details: r.message || r.details || '',
+  });
+
+  const fetchOffers = async () => {
+    try {
+      const csrId = Number(localStorage.getItem('userId')) || 0;
+      if (!csrId) return setOffersRequests([]);
+      const res = await fetch(`/api/csr/${csrId}/offers`, { method: 'GET', credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch offers');
+      const payload = await res.json();
+      const items = (payload.offers || payload.requests || []) as any[];
+      setOffersRequests(items.map(normalize));
+      // mark offered items as interested by default
+      const map: Record<string, boolean> = {};
+      items.forEach((it) => map[String(it.requestId || it.id || it.request_id)] = true);
+      setInterestedIds(map);
+    } catch (err) {
+      console.error('Error fetching offers', err);
+      toast.error('Failed to load offers');
+      setOffersRequests([]);
+    }
+  };
+
+  useEffect(() => { fetchOffers(); }, []);
 
   const openDetails = (request: Request) => setSelectedRequest(request);
   const closeDetails = () => setSelectedRequest(null);
@@ -62,17 +75,57 @@ const Offers: React.FC = () => {
 
   const handleReject = (id?: string) => {
     if (!id) return;
-    // remove the offer from the Offers list (sent back to All Requests)
-    setOffersRequests((prev) => prev.filter((r) => r.id !== id));
-    closeDetails();
+    // Cancel this CSR's interest for the request via PIN route
+    (async () => {
+      try {
+        const csrId = Number(localStorage.getItem('userId')) || 0;
+        if (!csrId) return;
+        const res = await fetch(`/api/pin/offers/${id}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ csrId }),
+        });
+        if (res.ok) {
+          toast.success('Offer rejected');
+          // refresh list
+          await fetchOffers();
+          closeDetails();
+        } else {
+          const body = await res.text();
+          console.error('Failed to reject offer', body);
+          toast.error('Failed to reject offer');
+        }
+      } catch (err) {
+        console.error('Error rejecting offer', err);
+        toast.error('Error rejecting offer');
+      }
+    })();
   };
 
   const handleAccept = (id?: string) => {
     if (!id) return;
-    // mark this offer as awaiting confirmation and keep modal open showing the waiting message
-    setAwaitingIds((prev) => ({ ...prev, [id]: true }));
-    // optionally update the item's status to indicate it's in progress
-    setOffersRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: 'Pending' } : r));
+    // For CSR accepting an offer we'll mark interest (POST to interested) and set awaiting status
+    (async () => {
+      try {
+        const csrId = Number(localStorage.getItem('userId')) || 0;
+        if (!csrId) return;
+        const res = await fetch(`/api/csr/${csrId}/interested/${id}`, { method: 'POST', credentials: 'include' });
+        if (res.ok) {
+          toast.success('Accepted offer — waiting for PIN confirmation');
+          setAwaitingIds((prev) => ({ ...prev, [id]: true }));
+          setOffersRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: 'Pending' } : r));
+        } else {
+          const body = await res.text();
+          console.error('Failed to accept offer', body);
+          toast.error('Failed to accept offer');
+        }
+      } catch (err) {
+        console.error('Error accepting offer', err);
+        toast.error('Error accepting offer');
+      }
+    })();
+    
   };
 
   return (

@@ -4,7 +4,6 @@ import "./UserAccounts.css";
 interface User {
   id: string;
   username: string;
-  password?: string;
   role: string;
   status: "Active" | "Suspended";
 }
@@ -25,7 +24,6 @@ const UserAccounts: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("All Status");
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<string>("User Admin");
   const [newStatus, setNewStatus] = useState<User['status']>("Active");
 
@@ -93,7 +91,6 @@ const UserAccounts: React.FC = () => {
 
   const openModal = () => {
     setNewName("");
-    setNewPassword("");
     setNewRole("User Admin");
     setNewStatus("Active");
     setShowModal(true);
@@ -104,7 +101,7 @@ const UserAccounts: React.FC = () => {
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const nextId = (users.length + 1).toString().padStart(3, "0");
-    const newUser: User = { id: nextId, username: newName || `user_${nextId}`, password: newPassword || undefined, role: newRole, status: newStatus };
+    const newUser: User = { id: nextId, username: newName || `user_${nextId}`, role: newRole, status: newStatus };
     setUsers([newUser, ...users]);
     setShowModal(false);
   };
@@ -164,12 +161,8 @@ const UserAccounts: React.FC = () => {
                 <h2 id="modal-title">Create Account</h2>
                 <form className="user-accounts-modal-form" onSubmit={handleCreateSubmit}>
                   <label>
-                    Name
+                    Username
                     <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Full name or username" required />
-                  </label>
-                  <label>
-                    Password
-                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Password" />
                   </label>
                   <label>
                     Role

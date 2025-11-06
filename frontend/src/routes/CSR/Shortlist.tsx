@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { MapPin } from "lucide-react"; // Importing icons for delete and location
 import "./Shortlist.css";
 import CSRRequestDetails from "./CSRRequestDetails";
@@ -12,56 +13,86 @@ interface Request {
   pinName: string;
   pinId: string;
   region: string;
-  views: number;
+  views?: number;
   status?: "Available" | "Pending" | "Completed";
   details?: string;
 }
 
-const initialRequests: Request[] = [
-  {
-    id: "REQ-009",
-    title: "Medical Appointment Companion",
-    priority: "High Priority",
-    requestType: "Medical",
-    pinName: "Iris Lim",
-    pinId: "PIN-8901",
-    region: "Central Region",
-    views: 18,
-  },
-  {
-    id: "REQ-010",
-    title: "Technology Tutoring",
-    priority: "Low Priority",
-    requestType: "Tutoring",
-    pinName: "Jack Wong",
-    pinId: "PIN-4568",
-    region: "South Region",
-    views: 6,
-  },
-];
-
 const Shortlist: React.FC = () => {
-  const [shortlistedRequests] = useState<Request[]>(initialRequests);
+  const [shortlistedRequests, setShortlistedRequests] = useState<Request[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
-  const [interestedIds, setInterestedIds] = useState<Record<string, boolean>>(() => {
-    // mark all currently-shortlisted requests as interested by default
-    const map: Record<string, boolean> = {};
-    initialRequests.forEach((r) => { map[r.id] = true; });
-    return map;
+  const [interestedIds, setInterestedIds] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(false);
+
+  const normalize = (r: any): Request => ({
+    id: String(r.requestId || r.request_id || r.id),
+    title: r.title || r.name || "Untitled",
+    priority: r.urgencyLevel ? (String(r.urgencyLevel).toLowerCase().includes("urgent") || String(r.urgencyLevel).toLowerCase().includes("high") ? "High Priority" : "Low Priority") : "Low Priority",
+    requestType: r.categoryName || r.requestType || "General",
+    pinName: r.pinName || r.pinUsername || "",
+    pinId: String(r.pinId || r.pin_id || ""),
+    region: r.location || r.region || "",
+    views: r.view_count || 0,
+    status: r.status || "Available",
+    details: r.message || r.details || "",
   });
 
-  // const handleDelete = (requestId: string) => {
-  //   setShortlistedRequests((prev) => prev.filter((r) => r.id !== requestId));
-  // };
+  const fetchShortlist = async () => {
+    setLoading(true);
+    try {
+      const csrId = Number(localStorage.getItem('userId')) || 0;
+      if (!csrId) return setShortlistedRequests([]);
+      const res = await fetch(`/api/csr/${csrId}/shortlist`, { method: 'GET', credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch shortlist');
+      const payload = await res.json();
+      const items = (payload.shortlistedRequests || []) as any[];
+      const list = items.map(normalize);
+      setShortlistedRequests(list);
+      // mark all as interested by default
+      const map: Record<string, boolean> = {};
+      list.forEach((it) => map[it.id] = true);
+      setInterestedIds(map);
+    } catch (err) {
+      console.error('Error fetching shortlist', err);
+      toast.error('Failed to load shortlist');
+      setShortlistedRequests([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchShortlist(); }, []);
+
+  const handleRemoveShortlist = async (requestId: string) => {
+    try {
+      const csrId = Number(localStorage.getItem('userId')) || 0;
+      if (!csrId) return;
+      const res = await fetch(`/api/csr/${csrId}/shortlist/${requestId}`, { method: 'DELETE', credentials: 'include' });
+      if (res.ok) {
+        // refresh
+        await fetchShortlist();
+        toast.success('Removed from shortlist');
+      } else {
+        const body = await res.text();
+        console.error('Failed to remove from shortlist', body);
+        toast.error('Failed to remove from shortlist');
+      }
+    } catch (err) {
+      console.error('Error removing from shortlist', err);
+      toast.error('Error removing from shortlist');
+    }
+  };
 
   const openDetails = (request: Request) => setSelectedRequest(request);
   const closeDetails = () => setSelectedRequest(null);
-  const toggleInterested = (id: string) => {
-    setInterestedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleInterested = async (id: string) => {
+    // In shortlist, toggling interest removes from shortlist
+    await handleRemoveShortlist(id);
   };
 
   return (
     <div className="shortlist-container">
+      {loading && <div className="loading">Loading shortlist...</div>}
       <div className="shortlist-top">
         <div>
         <header className="shortlist-header"></header>
@@ -95,14 +126,6 @@ const Shortlist: React.FC = () => {
                   <p className="shortlist-request-pin"><strong>PIN:</strong> {request.pinName}</p>
                   <p className="shortlist-request-location"><MapPin className="icon" /> {request.region}</p>
                 </div>
-
-                {/* <button
-                  type="button"
-                  className="shortlist-delete-button"
-                  onClick={(e) => { e.stopPropagation(); handleDelete(request.id); }}
-                >
-                  <Trash2 className="icon" /> Delete
-                </button> */}
               </div>
             ))}
           </div>
