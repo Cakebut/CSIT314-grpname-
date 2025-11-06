@@ -6,24 +6,28 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.7.0",
     "@types/pg": "^8.15.5",
-    "drizzle-kit": "^0.31.5",
+    "drizzle-kit": "^0.31.6",
     "eslint": "^9.37.0",
     "express": "^5.1.0",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "scripts": {
-  "build": "tsc",
-  "start": "node dist/index.js",
-  "dev": "nodemon",
-  "db:seed": "ts-node src/db/Seeding/seedRoles.ts && ts-node src/db/Seeding/seedUsers.ts",
-  "db:delete": "ts-node src/db/Seeding/deleteUsers.ts"
-  
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "db:migrate:add_deleted": "tsx scripts/add_deleted_to_service_type.ts",
+    "db:seed": "ts-node src/db/Seeding/seedData.ts",
+    "db:delete": "ts-node src/db/Seeding/deleteData.ts",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -44,6 +48,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "express-session": "^1.18.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
   }
 }

@@ -1,12 +1,13 @@
-
-
-import { useraccountTable, roleTable } from "../db/schema/aiodb";
+// User Entity Class
+import { useraccountTable, roleTable, passwordResetRequestsTable, auditLogTable, adminNotificationsTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
-import { db } from "../index";
+import { db } from "../db/client";
 import { useraccountData } from "../shared/dataClasses";
+ 
 
 export class UserEntity {
+  
 
  
 
@@ -67,7 +68,7 @@ public async createUserFunc(
       });
       return true
     } catch (err) {
-      console.error(err)
+      console.error("ERROR HELP")
       return false;
     }
   }
@@ -96,6 +97,21 @@ public async getAllUserAccounts(): Promise<useraccountData[]> {
     return [];
   }
 }
+
+  // Get a single user by username
+  public async getUserByUsername(username: string): Promise<{ id: number; username: string } | null> {
+    try {
+      const [user] = await db
+        .select({ id: useraccountTable.id, username: useraccountTable.username })
+        .from(useraccountTable)
+        .where(eq(useraccountTable.username, username))
+        .limit(1);
+      return user ?? null;
+    } catch (err) {
+      console.error('getUserByUsername error:', err);
+      return null;
+    }
+  }
 
 
 
@@ -159,6 +175,282 @@ public async deleteUser(id: number): Promise<boolean> {
       return false;
     }
   }
+
+  // Search roles by label (case-insensitive, partial match)
+  async searchRoles(keyword: string): Promise<{ id: number, label: string, issuspended: boolean }[]> {
+    try {
+      const roles = await db
+        .select({ id: roleTable.id, label: roleTable.label, issuspended: roleTable.issuspended })
+        .from(roleTable)
+        .where(ilike(roleTable.label, `%${keyword}%`));
+      return roles;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  // Search users by username (case-insensitive, partial match)
+  async searchUsers(keyword: string): Promise<{ id: number, username: string, userProfile: string, isSuspended: boolean }[]> {
+    try {
+      const users = await db
+        .select({
+          id: useraccountTable.id,
+          username: useraccountTable.username,
+          userProfile: roleTable.label,
+          isSuspended: useraccountTable.issuspended
+        })
+        .from(useraccountTable)
+        .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id))
+        .where(ilike(useraccountTable.username, `%${keyword}%`));
+      return users.map(user => ({
+        id: user.id,
+        username: user.username,
+        userProfile: user.userProfile ?? "",
+        isSuspended: user.isSuspended
+      }));
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  // Search and filter users by username, role, and status
+  async searchAndFilterUsers({ keyword = '', role = '', status = '' }: { keyword?: string, role?: string, status?: string }): Promise<{ id: number, username: string, userProfile: string, isSuspended: boolean }[]> {
+    try {
+      let query = db
+        .select({
+          id: useraccountTable.id,
+          username: useraccountTable.username,
+          userProfile: roleTable.label,
+          isSuspended: useraccountTable.issuspended
+        })
+        .from(useraccountTable)
+        .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id));
+
+      const conditions = [];
+      if (keyword) {
+        conditions.push(ilike(useraccountTable.username, `%${keyword}%`));
+      }
+      if (role) {
+        conditions.push(ilike(roleTable.label, `%${role}%`));
+      }
+      if (status) {
+        if (status === 'Active') conditions.push(eq(useraccountTable.issuspended, false));
+        if (status === 'Suspended') conditions.push(eq(useraccountTable.issuspended, true));
+      }
+      if (conditions.length > 0) {
+        // @ts-ignore
+        query = query.where(and(...conditions));
+      }
+      const users = await query;
+      return users.map(user => ({
+        id: user.id,
+        username: user.username,
+        userProfile: user.userProfile ?? "",
+        isSuspended: user.isSuspended
+      }));
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  // Export all user accounts as CSV
+  async exportUserAccountsCSV(): Promise<string> {
+    const users = await new UserEntity().getAllUserAccounts();
+    const headers = ['ID', 'Username', 'Role', 'Status'];
+    function escapeCsv(val: any) {
+      if (val == null) return '';
+      const str = String(val);
+      const needsQuotes = /[",\n]/.test(str);
+      const escaped = str.replace(/"/g, '""');
+      return needsQuotes ? `"${escaped}"` : escaped;
+    }
+    const rows = users.map(u => [
+      u.id,
+      u.username,
+      u.userProfile,
+      u.isSuspended ? 'Suspended' : 'Active'
+    ]);
+    const csvData = [headers.join(','), ...rows.map(r => r.map(escapeCsv).join(','))].join('\n');
+    return csvData;
 }
 
- 
+
+
+//==================================================
+// Password Reset Request Entity Methods
+  // Create a new password reset request
+  async submitPasswordResetRequest(userId: number, username: string, newPassword: string) {
+    try {
+      const [request] = await db.insert(passwordResetRequestsTable).values({
+        user_id: userId,
+        username: username, // Store username in table
+        new_password: newPassword, // Store as plain text for now
+        status: "Pending",
+        requested_at: new Date(),
+      }).returning();
+      // Create an admin notification so User Admins can be informed
+      try {
+        await db.insert(adminNotificationsTable).values({
+          user_id: userId,
+          username: username,
+          message: 'Request password change',
+          // createdAt and read will use defaults
+        });
+      } catch (notifErr) {
+        console.error('Failed to create admin notification for password reset request:', notifErr);
+        // Don't fail the whole operation if notification insertion fails
+      }
+      return request;
+    } catch (err) {
+      console.error("Create password reset request error:", err);
+      return null;
+    }
+  }
+
+  // Fetch all password reset requests (for admin dashboard)
+  async getPasswordResetRequests(status?: string) {
+    try {
+      let requests;
+      if (status) {
+        requests = await db
+          .select({
+            id: passwordResetRequestsTable.id,
+            user_id: passwordResetRequestsTable.user_id,
+            username: passwordResetRequestsTable.username,
+            new_password: passwordResetRequestsTable.new_password,
+            status: passwordResetRequestsTable.status,
+            requested_at: passwordResetRequestsTable.requested_at,
+            reviewed_at: passwordResetRequestsTable.reviewed_at,
+            reviewed_by: passwordResetRequestsTable.reviewed_by,
+            admin_note: passwordResetRequestsTable.admin_note,
+            user_role: roleTable.label,
+            account_status: useraccountTable.issuspended,
+            admin_name: passwordResetRequestsTable.admin_name,
+          
+          })
+          .from(passwordResetRequestsTable)
+          .leftJoin(useraccountTable, eq(passwordResetRequestsTable.user_id, useraccountTable.id))
+          .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id))
+          .where(eq(passwordResetRequestsTable.status, status));
+      } else {
+        requests = await db
+          .select({
+            id: passwordResetRequestsTable.id,
+            user_id: passwordResetRequestsTable.user_id,
+            username: passwordResetRequestsTable.username,
+            new_password: passwordResetRequestsTable.new_password,
+            status: passwordResetRequestsTable.status,
+            requested_at: passwordResetRequestsTable.requested_at,
+            reviewed_at: passwordResetRequestsTable.reviewed_at,
+            reviewed_by: passwordResetRequestsTable.reviewed_by,
+            admin_note: passwordResetRequestsTable.admin_note,
+            user_role: roleTable.label,
+            account_status: useraccountTable.issuspended,
+            admin_name: passwordResetRequestsTable.admin_name,
+          })
+          .from(passwordResetRequestsTable)
+          .leftJoin(useraccountTable, eq(passwordResetRequestsTable.user_id, useraccountTable.id))
+          .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id));
+      }
+      // Map account_status to 'Active'/'Suspended' for frontend clarity
+      return requests.map(r => ({
+        ...r,
+        account_status: r.account_status ? 'Suspended' : 'Active',
+        user_role: r.user_role || '',
+      }));
+    } catch (err) {
+      console.error("Fetch password reset requests error:", err);
+      return [];
+    }
+  }
+
+  // Approve a password reset request
+  async approvePasswordResetRequest(requestId: number, adminId: number, adminName: string, note: string) {
+    try {
+      // 1. Get the request
+      const [request] = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.id, requestId)).limit(1);
+      if (!request || request.status !== "Pending") return false;
+      // 2. Update user's password
+      await db.update(useraccountTable)
+        .set({ password: request.new_password })
+        .where(eq(useraccountTable.id, request.user_id));
+      // 3. Update request status
+      await db.update(passwordResetRequestsTable)
+        .set({ status: "Approved", reviewed_at: new Date(), reviewed_by: adminId, admin_name: adminName, admin_note: note })
+        .where(eq(passwordResetRequestsTable.id, requestId));
+      // 4. Log to audit table
+      await db.insert(auditLogTable).values({
+        actor: adminName,
+        action: "Approve Password Reset",
+        target: request.username,
+        details: note, //`RequestId:${requestId}, Note:${note}`,
+        timestamp: new Date(),
+      });
+      return true;
+    } catch (err) {
+      console.error("Approve password reset request error:", err);
+      return false;
+    }
+  }
+
+  // Reject a password reset request
+  async rejectPasswordResetRequest(requestId: number, adminId: number, adminName: string, note: string) {
+    try {
+      await db.update(passwordResetRequestsTable)
+        .set({ status: "Rejected", reviewed_at: new Date(), reviewed_by: adminId, admin_note: note, admin_name: adminName })
+        .where(eq(passwordResetRequestsTable.id, requestId));
+      // Log to audit table
+      // Get the request to fetch username
+      const [request] = await db.select().from(passwordResetRequestsTable).where(eq(passwordResetRequestsTable.id, requestId)).limit(1);
+      await db.insert(auditLogTable).values({
+        actor: adminName,
+        action: "Reject Password Reset",
+        target: request.username,
+        details: note, //`RequestId:${requestId}, Note:${note}`,
+        timestamp: new Date(),
+      });
+      return true;
+    } catch (err) {
+      console.error("Reject password reset request error:", err);
+      return false;
+    }
+  }
+
+
+  // Clear all password reset requests
+  async clearAllPasswordResetRequests(): Promise<boolean> {
+    try {
+      await db.delete(passwordResetRequestsTable);
+      return true;
+    } catch (err) {
+      console.error("Clear all password reset requests error:", err);
+      return false;
+    }
+  }
+
+
+
+
+   // Admin Notification Methods
+  async getAdminNotifications() {
+    return await db.select().from(adminNotificationsTable)
+      .orderBy((adminNotificationsTable.read), (adminNotificationsTable.createdAt));
+  }
+
+  async markAdminNotificationRead(id: number) {
+    if (!id) throw new Error("Invalid id");
+    await db.update(adminNotificationsTable).set({ read: 1 }).where(eq(adminNotificationsTable.id, id));
+    return true;
+  }
+
+  async deleteAdminNotification(id: number) {
+    if (!id) throw new Error("Invalid id");
+    await db.delete(adminNotificationsTable).where(eq(adminNotificationsTable.id, id));
+    return true;
+  }
+   
+}
+

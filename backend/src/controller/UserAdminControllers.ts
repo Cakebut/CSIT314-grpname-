@@ -1,4 +1,23 @@
+// Admin Notification Controller
 import { UserEntity } from "../entities/userAccount";
+
+
+export class AdminNotificationController {
+  private userEntity = new UserEntity();
+
+  async getAdminNotifications() {
+    return await this.userEntity.getAdminNotifications();
+  }
+
+  async markNotificationRead(id: number) {
+    return await this.userEntity.markAdminNotificationRead(id);
+  }
+
+  async deleteNotification(id: number) {
+    return await this.userEntity.deleteAdminNotification(id);
+  }
+}
+ 
 
 export class ViewUserAccountController {
     private userAccount : UserEntity;
@@ -14,11 +33,23 @@ export class ViewUserAccountController {
 
 export class UpdateUserController {
   private userEntity = new UserEntity()
-  public async updateUserInfo(id: number, username: string, roleid: number, issuspended: boolean) {
-    return await this.userEntity.updateUser(id, username, roleid, issuspended);
+  public async updateUserInfo(id: number, username: string, roleid: number, issuspended: boolean, actor: string) {
+    // Get current user info to compare suspension status
+    const users = await this.userEntity.getAllUserAccounts();
+    const user = users.find(u => u.id === id);
+    const prevSuspended = user ? user.isSuspended : undefined;
+    const result = await this.userEntity.updateUser(id, username, roleid, issuspended);
+    return result;
   }
-  public async deleteUserById(id: number) {
-    return await this.userEntity.deleteUser(id);
+
+  
+  public async deleteUserById(id: number, actor: string) {
+    // Get username for logging
+    const users = await this.userEntity.getAllUserAccounts();
+    const user = users.find(u => u.id === id);
+    const username = user ? user.username : `id:${id}`;
+    const result = await this.userEntity.deleteUser(id);
+    return result;
   }
 }
 
@@ -31,10 +62,11 @@ export class CreateUserController {
   public async createUserFunc(
     username: string,
     password: string,
-    roleid: number
+    roleid: number,
+    actor: string
   ) {
-    const obj = await this.userEntity.createUserFunc(username, password, roleid)
-    return obj
+    const result = await this.userEntity.createUserFunc(username, password, roleid);
+    return result;
   }
 
  
@@ -45,17 +77,93 @@ export class CreateUserController {
 export class RoleController {
   private roleEntity = new UserEntity();
 
-  async createRole(label: string) {
-    return await this.roleEntity.createRole(label);
+  async createRole(label: string, actor: string) {
+    const result = await this.roleEntity.createRole(label);
+    return result;
   }
 
-  async deleteRole(id: number) {
-    return await this.roleEntity.deleteRole(id);
+  async deleteRole(id: number, actor: string) {
+   
+    return await this.roleEntity.searchRoles("");
+     
   }
 
-  async setRoleSuspended(id: number, issuspended: boolean) {
+  async setRoleSuspended(id: number, issuspended: boolean, actor: string) {
     return await this.roleEntity.setRoleSuspended(id, issuspended);
+    
+  }
+
+  // Search roles by label
+  async searchRoles(keyword: string) {
+    return await this.roleEntity.searchRoles(keyword);
   }
 }
 
+
+//Search User Controller
+export class SearchUserController {
+  private userAccount = new UserEntity();
+
+  public async searchUsers(keyword: string) {
+    return await this.userAccount.searchUsers(keyword);
+  }
+
+  public async searchAndFilterUsers(params: { keyword?: string, role?: string, status?: string }) {
+    return await this.userAccount.searchAndFilterUsers(params);
+  }
+}
+
+
+
+// Export user accounts as CSV
+export class ExportUserAccountController {
+  private userAccount = new UserEntity();
+  public async exportUserAccountsCSV() {
+    return await this.userAccount.exportUserAccountsCSV();
+  }
+}
+
+// Password Reset Request Controller
+export class PasswordResetRequestController {
+   private userEntity = new UserEntity();
+
+  // Clear all password reset requests
+  public async clearAllPasswordResetRequests() {
+    return await this.userEntity.clearAllPasswordResetRequests();
+  }
+  
+  //USER -> Admin Password Reset Request Flow
+  // User submits a password reset request (accepts username)
+  public async submitPasswordResetRequest(username: string, newPassword: string) {
+    // Look up userId from username using entity
+    const user = await this.userEntity.getUserByUsername(username);
+    if (!user) {
+      return { success: false, status: 404, error: "User not found" };
+    }
+    const userId = user.id;
+    const request = await this.userEntity.submitPasswordResetRequest(userId, username, newPassword);
+    if (request) {  
+      return { success: true, status: 200, request };
+    } else {
+      return { success: false, status: 500, error: "Failed to submit request" };
+    }
+  }
+
+
+  //ADMIN
+  // Admin fetches all password reset requests (optionally filter by status)
+  public async getPasswordResetRequests(status?: string) {
+    return await this.userEntity.getPasswordResetRequests(status);
+  }
+
+  // Admin approves a password reset request
+  public async approvePasswordResetRequest(requestId: number, adminId: number,  adminName: string, note: string) {
+    return await this.userEntity.approvePasswordResetRequest(requestId, adminId, adminName, note);
+  }
+
+  // Admin rejects a password reset request
+  public async rejectPasswordResetRequest(requestId: number, adminId: number,  adminName: string, note: string) {
+    return await this.userEntity.rejectPasswordResetRequest(requestId, adminId, adminName, note);
+  }
+}
 

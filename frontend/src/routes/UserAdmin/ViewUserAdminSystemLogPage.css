@@ -1,0 +1,153 @@
+.log-action-suspend-user, .log-action-suspend-user {
+  background: #ef4444 !important;
+  color: #fff !important;
+}
+.log-action-activate-user, .log-action-activate-user {
+  background: #22c55e !important;
+  color: #fff !important;
+}
+/* Modern log page styles */
+.system-log-container.modern-log {
+  max-width: 1000px;
+  margin: 2.5rem auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+  padding: 2.5rem 2rem;
+  font-family: 'Inter', Arial, sans-serif;
+}
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.log-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2d3748;
+  margin: 0;
+}
+.log-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.log-controls label {
+  font-size: 1rem;
+  color: #334155;
+  font-weight: 500;
+}
+.log-controls select {
+  margin: 0 0.5rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+}
+.clear-log-btn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.clear-log-btn:disabled {
+  background: #fca5a5;
+  cursor: not-allowed;
+}
+.log-table-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+}
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+.log-table th, .log-table td {
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+}
+.log-table th {
+  background: #f3f6fb;
+  font-weight: 700;
+  color: #334155;
+  font-size: 1.05rem;
+}
+.log-table tr:nth-child(even) {
+  background: #f9fafc;
+}
+.log-table tr {
+  transition: background 0.15s;
+}
+.log-table tr:hover {
+  background: #e0e7ef;
+}
+.log-user {
+  font-weight: 600;
+  color: #6C63FF;
+}
+.log-action {
+  font-weight: 600;
+  padding: 0.2em 0.7em;
+  border-radius: 6px;
+  background: #e0e7ef;
+  color: #334155;
+  font-size: 0.98em;
+}
+.log-action-update-user {
+  background: #fbbf24;
+  color: #fff;
+}
+.log-action-create-user {
+  background: #22c55e;
+  color: #fff;
+}
+.log-action-delete-user {
+  background: #ef4444;
+  color: #fff;
+}
+.log-action-suspend-role {
+  background: #64748b;
+  color: #fff;
+}
+.log-action-activate-role {
+  background: #22c55e;
+  color: #fff;
+}
+.log-target {
+  font-weight: 500;
+  color: #764ba2;
+}
+.log-timestamp {
+  font-family: 'Roboto Mono', monospace;
+  color: #334155;
+  font-size: 0.97em;
+}
+.log-details {
+  color: #64748b;
+  font-size: 0.97em;
+}
+.log-muted {
+  color: #b6bbc4;
+  text-align: center;
+  font-size: 1.1em;
+}
+.log-loading {
+  color: #64748b;
+  font-size: 1.1em;
+  text-align: center;
+  margin: 2rem 0;
+}
+.log-error {
+  color: #ef4444;
+  font-size: 1.1em;
+  text-align: center;
+  margin: 2rem 0;
+}

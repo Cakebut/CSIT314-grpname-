@@ -13,7 +13,7 @@ function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent form submission reload
     try {
-      const res = await fetch("http://localhost:3000/api/userAdmin/login", {
+      const res = await fetch("/api/userAdmin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -23,9 +23,11 @@ function Login() {
       if (res.ok) {
         setStatus("Login successful!");
         const data = await res.json();
-        // Store username and role for dashboard
+        // Store username, role, userId, and username for dashboard features
         localStorage.setItem('currentUsername', username);
         localStorage.setItem('currentRole', data.role);
+        if (data.id) localStorage.setItem('userId', String(data.id));
+        if (data.username) localStorage.setItem('username', data.username);
         if (data.role === "User Admin") {
           navigate("/useradmin");
         } 
@@ -36,7 +38,7 @@ function Login() {
           navigate("/csr");
         }
         else if (data.role === "Platform Manager") {
-          navigate("/platform");
+          navigate("/platformManager");
         }
       } else {
           let errorMsg = "Login attempt failed.";
@@ -110,12 +112,9 @@ function Login() {
             />
           </div>
           <div className="forgot">
+        
             <section>
-              <input type="checkbox" id="check" />
-              <label htmlFor="check">Remember me</label>
-            </section>
-            <section>
-              <a className="login-text" href="#">Forgot Password</a>
+              <a className="login-text"  href="/forgot-password">Forgot Password</a>
             </section>
           </div>
           <div className="input-submit" style={{ marginBottom: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
