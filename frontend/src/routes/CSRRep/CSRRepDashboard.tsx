@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import "./CSRRepDashboard.css";
 import "./CSRRepDashboard.extra.css";
 
@@ -387,7 +386,7 @@ function CSRAvailableRequests() {
   const [searchTitle, setSearchTitle] = useState("");
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
-  const [urgencyOptions, setUrgencyOptions] = useState<string[]>(["High Priority", "Low Priority"]);
+  const [urgencyOptions] = useState<string[]>(["High Priority", "Low Priority"]);
   useEffect(() => {
     fetch('/api/csr/service-types')
       .then(res => res.json())
@@ -744,7 +743,7 @@ function CSROffers() {
   const [filterLocation, setFilterLocation] = useState<string>("");
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
-  const [filterStatus, setFilterStatus] = useState<OfferStatus | "">("");
+  const [filterStatus] = useState<OfferStatus | "">("");
   const csrId = getCSRId();
   useEffect(() => {
     const fetchOffers = async () => {
@@ -811,25 +810,7 @@ function CSROffers() {
     }
     return result;
   }, [tab, offers, filterCategory, filterLocation, filterStatus]);
-  const handleCancelInterest = async (requestId: number) => {
-    const csrId = getCSRId();
-    if (!csrId) return;
-    try {
-      const resp = await fetch(`http://localhost:3000/api/pin/offers/${requestId}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ csrId }),
-      });
-      if (!resp.ok) {
-        alert('Failed to cancel interest');
-        return;
-      }
-      // Reload offers after cancel
-      window.location.reload(); // or refetch offers if you use state
-    } catch (e) {
-      alert('Error cancelling interest');
-    }
-  };
+    // Cancel action removed from this view; CSR cancel handled elsewhere if needed.
   return (
     <div className="csr-page">
       <h2 className="csr-section-title big">My Offers</h2>
@@ -896,15 +877,7 @@ function CSROffers() {
               ) : (
                 <div className="csr-muted small" style={{ marginTop: 8 }}>No feedback yet.</div>
               )}
-              <div style={{ marginTop: 8 }}>
-                <button
-                  className="csr-btn-danger"
-                  style={{ minWidth: 110, marginRight: 8 }}
-                  onClick={() => handleCancelInterest(o.id)}
-                >
-                  Cancel
-                </button>
-              </div>
+              {/* Cancel button removed per request: CSR cancels handled elsewhere or not allowed here */}
             </div>
           </div>
         ))}
