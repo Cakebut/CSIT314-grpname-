@@ -51,13 +51,16 @@ const Reports: React.FC = () => {
 
   return (
     <div className="reports-container">
-      <div className="header">
-        <h1>Daily Volunteer Services Report</h1>
-        <p>Comprehensive analytics and statistics of volunteer service requests</p>
+      <div className="reports-top">
+        <div>
+        <header className="reports-header"></header>
+          <h1>Volunteer Services Report</h1>
+          <p>A collection of data analytics and statistics for the volunteer services</p>
+        </div>
       </div>
 
       {/* Date Range and Date Selector */}
-      <div className="date-range-selector">
+      <div className="reports-date-range-selector">
         <label>Date Range:</label>
         <select value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
           <option value="Daily">Daily</option>
@@ -69,33 +72,33 @@ const Reports: React.FC = () => {
       </div>
 
       {/* Key Statistics Section */}
-      <div className="stats-section">
+      <div className="reports-stats-section">
         <div className="stat-card">
           <h3>Total Requests</h3>
           <p>{totalRequests}</p>
-          <p className="percentage-change">+12% from last day</p>
+          <p className="reports-percentage-change">+12% from last day</p>
         </div>
         <div className="stat-card">
           <h3>Completed</h3>
           <p>{completedRequests}</p>
-          <p className="percentage-change">75% completion rate</p>
+          <p className="reports-percentage-change">75% completion rate</p>
         </div>
         <div className="stat-card">
           <h3>Pending</h3>
           <p>{pendingRequests}</p>
-          <p className="percentage-change">Awaiting assignment</p>
+          <p className="reports-percentage-change">Awaiting assignment</p>
         </div>
         <div className="stat-card">
           <h3>Active CSRs</h3>
           <p>{activeCSRs}</p>
-          <p className="percentage-change">Volunteers this day</p>
+          <p className="reports-percentage-change">Volunteers this day</p>
         </div>
       </div>
 
       {/* Graphs */}
-      <div className="graphs">
-        <div className="graph-row">
-          <div className="graph-card">
+      <div className="reports-graphs">
+        <div className="reports-graph-row">
+          <div className="reports-graph-card">
             <h3>Hourly Activity</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={hourlyData}>
@@ -109,7 +112,7 @@ const Reports: React.FC = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="graph-card">
+          <div className="reports-graph-card">
             <h3>Top Service Types</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -122,8 +125,8 @@ const Reports: React.FC = () => {
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="graph-row">
-          <div className="graph-card">
+        <div className="reports-graph-row">
+          <div className="reports-graph-card">
             <h3>Requests by Region</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={regionData}>
@@ -144,7 +147,7 @@ const Reports: React.FC = () => {
       </div>
 
       {/* Download Report Button */}
-      <div className="download-button">
+      <div className="reports-download-button">
         <button onClick={handleDownloadReport}>
           <Download className="icon" /> Download Report
         </button>

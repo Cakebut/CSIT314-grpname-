@@ -5,8 +5,7 @@ import "./SearchHistory.css";
 // Define structure for service record
 interface ServiceRecord {
   serviceName: string;
-  date: string;
-  duration: string;
+  date: string
   location: string;
   serviceType: string;
   status: "Completed" | "Pending";
@@ -16,7 +15,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Community Food Drive",
     date: "Oct 15, 2025",
-    duration: "4 hours",
     location: "Downtown Community Center",
     serviceType: "Food Distribution",
     status: "Completed",
@@ -24,7 +22,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Senior Home Visit",
     date: "Oct 8, 2025",
-    duration: "3 hours",
     location: "Sunrise Senior Living",
     serviceType: "Elder Care",
     status: "Pending",
@@ -32,7 +29,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Environmental Cleanup",
     date: "Sep 22, 2025",
-    duration: "5 hours",
     location: "River Park",
     serviceType: "Environmental",
     status: "Completed",
@@ -40,7 +36,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Youth Mentoring Session",
     date: "Sep 10, 2025",
-    duration: "2 hours",
     location: "Lincoln High School",
     serviceType: "Education",
     status: "Pending",
@@ -48,7 +43,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Medical Supply Distribution",
     date: "Aug 28, 2025",
-    duration: "6 hours",
     location: "City Health Clinic",
     serviceType: "Healthcare",
     status: "Completed",
@@ -56,7 +50,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Homeless Shelter Support",
     date: "Aug 15, 2025",
-    duration: "4 hours",
     location: "Safe Haven Shelter",
     serviceType: "Food Distribution",
     status: "Pending",
@@ -64,7 +57,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Tree Planting Initiative",
     date: "Jul 30, 2025",
-    duration: "3 hours",
     location: "Central Park",
     serviceType: "Environmental",
     status: "Completed",
@@ -72,7 +64,6 @@ const initialRecords: ServiceRecord[] = [
   {
     serviceName: "Hospital Volunteer Work",
     date: "Jul 12, 2025",
-    duration: "5 hours",
     location: "General Hospital",
     serviceType: "Healthcare",
     status: "Pending",
@@ -106,11 +97,10 @@ const SearchHistory: React.FC = () => {
 
   const handleDownloadHistory = () => {
     const csvRows = [
-      ["Service Name", "Date", "Duration", "Location", "Service Type", "Status"],
+      ["Service Name", "Date", "Location", "Service Type", "Status"],
       ...records.map((record) => [
         record.serviceName,
         record.date,
-        record.duration,
         record.location,
         record.serviceType,
         record.status,
@@ -194,7 +184,6 @@ const SearchHistory: React.FC = () => {
             <tr>
               <th>Service Name</th>
               <th>Date</th>
-              <th>Duration</th>
               <th>Location</th>
               <th>Service Type</th>
               <th>Status</th>
@@ -205,7 +194,6 @@ const SearchHistory: React.FC = () => {
               <tr key={record.serviceName}>
                 <td>{record.serviceName}</td>
                 <td>{record.date}</td>
-                <td>{record.duration}</td>
                 <td>{record.location}</td>
                 <td>{record.serviceType}</td>
                 <td className={record.status === "Completed" ? "completed" : "pending"}>
