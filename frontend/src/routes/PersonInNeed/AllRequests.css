@@ -1,13 +1,13 @@
 /* Container CSS ---------------------------------------------------------------------------------------------- */
 
-.allrequests-container {
+.all-requests-container {
   padding: 20px;
   max-width: 100%;
   margin: 0 auto; /* To center */
   font-family: "Montserrat", sans-serif;
 }
 
-.allrequests-top {
+.all-requests-top {
   display: flex;  
   justify-content: space-between;
   align-items: center;
@@ -16,23 +16,23 @@
 
 /* Header  CSS ---------------------------------------------------------------------------------------------- */
 
-.allrequests-header {
+.all-requests-header {
   margin-bottom: 20px;
 }
 
-.allrequests-header h1 {
+.all-requests-header h1 {
   font-size: 2rem;
   font-weight: bold;
 }
 
-.allrequests-header p {
+.all-requests-header p {
   font-size: 1rem;
   color: #555;
 }
 
 /* Filters CSS ---------------------------------------------------------------------------------------------- */
 
-.allrequests-actions {
+.all-requests-actions {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -43,7 +43,7 @@
   margin-top: 30px;
 }
 
-.search-allrequests {
+.search-all-requests {
   padding: 5px 10px;
   border-radius: 10px;
   height: 50px;
@@ -53,7 +53,7 @@
   outline: none;
 }
 
-.filter-allrequests {
+.filter-all-requests {
   padding: 5px 40px; /* left:(top bottom) right:(left right) */
   border-radius: 10px;
   height: 50px;
@@ -64,7 +64,7 @@
   text-align: left;
 }
 
-.reset-allrequests {
+.reset-all-requests {
   padding: 6px 12px;
   border-radius: 10px;
   cursor: pointer;
@@ -75,20 +75,20 @@
   color: #ffffff;
 }
 
-.reset-allrequests:hover {
+.reset-all-requests:hover {
   background-color: #111111;
 }
 
 /* List CSS ---------------------------------------------------------------------------------------------- */
 
-.allrequests-request-list {
+.all-requests-list {
   display: flex;
   flex-direction: column;
   gap: 30px;
   margin-top: 40px;
 }
 
-.allrequests-request-card {
+.all-requests-card {
   background-color: #ffffff;
   padding: 16px;
   border-radius: 8px;
@@ -99,41 +99,41 @@
   position: relative;
 }
 
-.allrequests-request-card:hover {
+.all-requests-card:hover {
   box-shadow: 0 8px 20px rgba(2,6,23,0.1);
   transform: scale(1.02);
   cursor: pointer;
 }
 
 /* highlight card background when priority is high */
-.allrequests-request-card.priority-high-card {
+.all-requests-card.priority-high-card {
   background-color: rgba(255, 0, 0, 0.08);
 }
 
-.allrequests-request-header {
+.all-requests-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.allrequests-request-title {
+.all-requests-title {
   font-size: 1.125rem;
   font-weight: 700;
   color: #0f172a;
 }
 
-.allrequests-request-priority {
+.all-requests-priority {
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 0.825rem;
 }
-.allrequests-request-body {
+.all-requests-body {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.allrequests-request-body p {
+.all-requests-body p {
   margin: 0;
   font-size: 0.95rem;
   color: #374151;
@@ -145,12 +145,12 @@
   margin-right: 5px;
 }
 
-.allrequests-request-type strong,
-.allrequests-request-pin strong {
+.all-requests-type strong,
+.all-requests-pin strong {
   color: #111827;
 }
 
-.allrequests-request-location {
+.all-requests-location {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -158,7 +158,7 @@
   padding-top: 15px;
 }
 
-.allrequests-request-priority {
+.all-requests-priority {
   position: absolute;
   top: 12px;
   right: 12px;

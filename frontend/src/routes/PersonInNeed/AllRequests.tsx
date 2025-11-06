@@ -154,8 +154,8 @@ const Available: React.FC = () => {
   };
 
   return (
-    <div className="allrequests-container">
-      <div className="allrequests-top">
+    <div className="all-requests-container">
+      <div className="all-requests-top">
         <div>
         <header className="allrequests-header"></header>
           <h1>Available Requests</h1>
@@ -163,18 +163,18 @@ const Available: React.FC = () => {
         </div>
       </div>
 
-        <div className="allrequests-actions">
+        <div className="all-requests-actions">
         <input
           type="text"
           placeholder="Search by request title, description, or name"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="search-allrequests"
+          className="search-all-requests"
         />
         <select
           value={filterLocation}
           onChange={(e) => setFilterLocation(e.target.value)}
-          className="filter-allrequests"
+          className="filter-all-requests"
         >
           <option>All Locations</option>
           <option>North Region</option>
@@ -183,25 +183,25 @@ const Available: React.FC = () => {
           <option>West Region</option>
           <option>Central Region</option>
         </select>
-        <button className="reset-allrequests btn" onClick={() => { setFilterLocation("All Locations"); setSearchQuery(""); }}>
+        <button className="reset-all-requests btn" onClick={() => { setFilterLocation("All Locations"); setSearchQuery(""); }}>
           Reset
         </button>
       </div>
 
-      <div className="allrequests-request-list">
+      <div className="all-requests-list">
         {filteredRequests.map((request) => (
-          <div key={request.id} onClick={() => openDetails(request)} className={`allrequests-request-card ${request.priority.toLowerCase().includes("high") ? 'priority-high-card' : ''}`}>
-            <span className={`allrequests-request-priority ${request.priority.toLowerCase().includes("high") ? 'priority-high' : 'priority-low'}`}>
+          <div key={request.id} onClick={() => openDetails(request)} className={`all-requests-card ${request.priority.toLowerCase().includes("high") ? 'priority-high-card' : ''}`}>
+            <span className={`all-requests-priority ${request.priority.toLowerCase().includes("high") ? 'priority-high' : 'priority-low'}`}>
               {request.priority}
             </span>
-            <div className="allrequests-request-header">
-              <h3 className="allrequests-request-title">{request.title}</h3>
+            <div className="all-requests-header">
+              <h3 className="all-requests-title">{request.title}</h3>
             </div>
 
-            <div className="allrequests-request-body">
-              <p className="allrequests-request-type"><strong>Request Type:</strong> {request.requestType}</p>
-              <p className="allrequests-request-pin"><strong>PIN:</strong> {request.pinName}</p>
-              <p className="allrequests-request-location"><MapPin className="icon" /> {request.region}</p>
+            <div className="all-requests-body">
+              <p className="all-requests-type"><strong>Request Type:</strong> {request.requestType}</p>
+              <p className="all-requests-pin"><strong>PIN:</strong> {request.pinName}</p>
+              <p className="all-requests-location"><MapPin className="icon" /> {request.region}</p>
             </div>
           </div>
         ))}
