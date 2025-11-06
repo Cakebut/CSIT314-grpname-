@@ -123,7 +123,11 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
     res.setHeader("Content-Disposition", "attachment; filename=custom-report.csv");
     res.send(csv);
   } catch (e: any) {
-    res.status(400).json({ error: e.message ?? "Bad request" });
+    // Always return a CSV, even on error
+    const header = ["date", "total", "Pending", "InProgress", "Completed", "Cancelled"];
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=custom-report.csv");
+    res.send(header.join(",") + "\n");
   }
 });
 
@@ -181,7 +185,19 @@ platformRouter.get("/reports/custom-data.csv", async (req, res) => {
     res.setHeader("Content-Disposition", "attachment; filename=custom-report-data.csv");
     res.send(csv);
   } catch (e: any) {
-    res.status(400).json({ error: e.message ?? "Bad request" });
+    // Always return a CSV, even on error
+    const header = [
+      "requestedAt",
+      "requestedDate",
+      "serviceType",
+      "status",
+      "pin_id",
+      "csr_id",
+      "message",
+    ];
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=custom-report-data.csv");
+    res.send(header.join(",") + "\n");
   }
 });
 

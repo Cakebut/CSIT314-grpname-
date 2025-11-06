@@ -102,12 +102,12 @@ export class PlatformManagerEntity {
       .select({ pins: count() })
       .from(useraccountTable)
       .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id))
-      .where(and(eq(useraccountTable.issuspended, false), eq(roleTable.label, 'PIN')));
+      .where(and(eq(useraccountTable.issuspended, false), eq(roleTable.label, 'Person In Need')));
     const [{ csrs }] = await this.db
       .select({ csrs: count() })
       .from(useraccountTable)
       .leftJoin(roleTable, eq(useraccountTable.roleid, roleTable.id))
-      .where(and(eq(useraccountTable.issuspended, false), eq(roleTable.label, 'CSR')));
+      .where(and(eq(useraccountTable.issuspended, false), eq(roleTable.label, 'CSR Rep')));
     return { activePINs: Number(pins ?? 0), activeCSRs: Number(csrs ?? 0) };
   }
 
@@ -201,8 +201,9 @@ export class PlatformManagerEntity {
     const totalRes = await this.db.execute(sql`
       SELECT COUNT(*)::int AS total
       FROM ${csr_requestsTable} cr
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
       WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
-      ${idFilterArr ? sql`AND cr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
+      ${idFilterArr ? sql`AND pr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
     `);
     const total = Number(totalRes.rows?.[0]?.total ?? 0);
 
@@ -211,8 +212,9 @@ export class PlatformManagerEntity {
     const rowsByStatusRes = await this.db.execute(sql`
       SELECT cr.status AS status, COUNT(*)::int AS n
       FROM ${csr_requestsTable} cr
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
       WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
-      ${idFilterArr ? sql`AND cr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
+      ${idFilterArr ? sql`AND pr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
       GROUP BY cr.status
     `);
 
@@ -220,13 +222,14 @@ export class PlatformManagerEntity {
     rowsByStatusRes.rows.forEach((r: any) => (byStatus[r.status] = Number(r.n)));
 
     const idFilter = typeIds && typeIds.length
-      ? sql`AND cr."categoryID" IN (${sql.join(typeIds.map(id => sql`${id}`), sql`,`)})`
+      ? sql`AND pr."categoryID" IN (${sql.join(typeIds.map(id => sql`${id}`), sql`,`)})`
       : sql``;
 
     const rowsByType = await this.db.execute(sql`
       SELECT st.name as name, COUNT(*)::int as n
       FROM ${csr_requestsTable} cr
-      JOIN ${service_typeTable} st ON st.id = cr."categoryID"
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      JOIN ${service_typeTable} st ON st.id = pr."categoryID"
       WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       GROUP BY st.name
@@ -238,13 +241,11 @@ export class PlatformManagerEntity {
     const uniqRes = await this.db.execute(sql`
       SELECT COUNT(DISTINCT cr.csr_id)::int AS uniq
       FROM ${csr_requestsTable} cr
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
       WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
     `);
     const uniq = Number(uniqRes.rows?.[0]?.uniq ?? 0);
-
-    const completed = byStatus["Completed"] ?? 0;
-    const completionRate = total ? Number((completed / total).toFixed(3)) : 0;
 
     const trend = await this.db.execute(sql`
       SELECT to_char(date_trunc('day', cr."requestedAt"), 'YYYY-MM-DD') AS d,
@@ -254,6 +255,7 @@ export class PlatformManagerEntity {
              SUM((cr.status='Completed')::int)::int AS "Completed",
              SUM((cr.status='Cancelled')::int)::int AS "Cancelled"
       FROM ${csr_requestsTable} cr
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
       WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       GROUP BY d
@@ -268,9 +270,13 @@ export class PlatformManagerEntity {
       Cancelled: r.Cancelled,
     }));
 
+    const completed = byStatus["Completed"] ?? 0;
+    const completionRate = total ? Number((completed / total).toFixed(3)) : 0;
     const averageTimeToComplete = null;
     const totalVolunteerHours = 0;
 
+    // Get active PINs and CSRs
+    const activeStats = await this.countActiveUsersByRole();
     return {
       totalRequests: total,
       byStatus,
@@ -280,6 +286,8 @@ export class PlatformManagerEntity {
       completionRate,
       averageTimeToComplete,
       trendDaily,
+      activePINs: activeStats.activePINs,
+      activeCSRs: activeStats.activeCSRs,
     };
   }
 
@@ -309,7 +317,7 @@ export class PlatformManagerEntity {
     }
 
     const idFilter = typeIds && typeIds.length
-      ? sql`AND cr."categoryID" IN (${sql.join(typeIds.map(id => sql`${id}`), sql`,`)})`
+      ? sql`AND pr."categoryID" IN (${sql.join(typeIds.map(id => sql`${id}`), sql`,`)})`
       : sql``;
 
     const rows = await this.db.execute(sql`
@@ -320,7 +328,8 @@ export class PlatformManagerEntity {
              cr.csr_id        AS csr_id,
              cr.message       AS message
       FROM ${csr_requestsTable} cr
-      JOIN ${service_typeTable} st ON st.id = cr."categoryID"
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      JOIN ${service_typeTable} st ON st.id = pr."categoryID"
       WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       ORDER BY cr."requestedAt" ASC

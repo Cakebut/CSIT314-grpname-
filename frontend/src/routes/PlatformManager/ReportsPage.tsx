@@ -11,11 +11,13 @@ type Summary = {
   completionRate: number;
   averageTimeToComplete: number | null;
   trendDaily: TrendRow[];
+  activePINs: number;
+  activeCSRs: number;
 };
 
 
 
-type ActiveStats = { activePINs: number; activeCSRs: number };
+// Removed unused ActiveStats type
 type QuickBucket = { total: number; Pending: number; InProgress: number; Completed: number; Cancelled: number };
 type QuickStats = { day: QuickBucket | null; week: QuickBucket | null; month: QuickBucket | null };
 
@@ -28,7 +30,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
-  const [active, setActive] = useState<ActiveStats | null>(null);
+  // Removed unused active state
   
   const [quick, setQuick] = useState<QuickStats | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
@@ -41,12 +43,7 @@ export default function ReportsPage() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    fetch('/api/pm/stats/active')
-      .then(r => r.ok ? r.json() : Promise.reject(new Error('stats failed')))
-      .then(s => setActive(s))
-      .catch(()=>{});
-  }, []);
+  // Removed unused active stats fetch
 
   useEffect(() => {
     fetch('/api/pm/reports/quick')
@@ -209,12 +206,12 @@ export default function ReportsPage() {
       {summary && summary.totalRequests > 0 && (
         <div className="results">
           <div className="cards">
-            <div className="card"><b>Total</b><span>{summary.totalRequests}</span></div>
+            <div className="card highlight"><b>Total Requests</b><span>{summary.totalRequests}</span></div>
             <div className="card"><b>Completed</b><span>{summary.byStatus["Completed"] || 0}</span></div>
             <div className="card"><b>Unique Volunteers</b><span>{summary.uniqueVolunteers}</span></div>
             <div className="card"><b>Completion Rate</b><span>{(summary.completionRate*100).toFixed(1)}%</span></div>
-            {active && <div className="card"><b>Active PINs</b><span>{active.activePINs}</span></div>}
-            {active && <div className="card"><b>Active CSRs</b><span>{active.activeCSRs}</span></div>}
+            <div className="card highlight"><b>Active PINs</b><span>{summary.activePINs ?? 0}</span></div>
+            <div className="card highlight"><b>Active CSRs</b><span>{summary.activeCSRs ?? 0}</span></div>
           </div>
 
           <h3>By Status</h3>
