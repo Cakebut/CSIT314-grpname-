@@ -1,128 +1,293 @@
-/* Main Container */
+/* Container CSS ---------------------------------------------------------------------------------------------- */
+
 .pending-offers-container {
   padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto; /* To center */
 }
 
-/* Title */
-h1 {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 10px;
+.pending-offers-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
 }
 
-/* Request Card */
-.request-card {
-  background-color: #fff;
-  padding: 20px;
+
+/* Header  CSS ---------------------------------------------------------------------------------------------- */
+
+.pending-offers-header {
   margin-bottom: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
 }
 
-.request-card h2 {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.request-card p {
-  color: #555;
-  margin-bottom: 10px;
-}
-
-/* CSR Offer Card */
-.csr-offers {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.csr-offer-card {
-  background-color: #f9f9f9;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-}
-
-.csr-info {
-  display: flex;
-  gap: 10px;
-}
-
-.csr-initial {
-  background-color: #007bff;
-  color: white;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-}
-
-.csr-details {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.csr-name {
+.pending-offers-header h1 {
+  font-size: 2rem;
   font-weight: bold;
 }
 
-.csr-email {
+.pending-offers-header p {
+  font-size: 1rem;
   color: #555;
 }
 
-.csr-skills {
+/* List CSS ---------------------------------------------------------------------------------------------- */
+
+.pending-offers-content {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  margin-top: 40px;
 }
 
-.skill {
-  background-color: #007bff;
-  color: white;
-  padding: 5px;
-  border-radius: 4px;
-  font-size: 12px;
+.pending-offers-empty-state {
+  padding:100px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 10px;
+.pending-offers-empty-state p {
+  color: #555;
+  font-size: 18px;
 }
 
-.accept-btn,
-.reject-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.pending-offers-list {
   display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 5px;
+}
+
+.pending-offers-card {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 70px 50px 40px 50px; /* top right bottom left */
+}
+
+.pending-offers-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
 }
 
-.accept-btn {
-  background-color: #28a745;
-  color: white;
+.pending-offers-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
 }
 
-.reject-btn {
-  background-color: #dc3545;
-  color: white;
+.pending-offers-priority {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.825rem;
 }
 
-.accept-btn:hover {
-  background-color: #218838;
+.pending-offers-body {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.reject-btn:hover {
-  background-color: #c82333;
+.pending-offers-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
 }
 
 .icon {
   width: 16px;
   height: 16px;
+  margin-right: 5px;
+}
+
+.pending-offers-type strong,
+.pending-offers-pin strong {
+  color: #111827;
+}
+
+.pending-offers-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #374151;
+}
+
+.pending-offers-priority {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  display: inline-block;
+  line-height: 1;
+}
+
+.priority-high {
+  background-color: #b41928;
+}
+.priority-low {
+  background-color: #6b7280;
+}
+
+.pending-offers-field {
+  font-size: 0.98rem;
+  color: #0f172a;
+}
+
+.pending-offers-field strong {
+  display: block;
+  margin-bottom: 25px;
+}
+
+.pending-offers-details {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid black;
+  height: 200px;
+}
+
+.pending-offers-delete-button {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.3s ease, background-color 0.3s ease;  
+  background-color: black;
+  color: white;
+}
+
+.pending-offers-delete-button:hover {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+}
+
+.pending-offers-delete-button .icon {
+  margin-right: 6px;
+}
+
+/* List CSS ---------------------------------------------------------------------- */
+
+.disable-pending-offers, .delete-pending-offers {
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 85px;
+  height: 30px;
+  font-size: 14px;
+}
+
+.pending-offers-table {
+  width: 100%;
+  border-spacing: 0;
+  margin-top: 30px;
+  overflow: hidden;
+  table-layout: fixed;
+}
+
+.pending-offers-table {
+  border-collapse: separate;
+  background-color: white;
+  background-clip: padding-box;
+}
+
+.pending-offers-table th, .pending-offers-table td {
+  padding: 20px 15px;
+  text-align: center;
+  border: none;
+}
+
+.pending-offers-table th:nth-child(1),
+.pending-offers-table td:nth-child(1) {
+  width: 20%;
+  padding-left: 15px;
+  padding-right: 8px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.pending-offers-table th:nth-child(2),
+.pending-offers-table td:nth-child(2) {
+  width: 40%;
+}
+
+.pending-offers-table th:nth-child(3),
+.pending-offers-table td:nth-child(3) {
+  width: 25%;
+}
+
+.pending-offers-table {
+  border-radius: 5px;
+}
+.pending-offers-table tbody tr + tr td {
+  border-top: 1px solid #000;
+}
+
+.pending-offers-table th {
+  border-bottom: 1px solid black;
+}
+
+/* Decision Buttons CSS -------------------------------------------------------- */
+
+.pending-offer-decision-buttons {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.pending-offer-decision-buttons .pending-offer-accept,
+.pending-offer-decision-buttons .pending-offer-reject {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pending-offer-decision-buttons .pending-offer-accept {
+  background: #0f1724; /* dark/navy like approve-btn */
+  color: #fff;
+  min-width: 120px;
+  box-shadow: 0 6px 18px rgba(15,23,36,0.12);
+}
+
+.pending-offer-decision-buttons .pending-offer-reject {
+  background: #b41928;
+  color: white;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.pending-offer-decision-buttons .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.pending-offer-waiting {
+  padding: 18px 22px;
+  border-radius: 10px;
+  color: #0f1724;
+  font-weight: 700;
 }

@@ -1,87 +1,142 @@
-/* Container for Available Requests */
-.available-container {
+/* Container CSS ---------------------------------------------------------------------------------------------- */
+
+.allrequests-container {
   padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto; /* To center */
+  font-family: "Montserrat", sans-serif;
 }
 
-/* Header section styling */
-.header {
+.allrequests-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* Header  CSS ---------------------------------------------------------------------------------------------- */
+
+.allrequests-header {
   margin-bottom: 20px;
 }
 
-.header h1 {
+.allrequests-header h1 {
   font-size: 2rem;
   font-weight: bold;
 }
 
-.header p {
+.allrequests-header p {
   font-size: 1rem;
   color: #555;
 }
 
-.actions {
+/* Filters CSS ---------------------------------------------------------------------------------------------- */
+
+.allrequests-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 1px black;
+  background-color: #F9FAFB;
+  margin-top: 30px;
 }
 
-.search-input {
+.search-allrequests {
   padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  width: 250px;
+  border-radius: 10px;
+  height: 50px;
+  width: 400px;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
 }
 
-.filter-select {
-  padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.filter-allrequests {
+  padding: 5px 40px; /* left:(top bottom) right:(left right) */
+  border-radius: 10px;
+  height: 50px;
+  border: none;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
+  text-align: left;
 }
 
-.request-list {
+.reset-allrequests {
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.reset-allrequests:hover {
+  background-color: #111111;
+}
+
+/* List CSS ---------------------------------------------------------------------------------------------- */
+
+.allrequests-request-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 30px;
+  margin-top: 40px;
 }
 
-.request-card {
-  background-color: #fff;
-  padding: 15px;
+.allrequests-request-card {
+  background-color: #ffffff;
+  padding: 16px;
   border-radius: 8px;
-  border: 1px solid #ddd;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  position: relative;
 }
 
-.request-header {
+.allrequests-request-card:hover {
+  box-shadow: 0 8px 20px rgba(2,6,23,0.1);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+/* highlight card background when priority is high */
+.allrequests-request-card.priority-high-card {
+  background-color: rgba(255, 0, 0, 0.08);
+}
+
+.allrequests-request-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.request-header h3 {
-  font-size: 1.25rem;
-  font-weight: bold;
+.allrequests-request-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.priority {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.875rem;
+.allrequests-request-priority {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.825rem;
+}
+.allrequests-request-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.high-priority {
-  background-color: #f87171;
-  color: white;
-}
-
-.low-priority {
-  background-color: #34d399;
-  color: white;
-}
-
-.request-details p {
-  font-size: 1rem;
-  margin: 5px 0;
+.allrequests-request-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
 }
 
 .icon {
@@ -90,15 +145,35 @@
   margin-right: 5px;
 }
 
-.view-btn {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.allrequests-request-type strong,
+.allrequests-request-pin strong {
+  color: #111827;
 }
 
-.view-btn:hover {
-  background-color: #0056b3;
+.allrequests-request-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #374151;
+  padding-top: 15px;
+}
+
+.allrequests-request-priority {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  display: inline-block;
+  line-height: 1;
+}
+
+.priority-high {
+  background-color: #b41928;
+}
+.priority-low {
+  background-color: #6b7280;
 }

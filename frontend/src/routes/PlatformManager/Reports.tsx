@@ -10,9 +10,6 @@ const completedRequests = 6;
 const pendingRequests = 2;
 const activeCSRs = 5;
 
-const avgCompletionTime = 4.5; // in hours
-const satisfactionRate = 95; // in percentage
-
 const hourlyData = [
   { time: "12AM", completed: 1, total: 3 },
   { time: "6AM", completed: 2, total: 4 },
@@ -93,18 +90,6 @@ const Reports: React.FC = () => {
           <p>{activeCSRs}</p>
           <p className="percentage-change">Volunteers this day</p>
         </div>
-      </div>
-
-      {/* Avg Completion Time and Satisfaction Rate */}
-      <div className="completion-time">
-        <h3>Average Completion Time</h3>
-        <p>{avgCompletionTime} hours</p>
-        <p className="percentage-change">+15% faster than last day</p>
-      </div>
-      <div className="satisfaction-rate">
-        <h3>Satisfaction Rate</h3>
-        <p>{satisfactionRate}%</p>
-        <p className="percentage-change">Based on PIN feedback</p>
       </div>
 
       {/* Graphs */}

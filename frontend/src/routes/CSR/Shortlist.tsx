@@ -1,104 +1,123 @@
 import React, { useState } from "react";
-import { FilePlus, Trash2, Send } from "lucide-react"; // Importing icons for delete and offer help
+import { MapPin } from "lucide-react"; // Importing icons for delete and location
 import "./Shortlist.css";
+import CSRRequestDetails from "./CSRRequestDetails";
 
 // Define the structure for a request
 interface Request {
   id: string;
   title: string;
-  description: string;
+  priority: "Low Priority" | "High Priority";
+  requestType: string;
   pinName: string;
   pinId: string;
   region: string;
-  submittedDate: string;
-  shortlistedDate: string;
-  tags: string[];
+  views: number;
+  status?: "Available" | "Pending" | "Completed";
+  details?: string;
 }
 
 const initialRequests: Request[] = [
   {
-    id: "REQ-003",
-    title: "Document Preparation",
-    description: "Need assistance preparing and organizing important documents",
-    pinName: "Carol Davis",
-    pinId: "PIN-9012",
-    region: "East Region",
-    submittedDate: "23/10/2024",
-    shortlistedDate: "03/11/2025",
-    tags: ["Document Management", "Organization"],
+    id: "REQ-009",
+    title: "Medical Appointment Companion",
+    priority: "High Priority",
+    requestType: "Medical",
+    pinName: "Iris Lim",
+    pinId: "PIN-8901",
+    region: "Central Region",
+    views: 18,
   },
   {
-    id: "REQ-004",
-    title: "Software Training",
-    description: "Looking for someone to provide training on using productivity software",
-    pinName: "David Wilson",
-    pinId: "PIN-3456",
-    region: "West Region",
-    submittedDate: "22/10/2024",
-    shortlistedDate: "03/11/2025",
-    tags: ["Training", "Software Knowledge"],
+    id: "REQ-010",
+    title: "Technology Tutoring",
+    priority: "Low Priority",
+    requestType: "Tutoring",
+    pinName: "Jack Wong",
+    pinId: "PIN-4568",
+    region: "South Region",
+    views: 6,
   },
 ];
 
 const Shortlist: React.FC = () => {
-  const [shortlistedRequests, setShortlistedRequests] = useState<Request[]>(initialRequests);
+  const [shortlistedRequests] = useState<Request[]>(initialRequests);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [interestedIds, setInterestedIds] = useState<Record<string, boolean>>(() => {
+    // mark all currently-shortlisted requests as interested by default
+    const map: Record<string, boolean> = {};
+    initialRequests.forEach((r) => { map[r.id] = true; });
+    return map;
+  });
 
-  const handleAddToShortlist = (request: Request) => {
-    setShortlistedRequests((prev) => [...prev, request]);
-  };
+  // const handleDelete = (requestId: string) => {
+  //   setShortlistedRequests((prev) => prev.filter((r) => r.id !== requestId));
+  // };
 
-  const handleRemoveFromShortlist = (requestId: string) => {
-    setShortlistedRequests((prev) => prev.filter((request) => request.id !== requestId));
-  };
-
-  const handleOfferHelp = (requestId: string) => {
-    // Logic to offer help (you can add functionality here)
-    console.log(`Offering help for request ID: ${requestId}`);
+  const openDetails = (request: Request) => setSelectedRequest(request);
+  const closeDetails = () => setSelectedRequest(null);
+  const toggleInterested = (id: string) => {
+    setInterestedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
     <div className="shortlist-container">
-      <header className="header">
-        <h1>My Shortlist</h1>
-        <p>Review and manage your saved PIN requests</p>
-        <p>{shortlistedRequests.length} requests in your shortlist</p>
-      </header>
+      <div className="shortlist-top">
+        <div>
+        <header className="shortlist-header"></header>
+          <h1>Shortlisted Requests</h1>
+          <p>Browse and view your shortlisted requests</p>
+        </div>
+      </div>
 
-      <div className="content">
+      <div className="shortlist-content">
         {shortlistedRequests.length === 0 ? (
-          <div className="empty-state">
-            <p>Your shortlist is empty</p>
-            <p>Browse available requests and add them to your shortlist for later review</p>
+
+          <div className="shortlist-empty-state">
+            <p>Your shortlist is empty.</p>
+            <p>Browse available requests and add them to your shortlist for later.</p>
           </div>
+
         ) : (
-          <div className="request-list">
+
+          <div className="shortlist-request-list">
             {shortlistedRequests.map((request) => (
-              <div key={request.id} className="request-card">
-                <div className="request-header">
-                  <h3>{request.title} <span className="request-id">({request.id})</span></h3>
-                  <div className="action-buttons">
-                    <button onClick={() => handleOfferHelp(request.id)} className="offer-help-btn">
-                      <Send className="icon" /> Offer Help
-                    </button>
-                    <button onClick={() => handleRemoveFromShortlist(request.id)} className="delete-btn">
-                      <Trash2 className="icon" /> Delete
-                    </button>
-                  </div>
+              <div key={request.id} onClick={() => openDetails(request)} className={`shortlist-request-card ${request.priority.toLowerCase().includes("high") ? 'priority-high-card' : ''}`}>
+                <span className={`shortlist-request-priority ${request.priority.toLowerCase().includes("high") ? 'priority-high' : 'priority-low'}`}>
+                  {request.priority}
+                </span>
+                <div className="shortlist-request-header">
+                  <h3 className="shortlist-request-title">{request.title}</h3>
                 </div>
-                <p><strong>PIN:</strong> {request.pinName} ({request.pinId})</p>
-                <p><strong>Region:</strong> {request.region}</p>
-                <p><strong>Submitted:</strong> {request.submittedDate}</p>
-                <p><strong>Shortlisted:</strong> {request.shortlistedDate}</p>
-                <div className="tags">
-                  {request.tags.map((tag, index) => (
-                    <span key={index} className="tag">{tag}</span>
-                  ))}
+
+                <div className="shortlist-request-body">
+                  <p className="shortlist-request-type"><strong>Request Type:</strong> {request.requestType ?? 'General'}</p>
+                  <p className="shortlist-request-pin"><strong>PIN:</strong> {request.pinName}</p>
+                  <p className="shortlist-request-location"><MapPin className="icon" /> {request.region}</p>
                 </div>
+
+                {/* <button
+                  type="button"
+                  className="shortlist-delete-button"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(request.id); }}
+                >
+                  <Trash2 className="icon" /> Delete
+                </button> */}
               </div>
             ))}
           </div>
         )}
+
       </div>
+        {selectedRequest && (
+          <CSRRequestDetails
+            request={selectedRequest}
+            open={!!selectedRequest}
+            onClose={closeDetails}
+            interested={!!interestedIds[selectedRequest.id]}
+            onToggleInterested={() => toggleInterested(selectedRequest.id)}
+          />
+        )}
     </div>
   );
 };

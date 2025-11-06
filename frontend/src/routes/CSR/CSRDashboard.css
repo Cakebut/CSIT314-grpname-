@@ -110,95 +110,160 @@
   background-color: #f3f4f6;
 }
 
-/* Notification Button (Popover) */
-.notification-button-container {
+/* Notification popover (fixed top-right) */
+.CSR-notification-popover-wrapper {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
+  top: 50px;
+  right: 50px;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-start;
 }
 
-/* Notification Bell Button */
-.notification-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  padding: 10px;
-  font-size: 24px;
-  position: relative;
+.CSR-notification-button {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.12);
+  width: 44px;
+  height: 44px;
+  border-radius: 4px; /* sharper, more square corners */
+  display: grid; /* use grid to guarantee perfect centering of the icon */
+  place-items: center;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease;
+  padding: 0; /* remove padding so icon centers perfectly */
+  color: #000000; /* ensure icon is black by default */
+  position: relative;
 }
 
-.notification-button:hover {
-  background-color: #0056b3;
+.CSR-notification-button:hover {
+  background: #fbfbfd;
 }
 
-/* Badge for unread notifications */
-.notification-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: red;
-  color: white;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 50%;
-  min-width: 20px;
-  text-align: center;
+.CSR-notification-button:focus {
+  outline: none;
+  /* subtle neutral focus ring instead of a blue one */
+  box-shadow: 0 0 0 4px rgba(2,6,23,0.06);
 }
 
-/* Popover Content */
-.notification-popover {
-  background-color: white;
+.CSR-notification-button:active {
+  background: #ffffff;
+}
+
+.CSR-notification-popover {
+  margin-top: 10px;
+  margin-right: 0;
+  width: 1000px;
+  background: white;
   border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  padding: 15px;
-  font-size: 14px;
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
-  z-index: 1001;
-  animation: popover-slide-in 0.3s ease-out;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 
-/* Popover Animation */
-@keyframes popover-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+.CSR-notification-popover-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.CSR-notification-popover-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.CSR-notification-popover-body {
+  padding: 28px 16px 20px 16px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.CSR-notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #9ca3af;
+}
+
+.CSR-notification-empty .CSR-empty-icon {
+  width: 44px;
+  height: 44px;
+  color: #d1d5db;
+}
+
+.CSR-notification-empty .CSR-empty-text {
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+
+.CSR-notification-button .icon {
+  width: 18px;
+  height: 18px;
+  color: #000000;
+  display: block; /* ensure it doesn't behave like inline element */
+  margin: 0; /* remove any stray margins */
+}
+
+/* unread badge */
+.CSR-badge {
+  position: absolute;
+  top: -10px;
+  right: -13px;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 5px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  line-height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.CSR-notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 95%;
+}
+
+.CSR-notification-item {
+  padding: 10px 30px;
+  border-radius: 6px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid black;
+}
+
+.CSR-notification-item.unread {
+  background: #f8fafc;
+}
+
+.CSR-notification-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.CSR-notification-time {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+@media (max-width: 640px) {
+  .CSR-notification-popover {
+    right: 10px;
+    width: 280px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Notification items */
-.notification-item {
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  transition: background-color 0.2s ease;
-}
-
-.notification-item:hover {
-  background-color: #e0e0e0;
-}
-
-.notification-item.unread {
-  font-weight: bold;
-}
-
-.notification-item.read {
-  color: #888;
-}
-
-/* Styling for the icon */
-.icon {
-  width: 24px;
-  height: 24px;
 }

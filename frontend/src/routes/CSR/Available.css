@@ -1,9 +1,10 @@
-/* Container for Available Requests */
+/* Container CSS ---------------------------------------------------------------------------------------------- */
 
 .available-container {
   padding: 20px;
   max-width: 100%;
   margin: 0 auto; /* To center */
+  font-family: "Montserrat", sans-serif;
 }
 
 .available-top {
@@ -13,7 +14,8 @@
   margin-bottom: 18px;
 }
 
-/* Header section styling */
+/* Header  CSS ---------------------------------------------------------------------------------------------- */
+
 .available-header {
   margin-bottom: 20px;
 }
@@ -28,37 +30,84 @@
   color: #555;
 }
 
+/* Filters CSS ---------------------------------------------------------------------------------------------- */
+
 .available-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 1px black;
+  background-color: #F9FAFB;
+  margin-top: 30px;
 }
 
 .search-available {
   padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  width: 250px;
+  border-radius: 10px;
+  height: 50px;
+  width: 400px;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
 }
 
 .filter-available {
-  padding: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  padding: 5px 40px; /* left:(top bottom) right:(left right) */
+  border-radius: 10px;
+  height: 50px;
+  border: none;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
+  text-align: left;
 }
+
+.reset-available {
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.reset-available:hover {
+  background-color: #111111;
+}
+
+/* List CSS ---------------------------------------------------------------------------------------------- */
 
 .available-request-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 30px;
+  margin-top: 40px;
 }
 
 .available-request-card {
-  background-color: #fff;
-  padding: 15px;
+  background-color: #ffffff;
+  padding: 16px;
   border-radius: 8px;
-  border: 1px solid #ddd;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  position: relative;
+}
+
+.available-request-card:hover {
+  box-shadow: 0 8px 20px rgba(2,6,23,0.1);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+/* highlight card background when priority is high */
+.available-request-card.priority-high-card {
+  background-color: rgba(255, 0, 0, 0.08);
 }
 
 .available-request-header {
@@ -67,30 +116,27 @@
   align-items: center;
 }
 
-.available-request-header h3 {
-  font-size: 1.25rem;
-  font-weight: bold;
+.available-request-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.priority {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.875rem;
+.available-request-priority {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.825rem;
+}
+.available-request-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.high-priority {
-  background-color: #f87171;
-  color: white;
-}
-
-.low-priority {
-  background-color: #34d399;available
-  color: white;
-}
-
-.available-request-details p {
-  font-size: 1rem;
-  margin: 5px 0;
+.available-request-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
 }
 
 .icon {
@@ -99,15 +145,35 @@
   margin-right: 5px;
 }
 
-.view-available {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.available-request-type strong,
+.available-request-pin strong {
+  color: #111827;
 }
 
-.view-available:hover {
-  background-color: #0056b3;
+.available-request-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #374151;
+  padding-top: 15px;
+}
+
+.available-request-priority {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  display: inline-block;
+  line-height: 1;
+}
+
+.priority-high {
+  background-color: #b41928;
+}
+.priority-low {
+  background-color: #6b7280;
 }

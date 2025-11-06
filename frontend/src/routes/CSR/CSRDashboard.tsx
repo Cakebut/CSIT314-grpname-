@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { LogOut, ClipboardList, Bookmark, Clock, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LogOut, ClipboardList, Bookmark, Clock, CheckCircle, Bell } from "lucide-react";
+import * as Popover from "@radix-ui/react-popover";
 
 import Available from "./Available";
 import Shortlist from "./Shortlist";
 import Offers from "./Offers";
 import SearchHistory from "./SearchHistory";
 
-import NotificationButton from "../../components/NotificationButton";
 import "./CSRDashboard.css";
 
 interface CSRDashboardProps {
@@ -17,6 +17,19 @@ type ActiveSection = "Available" | "Shortlist" | "Offers" | "SearchHistory";
 
 function CSRDashboard({ onLogout }: CSRDashboardProps) {
   const [activeSection, setActiveSection] = useState<ActiveSection>("Available");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState([
+      { id: 1, title: "New offer received", time: "2h ago", read: false },
+      { id: 2, title: "Password request approved", time: "1d ago", read: true },
+    ]);
+    const unreadCount = notifications.filter((n) => !n.read).length;
+  8
+    // When the popover opens, mark notifications as read (clears badge)
+    useEffect(() => {
+      if (notificationsOpen && unreadCount > 0) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      }
+    }, [notificationsOpen]);
 
   return (
     <div className="CSR-dashboard-container">
@@ -25,7 +38,7 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
 
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">CSR Dashboard</h1>
+          <h1 className="sidebar-title">CSR Representative's Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 
@@ -86,8 +99,59 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
         {activeSection === "SearchHistory" && <SearchHistory />}
       </div>
 
-      {/* Notification Button */}
-      <NotificationButton />
+      {/* Notification popover */}
+      <div className="CSR-notification-popover-wrapper">
+        <Popover.Root open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+            <Popover.Trigger asChild>
+            <button
+              className="CSR-notification-button"
+              aria-haspopup="true"
+              aria-expanded={notificationsOpen}
+              title="Notifications"
+            >
+              <Bell className="icon" />
+              {unreadCount > 0 && (
+                <span className="CSR-badge" aria-hidden>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </Popover.Trigger>
+
+          <Popover.Portal>
+            <Popover.Content className="CSR-notification-popover" sideOffset={8} align="end">
+              <div className="CSR-notification-popover-header">
+                <h3>Notifications</h3>
+              </div>
+
+              <div className="CSR-notification-popover-body">
+                {notifications.length === 0 ? (
+                  <div className="CSR-notification-empty">
+                    <Bell className="CSR-empty-icon" />
+                    <div className="CSR-empty-text">No notifications yet</div>
+                  </div>
+                ) : (
+                  <ul className="CSR-notification-list">
+                    {notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        className={`CSR-notification-item ${n.read ? "read" : "unread"}`}
+                        onClick={() =>
+                          setNotifications((prev) => prev.map((p) => (p.id === n.id ? { ...p, read: true } : p)))
+                        }
+                      >
+                        <div className="CSR-notification-title">{n.title}</div>
+                        <div className="CSR-notification-time">{n.time}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <Popover.Close />
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      </div>
     </div>
   );
 }

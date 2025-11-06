@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { LogOut, Users, FileText, ClipboardList } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LogOut, Users, FileText, ClipboardList, Bell } from "lucide-react";
+import * as Popover from "@radix-ui/react-popover";
 
 import AllRequests from "./AllRequests";
 import PendingOffers from "./PendingOffers";
 import MyRequests from "./MyRequests";
-import NotificationButton from "../../components/NotificationButton";
 import "./PINDashboard.css";
 
 interface PINDashboardProps {
@@ -15,6 +15,19 @@ type ActiveSection = "AllRequests" | "PendingOffers" | "MyRequests";
 
 function PINDashboard({ onLogout }: PINDashboardProps) {
   const [activeSection, setActiveSection] = useState<ActiveSection>("AllRequests");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+      const [notifications, setNotifications] = useState([
+        { id: 1, title: "New offer received", time: "2h ago", read: false },
+        { id: 2, title: "Password request approved", time: "1d ago", read: true },
+      ]);
+      const unreadCount = notifications.filter((n) => !n.read).length;
+    
+      // When the popover opens, mark notifications as read (clears badge)
+      useEffect(() => {
+        if (notificationsOpen && unreadCount > 0) {
+          setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        }
+      }, [notificationsOpen]);
 
   return (
     <div className="PIN-dashboard-container">
@@ -23,7 +36,7 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
 
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">Person-In-Need Dashboard</h1>
+          <h1 className="sidebar-title">Person In Need's Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 
@@ -75,8 +88,59 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
         {activeSection === "MyRequests" && <MyRequests />}
       </div>
 
-      {/* Notification Button */}
-      <NotificationButton />
+      {/* Notification popover */}
+      <div className="PIN-notification-popover-wrapper">
+        <Popover.Root open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+            <Popover.Trigger asChild>
+            <button
+              className="PIN-notification-button"
+              aria-haspopup="true"
+              aria-expanded={notificationsOpen}
+              title="Notifications"
+            >
+              <Bell className="icon" />
+              {unreadCount > 0 && (
+                <span className="PIN-badge" aria-hidden>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </Popover.Trigger>
+
+          <Popover.Portal>
+            <Popover.Content className="PIN-notification-popover" sideOffset={8} align="end">
+              <div className="PIN-notification-popover-header">
+                <h3>Notifications</h3>
+              </div>
+
+              <div className="PIN-notification-popover-body">
+                {notifications.length === 0 ? (
+                  <div className="PIN-notification-empty">
+                    <Bell className="PIN-empty-icon" />
+                    <div className="PIN-empty-text">No notifications yet</div>
+                  </div>
+                ) : (
+                  <ul className="PIN-notification-list">
+                    {notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        className={`PIN-notification-item ${n.read ? "read" : "unread"}`}
+                        onClick={() =>
+                          setNotifications((prev) => prev.map((p) => (p.id === n.id ? { ...p, read: true } : p)))
+                        }
+                      >
+                        <div className="PIN-notification-title">{n.title}</div>
+                        <div className="PIN-notification-time">{n.time}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <Popover.Close />
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      </div>
     </div>
   );
 }
