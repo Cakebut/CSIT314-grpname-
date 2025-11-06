@@ -6,11 +6,13 @@ type Summary = {
   totalRequests: number;
   byStatus: Record<string, number>;
   byServiceType: Record<string, number>;
-  totalVolunteerHours: number;
   uniqueVolunteers: number;
   completionRate: number;
-  averageTimeToComplete: number | null;
-  trendDaily: TrendRow[];
+  averageTimeToComplete?: number | null;
+  trendDaily?: TrendRow[];
+  totalShortlistCount?: number;
+  totalInterestedCount?: number;
+  totalViewCount?: number;
   activePINs: number;
   activeCSRs: number;
 };
@@ -46,10 +48,34 @@ export default function ReportsPage() {
   // Removed unused active stats fetch
 
   useEffect(() => {
-    fetch('/api/pm/reports/quick')
-      .then(r => r.ok ? r.json() : Promise.reject(new Error('quick failed')))
-      .then(d => setQuick(d))
-      .catch(()=>{});
+    // Fetch quick stats based on the client's local calendar (so the UI "Today" matches the user's local day)
+    async function loadQuick() {
+      try {
+        const today = fmt(new Date());
+        const dayRes = await fetch(`/api/pm/reports/custom?start=${today}&end=${today}`);
+        const dayJson = await dayRes.json();
+        const dayTotal = dayRes.ok ? (dayJson.totalRequests ?? 0) : 0;
+
+        const weekStart = fmt(startOfWeek());
+        const weekEnd = fmt(endOfWeek());
+        const weekRes = await fetch(`/api/pm/reports/custom?start=${weekStart}&end=${weekEnd}`);
+        const weekJson = await weekRes.json();
+        const weekTotal = weekRes.ok ? (weekJson.totalRequests ?? 0) : 0;
+
+        const monthStart = fmt(startOfMonth());
+        const monthEnd = fmt(endOfMonth());
+        const monthRes = await fetch(`/api/pm/reports/custom?start=${monthStart}&end=${monthEnd}`);
+        const monthJson = await monthRes.json();
+        const monthTotal = monthRes.ok ? (monthJson.totalRequests ?? 0) : 0;
+
+        setQuick({ day: { total: Number(dayTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
+                   week: { total: Number(weekTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
+                   month: { total: Number(monthTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 } });
+      } catch (e) {
+        // ignore
+      }
+    }
+    loadQuick();
   }, []);
 
   // Simple display-only representation; actual picking uses DateRangePicker below
@@ -102,8 +128,7 @@ export default function ReportsPage() {
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   }
-  function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
-  function endOfToday() { const d = new Date(); d.setHours(23,59,59,999); return d; }
+  // server-driven today is used for the quick daily report (see runQuickDay)
   function startOfWeek() {
     const d = new Date();
     const day = d.getDay(); // 0=Sun..6=Sat
@@ -123,7 +148,11 @@ export default function ReportsPage() {
     onGenerate(sStr, eStr, { ignoreType: true });
   }
 
+  // Daily quick: use client-side calendar day so Generate Daily Report matches the displayed quick-card
+  function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+  function endOfToday() { const d = new Date(); d.setHours(23,59,59,999); return d; }
   const runQuickDay = () => runQuickRange(startOfToday(), endOfToday());
+
   const runQuickWeek = () => runQuickRange(startOfWeek(), endOfWeek());
   const runQuickMonth = () => runQuickRange(startOfMonth(), endOfMonth());
 
@@ -226,8 +255,16 @@ export default function ReportsPage() {
             <tbody>{Object.entries(summary.byServiceType).map(([k,v]) => <tr key={k}><td>{k}</td><td>{v}</td></tr>)}</tbody>
           </table>
 
-          <h3>Daily Trend</h3>
-          <TrendChart data={summary.trendDaily} />
+          <h3>Metrics</h3>
+          <div style={{ maxWidth: 700 }}>
+            <BarChartVertical
+              data={[
+                { label: 'Shortlist Count', value: Number(summary.totalShortlistCount ?? 0), color: palette[0] },
+                { label: 'Interested Count', value: Number(summary.totalInterestedCount ?? 0), color: palette[1] },
+                { label: 'View Count', value: Number(summary.totalViewCount ?? 0), color: palette[2] },
+              ]}
+            />
+          </div>
 
           <h3>Visualizations</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
@@ -397,27 +434,7 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
   );
 }
 
-function TrendChart({ data }: { data: TrendRow[] }) {
-  if (!data.length) return <div className="empty">No data</div>;
-  const w = 600, h = 200, pad = 24;
-  const xs = data.map((_, i) => i);
-  const ys = data.map(d => d.total);
-  const maxY = Math.max(...ys) || 1;
-  const points = xs.map((x,i) => {
-    const px = pad + (x/(xs.length-1||1))*(w-2*pad);
-    const py = h - pad - (ys[i]/maxY)*(h-2*pad);
-    return `${px},${py}`;
-  }).join(" ");
-  return (
-    <svg width={w} height={h} className="chart">
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/>
-      {data.map((d,i) => {
-        const px = pad + (i/(data.length-1||1))*(w-2*pad);
-        return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
-      })}
-    </svg>
-  );
-}
+// TrendChart removed — replaced by bar chart for shortlist/interested/view counts
 
 type ChartDatum = { label: string; value: number; color?: string };
 const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#dc2626', '#0ea5e9', '#22c55e'];

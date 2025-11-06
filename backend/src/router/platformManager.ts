@@ -99,6 +99,29 @@ platformRouter.get("/reports/custom", async (req, res) => {
   }
 });
 
+// Server-day full report: returns the same report shape as /reports/custom but for the server's current day
+platformRouter.get("/reports/custom/today", async (_req, res) => {
+  try {
+    const summary = await ctrl.getRequestsReportSummaryForToday();
+    res.json(summary);
+  } catch (e: any) {
+    console.error('[Reports] failed /reports/custom/today', e);
+    res.status(500).json({ error: e.message ?? 'Failed to generate today report' });
+  }
+});
+
+// Debug endpoint: return quick diagnostic counts and sample rows for a single date
+platformRouter.get("/reports/debug", async (req, res) => {
+  try {
+    const { date, types } = req.query as Record<string, string>;
+    const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const dbg = await ctrl.getRequestsReportDebug({ date, typeNames: typeList });
+    res.json(dbg);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message ?? 'Bad request' });
+  }
+});
+
 // CSV download based on daily trend
 platformRouter.get("/reports/custom.csv", async (req, res) => {
   try {

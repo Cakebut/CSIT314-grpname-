@@ -54,8 +54,22 @@ export class PlatformManagerController {
     return this.entity.getRequestsReportSummary(q);
   }
 
+  async getRequestsReportSummaryForToday() {
+    // Build server-local YYYY-MM-DD for today
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const today = `${y}-${m}-${day}`;
+    return this.entity.getRequestsReportSummary({ start: today, end: today });
+  }
+
   async getRequestsReportRows(q: ReportQuery) {
     return this.entity.getRequestsReportRows(q);
+  }
+
+  async getRequestsReportDebug(q: { date?: string; typeNames?: string[] }) {
+    return this.entity.getRequestsReportDebug(q.date, q.typeNames);
   }
 
   async sendAnnouncementToAllUsers({ message }: { message?: string }) {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CSRRepDashboard.css";
 import "./CSRRepDashboard.extra.css";
 
@@ -341,25 +342,34 @@ function CSRHeader() {
             </div>
           )}
         </div>
-        <a
-          className="csr-btn-outline"
-          href="/"
-          onClick={e => {
-            e.preventDefault();
-            // Remove all user-related keys for a clean logout
-            localStorage.removeItem("CSR_ID");
-            localStorage.removeItem("PIN_ID");
-            localStorage.removeItem("currentRole");
-            localStorage.removeItem("currentUsername");
-            localStorage.removeItem("userId");
-            localStorage.removeItem("username");
-            window.location.href = "/";
-          }}
-        >
-          Logout
-        </a>
+        {
+          // Use react-router navigation instead of direct href to preserve SPA behavior
+        }
+        <LogoutButton />
       </div>
     </header>
+  );
+}
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  return (
+    <button
+      className="csr-btn-outline"
+      onClick={() => {
+        // Remove all user-related keys for a clean logout
+        localStorage.removeItem("CSR_ID");
+        localStorage.removeItem("PIN_ID");
+        localStorage.removeItem("currentRole");
+        localStorage.removeItem("currentUsername");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("username");
+        // Navigate to root (replace history)
+        navigate('/', { replace: true });
+      }}
+    >
+      Logout
+    </button>
   );
 }
 
