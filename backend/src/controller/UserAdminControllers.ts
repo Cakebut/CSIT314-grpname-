@@ -83,23 +83,14 @@ export class RoleController {
   }
 
   async deleteRole(id: number, actor: string) {
-    // Get role label for logging
-    const roles = await this.roleEntity.searchRoles("");
-    const role = roles.find(r => r.id === id);
-    const roleLabel = role ? role.label : `id:${id}`;
-    const result = await this.roleEntity.deleteRole(id);
-    return result;
+   
+    return await this.roleEntity.searchRoles("");
+     
   }
 
   async setRoleSuspended(id: number, issuspended: boolean, actor: string) {
-    const result = await this.roleEntity.setRoleSuspended(id, issuspended);
-    if (result) {
-      // Get role label for logging
-      const roles = await this.roleEntity.searchRoles("");
-      const role = roles.find(r => r.id === id);
-      const roleLabel = role ? role.label : `id:${id}`;
-    }
-    return result;
+    return await this.roleEntity.setRoleSuspended(id, issuspended);
+    
   }
 
   // Search roles by label
@@ -107,8 +98,9 @@ export class RoleController {
     return await this.roleEntity.searchRoles(keyword);
   }
 }
-//Search User Controller
 
+
+//Search User Controller
 export class SearchUserController {
   private userAccount = new UserEntity();
 

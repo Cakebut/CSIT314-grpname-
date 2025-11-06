@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./ViewResetDashboard.css";
+import "./ViewResetDashboardPage.css";
 import { toast } from 'react-toastify';
 
 interface PasswordResetRequest {
