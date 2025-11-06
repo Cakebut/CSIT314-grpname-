@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { service_typeTable , locationTable , urgency_levelTable , useraccountTable, csr_requestsTable,pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable } from '../schema/aiodb';
+import { service_typeTable , locationTable , urgency_levelTable , useraccountTable, csr_requestsTable, pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable, feedbackTable } from '../schema/aiodb';
 import { passwordResetRequestsTable } from '../schema/aiodb';
  
 import dotenv from 'dotenv';
@@ -81,6 +81,17 @@ async function deletePIN_Req() {
   }
 }
 
+// Delete feedback entries (must be removed before deleting pin_requests and users)
+async function deleteFeedback() {
+  try {
+    console.log('🗑️ Deleting Feedback...');
+    const result = await db.delete(feedbackTable);
+    console.log('✅ All feedback deleted! Result:', result);
+  } catch (err) {
+    console.error('❌ Error deleting feedback:', err);
+  }
+}
+
 //Delete CSR Requests
 async function deleteCSR_Req() {
   try {
@@ -131,6 +142,8 @@ async function deleteAllData() {
   await deleteCSR_Shortlist();
   await deleteCSR_Interested();
   await deleteCSR_Req();
+  // delete feedback first to remove references to pin_requests and users
+  await deleteFeedback();
   await deletePIN_Req();
   await deleteNotifications();
   await deleteResetPasswordRequests();   // remove dependent password-reset records before deleting users to avoid FK violations

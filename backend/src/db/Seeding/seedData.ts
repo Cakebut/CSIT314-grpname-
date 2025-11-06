@@ -201,40 +201,14 @@ async function seedData() {
       } while (usedShortlistPairs.has(pair) && attempts < 10);
       if (usedShortlistPairs.has(pair)) continue;
       usedShortlistPairs.add(pair);
-      await db.insert(csr_shortlistTable).values({
-        csr_id,
-        pin_request_id,
-        shortlistedAt: faker.date.recent({ days: 30 }),
-      });
+      // await db.insert(csr_shortlistTable).values({
+      //   csr_id,
+      //   pin_request_id,
+      //   shortlistedAt: faker.date.recent({ days: 30 }),
+      // });
     }
     console.log("✅ Seeded CSR shortlist");
-
-    // Example: Seed CSR interested (avoid duplicate pairs)
-    const usedInterestedPairs = new Set();
-    for (
-      let i = 0;
-      i < Math.min(NUM_FAKE_CSR_REQUESTS, pinRequestIds.length, csrIds.length);
-      i++
-    ) {
-      let csr_id,
-        pin_request_id,
-        pair,
-        attempts = 0;
-      do {
-        csr_id = faker.helpers.arrayElement(csrIds);
-        pin_request_id = faker.helpers.arrayElement(pinRequestIds);
-        pair = `${csr_id},${pin_request_id}`;
-        attempts++;
-      } while (usedInterestedPairs.has(pair) && attempts < 10);
-      if (usedInterestedPairs.has(pair)) continue;
-      usedInterestedPairs.add(pair);
-      await db.insert(csr_interestedTable).values({
-        csr_id,
-        pin_request_id,
-        interestedAt: faker.date.recent({ days: 30 }),
-      });
-    }
-    console.log("✅ Seeded CSR interested");
+    
 
     console.log("✅ All data seeded!");
   } catch (err) {
