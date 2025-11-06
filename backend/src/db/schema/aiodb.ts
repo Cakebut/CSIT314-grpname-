@@ -169,3 +169,16 @@ export const passwordResetRequestsTable = pgTable(
         admin_note: text(),
     }
 );
+
+// Admin notifications table: used to notify User Admins about events like password reset requests
+export const adminNotificationsTable = pgTable(
+    'admin_notifications',
+    {
+        id: serial().primaryKey(),
+        user_id: integer().notNull().references(() => useraccountTable.id), // user who triggered the notification
+        username: varchar({ length: 64 }).notNull(), // username for convenience
+        message: text().notNull(), // e.g., 'Request password change'
+        createdAt: timestamp().notNull().defaultNow(),
+        read: integer().notNull().default(0), // 0 = unread, 1 = read
+    }
+);

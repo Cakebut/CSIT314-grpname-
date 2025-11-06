@@ -1,6 +1,6 @@
 import { notificationTable, useraccountTable, pin_requestsTable } from '../db/schema/aiodb';
 import { db } from '../db/client';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, not, and } from 'drizzle-orm';
 
 import { PinRequestEntity, PinRequest } from '../entities/personInNeedrequests';
 
@@ -8,6 +8,8 @@ export class PersonInNeedControllers {
   // Fetch notifications for a CSR user
   async getNotificationsForCsr(csr_id: number) {
     // Join notificationTable with useraccountTable (PIN) and pin_requestsTable for username and title
+  // Exclude notifications that are intended only for the PIN (e.g. 'interested_cancelled')
+  // so CSR won't get a notification for their own cancel action.
     return await db
       .select({
         id: notificationTable.id,
@@ -22,8 +24,8 @@ export class PersonInNeedControllers {
       })
       .from(notificationTable)
       .leftJoin(useraccountTable, eq(notificationTable.pin_id, useraccountTable.id))
-      .leftJoin(pin_requestsTable, eq(notificationTable.pin_request_id, pin_requestsTable.id))
-      .where(eq(notificationTable.csr_id, csr_id))
+  .leftJoin(pin_requestsTable, eq(notificationTable.pin_request_id, pin_requestsTable.id))
+  .where(and(not(eq(notificationTable.type, 'interested_cancelled')), eq(notificationTable.csr_id, csr_id)))
       .orderBy(desc(notificationTable.read), desc(notificationTable.createdAt));
   }
   // My Offers: Get all requests for a PIN user, with interested CSRs for each

@@ -1,5 +1,5 @@
 // User Entity Class
-import { useraccountTable, roleTable, passwordResetRequestsTable, auditLogTable } from "../db/schema/aiodb";
+import { useraccountTable, roleTable, passwordResetRequestsTable, auditLogTable, adminNotificationsTable } from "../db/schema/aiodb";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq, ilike, is } from "drizzle-orm";
 import { db } from "../db/client";
@@ -291,6 +291,18 @@ public async deleteUser(id: number): Promise<boolean> {
         status: "Pending",
         requested_at: new Date(),
       }).returning();
+      // Create an admin notification so User Admins can be informed
+      try {
+        await db.insert(adminNotificationsTable).values({
+          user_id: userId,
+          username: username,
+          message: 'Request password change',
+          // createdAt and read will use defaults
+        });
+      } catch (notifErr) {
+        console.error('Failed to create admin notification for password reset request:', notifErr);
+        // Don't fail the whole operation if notification insertion fails
+      }
       return request;
     } catch (err) {
       console.error("Create password reset request error:", err);

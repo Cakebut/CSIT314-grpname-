@@ -287,8 +287,28 @@ export class PinRequestEntity {
     return updated || null;
   }
   static async deleteRequest(id: number): Promise<boolean> {
-    const result = await db.delete(pin_requestsTable).where(eq(pin_requestsTable.id, id));
-    return (result.rowCount ?? 0) > 0;
+    // To avoid foreign key constraint failures and orphaned rows,
+    // delete related child rows first (shortlists, interested, csr_requests, feedback, notifications).
+    const schema = require('../db/schema/aiodb');
+    try {
+      // Delete from csr_shortlist
+      await db.delete(schema.csr_shortlistTable).where(eq(schema.csr_shortlistTable.pin_request_id, id));
+      // Delete from csr_interested
+      await db.delete(schema.csr_interestedTable).where(eq(schema.csr_interestedTable.pin_request_id, id));
+      // Delete from csr_requests (records of CSR offers/acceptances)
+      await db.delete(schema.csr_requestsTable).where(eq(schema.csr_requestsTable.pin_request_id, id));
+      // Delete feedback associated with this request
+      await db.delete(schema.feedbackTable).where(eq(schema.feedbackTable.requestId, id));
+      // Delete notifications related to this request
+      await db.delete(schema.notificationTable).where(eq(schema.notificationTable.pin_request_id, id));
+
+      // Finally delete the pin_requests row
+      const result = await db.delete(pin_requestsTable).where(eq(pin_requestsTable.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (err) {
+      console.error('Error deleting request and related rows:', err);
+      throw err;
+    }
   }
   /**
    * Returns all requests for a specific PIN user as CSV string for download.

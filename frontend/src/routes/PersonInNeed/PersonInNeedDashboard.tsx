@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from 'react-dom';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +45,8 @@ interface Request {
   urgencyColor?: string;
   view_count?: number;
   shortlist_count?: number;
-  csr_id?: number | null;
+  // optional array of csr shortlist entries (if backend provides detailed list)
+  csr_shortlists?: { csr_id: number }[];
 }
 
 // --- My Offers types ---
@@ -65,6 +67,12 @@ interface Offer {
 const API_BASE = "http://localhost:3000";
 
 const PersonInNeedDashboard: React.FC = () => {
+  // Filter bar state
+  const [filterText, setFilterText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterUrgency, setFilterUrgency] = useState("");
   const navigate = useNavigate();
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,6 +98,89 @@ const PersonInNeedDashboard: React.FC = () => {
 
   const [showMyRequests, setShowMyRequests] = useState(false);
   const [myRequests, setMyRequests] = useState<Request[]>([]);
+  // My Requests modal filter/sort state
+  const [myRequestsFilterTitle, setMyRequestsFilterTitle] = useState("");
+  const [myRequestsFilterType, setMyRequestsFilterType] = useState("");
+  const [myRequestsFilterStatus, setMyRequestsFilterStatus] = useState("");
+  const [myRequestsFilterUrgency, setMyRequestsFilterUrgency] = useState("");
+  const [myRequestsFilterDate, setMyRequestsFilterDate] = useState("");
+  const [myRequestsSortViews, setMyRequestsSortViews] = useState("asc");
+  const [myRequestsSortShortlists, setMyRequestsSortShortlists] = useState("asc");
+  const [myRequestsPrimarySort, setMyRequestsPrimarySort] = useState<'views'|'shortlists'>('views');
+  // Calendar popup state for My Requests date filter
+  const [showMyRequestsCalendar, setShowMyRequestsCalendar] = useState(false);
+  const [calendarViewDate, setCalendarViewDate] = useState<Date>(new Date());
+  const [tempCalendarSelected, setTempCalendarSelected] = useState<Date | null>(null);
+  const myRequestsCalendarRef = React.useRef<HTMLDivElement | null>(null);
+  const myRequestsDateButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const [myRequestsCalendarPos, setMyRequestsCalendarPos] = useState<{ top: number; left: number } | null>(null);
+
+  // Calendar helpers for My Requests date picker
+  const formatYMD = (d: Date) => d.toISOString().slice(0, 10);
+  const daysInMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const buildCalendar = (view: Date) => {
+    const year = view.getFullYear();
+    const month = view.getMonth();
+    const firstDay = new Date(year, month, 1).getDay(); // 0-6
+    const total = daysInMonth(view);
+    const cells: (Date | null)[] = [];
+    // leading blanks
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= total; d++) cells.push(new Date(year, month, d));
+    // trailing blanks to make full weeks
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  };
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    if (!showMyRequestsCalendar) return;
+    function onDocClick(e: MouseEvent) {
+      const el = myRequestsCalendarRef.current;
+      const btn = myRequestsDateButtonRef.current;
+      if (!(e.target instanceof Node)) return;
+      // if click is inside calendar popup or the date button, ignore
+      if (el && el.contains(e.target)) return;
+      if (btn && btn.contains(e.target)) return;
+      setShowMyRequestsCalendar(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [showMyRequestsCalendar]);
+
+  // After the portal popup renders, adjust position if it overflows (measure actual popup size)
+  useEffect(() => {
+    if (!showMyRequestsCalendar) return;
+    if (!myRequestsCalendarPos) return;
+    // Wait for popup to render
+    const raf = requestAnimationFrame(() => {
+      const el = myRequestsCalendarRef.current;
+      const btn = myRequestsDateButtonRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      let top = myRequestsCalendarPos.top;
+      let left = myRequestsCalendarPos.left;
+      // Shift left if overflowing right
+      if (left + rect.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - rect.width - 8);
+      // If overflowing bottom, try placing above the button
+      if (top + rect.height > window.innerHeight - 8) {
+        if (btn) {
+          const b = btn.getBoundingClientRect();
+          top = b.top - rect.height - 6;
+        } else {
+          top = Math.max(8, window.innerHeight - rect.height - 8);
+        }
+      }
+      // Clamp
+      if (top < 8) top = 8;
+      if (left < 8) left = 8;
+      // Only update if changed meaningfully
+      if (Math.abs(top - myRequestsCalendarPos.top) > 1 || Math.abs(left - myRequestsCalendarPos.left) > 1) {
+        setMyRequestsCalendarPos({ top, left });
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [showMyRequestsCalendar, myRequestsCalendarPos]);
   const [showCreate, setShowCreate] = useState(false);
   const [categoryID, setCategoryID] = useState("");
   const [title, setTitle] = useState("");
@@ -98,6 +189,7 @@ const PersonInNeedDashboard: React.FC = () => {
   const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
 
   const userId = Number(localStorage.getItem("userId"));
+  const username = localStorage.getItem("username") || "User";
 
   // Notification type
   interface Notification {
@@ -144,9 +236,11 @@ const PersonInNeedDashboard: React.FC = () => {
     fetch(`${API_BASE}/api/pin/notifications/${userId}`)
       .then(res => res.json())
       .then(data => {
-        setNotifications(data.data || []);
+        // Only keep 'interested' and 'shortlist' notification types for PIN dashboard
+        const filtered = (data.data || []).filter((n: Notification) => n.type === 'interested' || n.type === 'shortlist');
+        setNotifications(filtered);
         setNotiLoading(false);
-        setNotiHasUnread((data.data || []).some((n: Notification) => n.read === 0));
+        setNotiHasUnread(filtered.some((n: Notification) => n.read === 0));
       })
       .catch(() => {
         setNotiError("Could not load notifications.");
@@ -406,6 +500,47 @@ const PersonInNeedDashboard: React.FC = () => {
     setFeedbackLoading(false);
   }
 
+  // Compute filtered and sorted My Requests for the modal
+  const filteredSortedMyRequests = [...myRequests].filter(r => {
+    if (myRequestsFilterTitle && !(r.title || '').toLowerCase().includes(myRequestsFilterTitle.toLowerCase())) return false;
+    if (myRequestsFilterType && r.categoryName !== myRequestsFilterType) return false;
+    if (myRequestsFilterStatus && r.status !== myRequestsFilterStatus) return false;
+    if (myRequestsFilterUrgency && (r.urgencyLabel || '') !== myRequestsFilterUrgency) return false;
+    if (myRequestsFilterDate) {
+      const created = r.createdAt ? r.createdAt.slice(0,10) : '';
+      if (created !== myRequestsFilterDate) return false;
+    }
+    return true;
+  });
+  // Helper to get shortlist count either from detailed csr_shortlists array or from shortlist_count
+  const getShortlistCount = (r: Request) => Array.isArray((r as any).csr_shortlists) ? (r as any).csr_shortlists.length : (r.shortlist_count ?? 0);
+
+  // Apply sorting: primary key controlled by myRequestsPrimarySort
+  filteredSortedMyRequests.sort((a, b) => {
+    const compareBy = (key: 'views'|'shortlists') => {
+      if (key === 'views') {
+        const va = a.view_count ?? 0;
+        const vb = b.view_count ?? 0;
+        if (va !== vb) return myRequestsSortViews === 'asc' ? va - vb : vb - va;
+        return 0;
+      } else {
+        const sa = getShortlistCount(a);
+        const sb = getShortlistCount(b);
+        if (sa !== sb) return myRequestsSortShortlists === 'asc' ? sa - sb : sb - sa;
+        return 0;
+      }
+    };
+
+    // primary
+    const p = compareBy(myRequestsPrimarySort);
+    if (p !== 0) return p;
+    // secondary
+    const secondaryKey: 'views'|'shortlists' = myRequestsPrimarySort === 'views' ? 'shortlists' : 'views';
+    const s = compareBy(secondaryKey);
+    if (s !== 0) return s;
+    return 0;
+  });
+
   return (
     <>
       {/* Latest Announcement Modal */}
@@ -425,6 +560,74 @@ const PersonInNeedDashboard: React.FC = () => {
         </div>
       )}
       <div className="container">
+      {/* PIN Dashboard Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '18px 0 8px 0', background: '#f1f5f9', borderBottom: '1px solid #e0e7ef', marginBottom: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+          <h1 style={{ color: '#2563eb', fontWeight: 700, fontSize: '2rem', margin: 0 }}>PIN Dashboard</h1>
+          <p style={{ color: '#64748b', fontSize: '1.08rem', margin: 0 }}>Welcome {username}</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18, position: 'relative' }}>
+          {/* Notification bell and popover already present here */}
+          {/* Logout button already present here */}
+        </div>
+      </div>
+      {/* Filter Bar - inserted directly after header */}
+  <div style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'flex-end', flexWrap: 'nowrap' }}>
+        {/* Text filter bar on the left */}
+        <div>
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Search:</label>
+          <input
+            type="text"
+            value={filterText}
+            onChange={e => setFilterText(e.target.value)}
+            placeholder="Type to filter by title..."
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #d1d5db', width: 180 }}
+          />
+        </div>
+        <div>
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Status:</label>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            <option value="Available">Available</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div>
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Type:</label>
+          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            {serviceTypes.map(type => (
+              <option key={type.id} value={type.id}>{type.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Location:</label>
+          <select value={filterLocation} onChange={e => setFilterLocation(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            {locations.map(loc => (
+              <option key={loc.id} value={loc.id}>{loc.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Urgency:</label>
+          <select value={filterUrgency} onChange={e => setFilterUrgency(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            {urgencyLevels.map(u => (
+              <option key={u.id} value={u.label}>{u.label}</option>
+            ))}
+          </select>
+        </div>
+        <button className="button" style={{ marginLeft: 8 }} onClick={() => {
+          setFilterText("");
+          setFilterStatus("");
+          setFilterCategory("");
+          setFilterLocation("");
+          setFilterUrgency("");
+        }}>Clear</button>
+      </div>
       {/* Notification Button and Popover */}
       <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
         <button
@@ -619,6 +822,7 @@ const PersonInNeedDashboard: React.FC = () => {
                 ))}
               </div>
             </div>
+            {/* ...existing code ... */}
             <label style={{ fontWeight: 600 }}>Description (optional):</label>
             <textarea
               value={feedbackText}
@@ -654,12 +858,31 @@ const PersonInNeedDashboard: React.FC = () => {
         <div style={{ color: "#b91c1c", marginBottom: 12 }}>{error}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24, alignItems: 'center' }}>
-          {requests.filter(r => r.status !== 'Completed').length === 0 ? (
-            <div className="row-muted" style={{ fontSize: 18, color: '#64748b', padding: 32, borderRadius: 12, background: '#f3f4f6', width: '90%' }}>
-              No requests found.
-            </div>
-          ) : (
-            requests.filter(r => r.status !== 'Completed').map((r) => (
+          {/* Filter requests based on filter bar selections */}
+          {(() => {
+            const filteredRequests = requests
+              .filter(r => r.status !== 'Completed')
+              .filter(r => {
+                // Text filter (title)
+                if (filterText && !r.title.toLowerCase().includes(filterText.toLowerCase())) return false;
+                // Status filter
+                if (filterStatus && r.status?.toLowerCase() !== filterStatus.toLowerCase()) return false;
+                // Category filter
+                if (filterCategory && r.categoryID.toString() !== filterCategory) return false;
+                // Location filter
+                if (filterLocation && r.locationID?.toString() !== filterLocation) return false;
+                // Urgency filter (compare by label)
+                if (filterUrgency && r.urgencyLabel?.toLowerCase() !== filterUrgency.toLowerCase()) return false;
+                return true;
+              });
+            if (filteredRequests.length === 0) {
+              return (
+                <div className="row-muted" style={{ fontSize: 18, color: '#64748b', padding: 32, borderRadius: 12, background: '#f3f4f6', width: '90%' }}>
+                  No requests found.
+                </div>
+              );
+            }
+            return filteredRequests.map((r) => (
               <div
                 key={r.id}
                 style={{
@@ -730,8 +953,8 @@ const PersonInNeedDashboard: React.FC = () => {
                   )}
                 </div>
               </div>
-            ))
-          )}
+            ));
+          })()}
         </div>
       )}
 
@@ -793,6 +1016,143 @@ const PersonInNeedDashboard: React.FC = () => {
                 Download Past Service History
               </button>
             </div>
+            {/* Filter row for My Requests - placed directly below action buttons */}
+            <div className="my-requests-filter-row">
+              {/** common control style */}
+              <input
+                className="filter-control filter-title"
+                placeholder="Title"
+                value={myRequestsFilterTitle}
+                onChange={e => setMyRequestsFilterTitle(e.target.value)}
+              />
+              <select
+                className="filter-control filter-select"
+                value={myRequestsFilterType}
+                onChange={e => setMyRequestsFilterType(e.target.value)}
+              >
+                <option value="">Request Type</option>
+                {serviceTypes.map(st => (
+                  <option key={st.id} value={st.name}>{st.name}</option>
+                ))}
+              </select>
+              <select
+                className="filter-control filter-select"
+                value={myRequestsFilterStatus}
+                onChange={e => setMyRequestsFilterStatus(e.target.value)}
+              >
+                <option value="">Status</option>
+                <option value="Available">Available</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+              <select
+                className="filter-control filter-select"
+                value={myRequestsFilterUrgency}
+                onChange={e => setMyRequestsFilterUrgency(e.target.value)}
+              >
+                <option value="">Urgency Status</option>
+                {urgencyLevels.map(ul => (
+                  <option key={ul.id} value={ul.label}>{ul.label}</option>
+                ))}
+              </select>
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  ref={myRequestsDateButtonRef}
+                  onClick={() => {
+                    // position popup relative to button (page coordinates)
+                    const btn = myRequestsDateButtonRef.current;
+                    if (btn) {
+                      const rect = btn.getBoundingClientRect();
+                      // Use viewport coordinates for fixed positioning (no scroll offsets)
+                      // Ensure the popup stays within the viewport (avoid clipping)
+                      const POPUP_W = 240;
+                      const POPUP_H = 300;
+                      let left = rect.left;
+                      // shift left if overflowing right edge
+                      if (left + POPUP_W > window.innerWidth - 8) left = Math.max(8, window.innerWidth - POPUP_W - 8);
+                      // default top below button
+                      let top = rect.bottom + 6;
+                      // if popup would overflow bottom, position above the button
+                      if (top + POPUP_H > window.innerHeight - 8) {
+                        top = rect.top - POPUP_H - 6;
+                        if (top < 8) top = 8; // clamp to viewport
+                      }
+                      setMyRequestsCalendarPos({ top, left });
+                    } else {
+                      setMyRequestsCalendarPos({ top: 100, left: 100 });
+                    }
+                    // open calendar and initialize temp selection to current filter
+                    setTempCalendarSelected(myRequestsFilterDate ? new Date(myRequestsFilterDate) : null);
+                    setCalendarViewDate(myRequestsFilterDate ? new Date(myRequestsFilterDate) : new Date());
+                    setShowMyRequestsCalendar(s => !s);
+                  }}
+                  className="filter-control filter-button"
+                >
+                  <span style={{ color: myRequestsFilterDate ? '#0f172a' : '#6b7280', fontSize: 14 }}>{myRequestsFilterDate ? new Date(myRequestsFilterDate).toLocaleDateString() : 'Date'}</span>
+                </button>
+                {showMyRequestsCalendar && myRequestsCalendarPos ? createPortal(
+                  <div ref={el => { myRequestsCalendarRef.current = el; }} className="calendar-popup" style={{ position: 'fixed', top: myRequestsCalendarPos.top, left: myRequestsCalendarPos.left, zIndex: 9999999 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <button aria-label="Previous month" type="button" onClick={() => setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} style={{ border: 'none', background: 'transparent', fontSize: 18, padding: '4px 8px', color: '#0f172a' }}>‹</button>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{calendarViewDate.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>
+                      <button aria-label="Next month" type="button" onClick={() => setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={{ border: 'none', background: 'transparent', fontSize: 18, padding: '4px 8px', color: '#0f172a' }}>›</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 8, textAlign: 'center', color: '#64748b', fontSize: 12 }}>
+                      {['S','M','T','W','T','F','S'].map(d => <div key={d} style={{ fontSize: 12 }}>{d}</div>)}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 8 }}>
+                      {buildCalendar(calendarViewDate).map((dt, idx) => {
+                        const selected = dt && tempCalendarSelected && dt.toDateString() === tempCalendarSelected.toDateString();
+                        return (
+                          <div key={idx} className="day-cell">
+                            {dt ? (
+                              <button type="button" onClick={() => setTempCalendarSelected(dt)} className={`day-button${selected ? ' selected' : ''}`}>{dt.getDate()}</button>
+                            ) : <div />}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button type="button" onClick={() => setShowMyRequestsCalendar(false)} className="button">Cancel</button>
+                      <button type="button" onClick={() => {
+                        if (tempCalendarSelected) {
+                          setMyRequestsFilterDate(formatYMD(tempCalendarSelected));
+                        } else {
+                          setMyRequestsFilterDate('');
+                        }
+                        setShowMyRequestsCalendar(false);
+                      }} className="button primary" style={{ background: '#2563eb', color: '#fff' }}>Apply</button>
+                    </div>
+                  </div>,
+                  document.body
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className="filter-button"
+                style={{ background: myRequestsPrimarySort === 'views' ? '#0f6fd8' : '#1583e9', color: 'white', border: 'none', fontWeight: 600 }}
+                onClick={() => {
+                  // make views the primary sort key and toggle its direction
+                  setMyRequestsPrimarySort('views');
+                  setMyRequestsSortViews(myRequestsSortViews === 'asc' ? 'desc' : 'asc');
+                }}
+              >
+                Views {myRequestsSortViews === 'asc' ? '▲' : '▼'}
+              </button>
+              <button
+                type="button"
+                className="filter-button"
+                style={{ background: myRequestsPrimarySort === 'shortlists' ? '#0f6fd8' : '#1583e9', color: 'white', border: 'none', fontWeight: 600 }}
+                onClick={() => {
+                  // make shortlists the primary sort key and toggle its direction
+                  setMyRequestsPrimarySort('shortlists');
+                  setMyRequestsSortShortlists(myRequestsSortShortlists === 'asc' ? 'desc' : 'asc');
+                }}
+              >
+                Shortlists {myRequestsSortShortlists === 'asc' ? '▲' : '▼'}
+              </button>
+            </div>
             <table className="table">
               <thead>
                 <tr>
@@ -807,10 +1167,10 @@ const PersonInNeedDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {myRequests.length === 0 ? (
+                {filteredSortedMyRequests.length === 0 ? (
                   <tr><td colSpan={8} className="row-muted">No requests found.</td></tr>
                 ) : (
-                  myRequests.map(r => (
+                  filteredSortedMyRequests.map(r => (
                     <tr key={r.id}>
                       <td>{r.title}</td>
                       <td>{r.categoryName}</td>
@@ -855,7 +1215,7 @@ const PersonInNeedDashboard: React.FC = () => {
                       <td style={{ textAlign: 'center' }}>
                         <span title="Shortlists" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6c-1.5-1.4-3.9-1.4-5.4 0l-.9.9-.9-.9c-1.5-1.4-3.9-1.4-5.4 0-1.6 1.5-1.6 4 0 5.5l6.3 6.2c.2.2.5.2.7 0l6.3-6.2c1.6-1.5 1.6-4 0-5.5z"/></svg>
-                          <span style={{ fontWeight: 600 }}>{r.shortlist_count ?? 0}</span>
+                          <span style={{ fontWeight: 600 }}>{getShortlistCount(r)}</span>
                         </span>
                       </td>
                       <td>
