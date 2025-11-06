@@ -1,8 +1,23 @@
- 
+// Admin Notification Controller
 import { UserEntity } from "../entities/userAccount";
-import { db } from "../db/client";
-import { useraccountTable } from "../db/schema/aiodb";
-import { eq } from "drizzle-orm";
+
+
+export class AdminNotificationController {
+  private userEntity = new UserEntity();
+
+  async getAdminNotifications() {
+    return await this.userEntity.getAdminNotifications();
+  }
+
+  async markNotificationRead(id: number) {
+    return await this.userEntity.markAdminNotificationRead(id);
+  }
+
+  async deleteNotification(id: number) {
+    return await this.userEntity.deleteAdminNotification(id);
+  }
+}
+ 
 
 export class ViewUserAccountController {
     private userAccount : UserEntity;

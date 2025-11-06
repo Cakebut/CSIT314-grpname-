@@ -2,6 +2,8 @@ import { Router } from "express";
 import { Request, Response } from "express";
 import { db } from "../db/client";
 import { useraccountTable,roleTable, adminNotificationsTable } from "../db/schema/aiodb";
+import { AdminNotificationController } from "../controller/UserAdminControllers";
+const adminNotificationController = new AdminNotificationController();
 import { sql, eq, and, desc } from "drizzle-orm"; // Add this import
 
 
@@ -399,12 +401,13 @@ router.get("/userAdmin/password-reset-requests", async (req: Request, res: Respo
   return res.status(200).json({ success: true, requests });
 });
 
+
+//=============ADMIN NOTIFICATIONS =============//
 // Admin fetches admin notifications (new)
 router.get('/userAdmin/admin-notifications', async (req: Request, res: Response) => {
   try {
-    // Return most recent notifications, unread first
-  const notifications = await db.select().from(adminNotificationsTable).orderBy(desc(adminNotificationsTable.read), desc(adminNotificationsTable.createdAt));
-  res.status(200).json({ success: true, notifications });
+    const notifications = await adminNotificationController.getAdminNotifications();
+    res.status(200).json({ success: true, notifications });
   } catch (err) {
     console.error('Failed to fetch admin notifications:', err);
     res.status(500).json({ success: false, error: 'Failed to fetch admin notifications' });
@@ -416,7 +419,7 @@ router.patch('/userAdmin/admin-notifications/:id/read', async (req: Request, res
   const id = Number(req.params.id);
   if (!id) return res.status(400).json({ success: false, error: 'Invalid id' });
   try {
-    await db.update(adminNotificationsTable).set({ read: 1 }).where(eq(adminNotificationsTable.id, id));
+    await adminNotificationController.markNotificationRead(id);
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Failed to mark admin notification as read:', err);
@@ -429,7 +432,7 @@ router.delete('/userAdmin/admin-notifications/:id', async (req: Request, res: Re
   const id = Number(req.params.id);
   if (!id) return res.status(400).json({ success: false, error: 'Invalid id' });
   try {
-    await db.delete(adminNotificationsTable).where(eq(adminNotificationsTable.id, id));
+    await adminNotificationController.deleteNotification(id);
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Failed to delete admin notification:', err);

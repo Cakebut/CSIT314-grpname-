@@ -7,7 +7,7 @@ import { useraccountData } from "../shared/dataClasses";
  
 
 export class UserEntity {
-   
+  
 
  
 
@@ -430,5 +430,27 @@ public async deleteUser(id: number): Promise<boolean> {
       return false;
     }
   }
+
+
+
+
+   // Admin Notification Methods
+  async getAdminNotifications() {
+    return await db.select().from(adminNotificationsTable)
+      .orderBy((adminNotificationsTable.read), (adminNotificationsTable.createdAt));
+  }
+
+  async markAdminNotificationRead(id: number) {
+    if (!id) throw new Error("Invalid id");
+    await db.update(adminNotificationsTable).set({ read: 1 }).where(eq(adminNotificationsTable.id, id));
+    return true;
+  }
+
+  async deleteAdminNotification(id: number) {
+    if (!id) throw new Error("Invalid id");
+    await db.delete(adminNotificationsTable).where(eq(adminNotificationsTable.id, id));
+    return true;
+  }
+   
 }
 
