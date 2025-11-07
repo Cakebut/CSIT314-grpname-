@@ -1,4 +1,4 @@
-/* 
+/* Clear Logs Button Styling */
 .clear-logs-btn {
   background: #dd0b0b;
   color: #dd0b0b;
@@ -15,7 +15,7 @@
   background: #dc2626;
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.18);
 }
-
+/* Dashboard container */
 .password-reset-dashboard {
   background: #f6f8fa;
   min-height: 100vh;
@@ -113,7 +113,7 @@
   cursor: pointer;
 }
 
-
+/* Modal styles */
 .request-modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -193,4 +193,4 @@
 .strong {
   color: #22c55e;
   font-weight: 600;
-} */
+}
