@@ -1,0 +1,80 @@
+name: CI / CD - Build & Deploy
+
+on:
+  push:
+    branches: [ main, dillonDevelopment ]
+  pull_request:
+    branches: [ main, dillonDevelopment ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install backend dependencies & build
+        working-directory: ./backend
+        run: |
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Install frontend dependencies & build
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Build Docker images (GHCR)
+        if: env.DOCKER_PUSH == 'true'
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Logging in to GitHub Container Registry"
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -t ghcr.io/${{ github.repository_owner }}/crashout-backend:${IMAGE_TAG} -f backend/Dockerfile backend || true
+          docker build -t ghcr.io/${{ github.repository_owner }}/crashout-frontend:${IMAGE_TAG} -f frontend/Dockerfile frontend || true
+          docker push ghcr.io/${{ github.repository_owner }}/crashout-backend:${IMAGE_TAG} || true
+          docker push ghcr.io/${{ github.repository_owner }}/crashout-frontend:${IMAGE_TAG} || true
+
+  deploy:
+    name: Deploy to server via SSH
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dillonDevelopment'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy using SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          script: |
+            set -eux
+            # change to the app directory on the remote host (set REMOTE_APP_DIR secret)
+            cd "${{ secrets.REMOTE_APP_DIR }}"
+            # optional: pull latest images if you push to a registry
+            if [ -f docker-compose.yml ]; then
+              docker compose pull || true
+              docker compose up -d --build
+            else
+              echo "No docker-compose.yml on remote host; adjust deploy commands as needed"
+            fi
+
+# Notes:
+# - This workflow builds frontend and backend and runs tests if the projects expose `build` and `test` npm scripts.
+# - For Docker image publishing set the repository secret DOCKER_PUSH=true and provide a GITHUB_TOKEN with package write access (or another registry login secret).
+# - For SSH deploy set the secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, REMOTE_APP_DIR. The action will ssh to the host and run `docker compose up -d --build` in the target dir.
+# - If you prefer a different deployment method (e.g., Kubernetes, cloud provider CLI, or GitHub Pages for frontend) tell me and I can adapt the workflow.
