@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { CircleCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import "./ForgetPage.css";
 
-
-function Forget() {
-  const navigate = useNavigate();
-
+function Forget({ 
+  onCancel, 
+  onSubmit 
+}: {
+  onCancel? : () => void; 
+  onSubmit? : () => void
+}) {
+    
   const [username, setUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // For any validation checks
   const hasMinLength = newPassword.length >= 8;
@@ -21,65 +22,15 @@ function Forget() {
   const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
   const allValid = hasMinLength && hasUppercase && hasNumber && passwordsMatch && username.length > 0;
 
-  const validatePassword = (pw: string) => {
-    // At least 8 chars, one uppercase, one number
-    return /(?=.{8,})(?=.*[A-Z])(?=.*\d)/.test(pw);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (allValid && onSubmit) {
+      onSubmit();
+    }
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault?.();
+  const navigate = useNavigate();
 
-    if (!username || !newPassword || !confirmPassword) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-    if (!validatePassword(newPassword)) {
-      toast.error("Password does not meet requirements.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Call backend to submit password reset request
-      const res = await fetch('/api/userAdmin/password-reset-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, newPassword }),
-        credentials: 'include',
-      });
-      if (res.ok) {
-        setSubmitted(true);
-        toast.success("Password reset request submitted!");
-      } else {
-        toast.error("Failed to submit request.");
-      }
-    } catch (err) {
-      toast.error("Error submitting request.");
-    }
-    setLoading(false);
-  };
-
-  if (submitted) {
-    return (
-      <div className="forgot-password-container">
-        <div className="request-submitted-card">
-          <h2>Request Submitted</h2>
-          <p>Your password reset request has been received</p>
-          <ul className="request-status-list">
-            <li>✔ Your password change request has been successfully submitted</li>
-            <li>✔ Request is pending approval from the administrator</li>
-            <li>✔ You will receive confirmation once approved</li>
-          </ul>
-          <button className="back-login-btn" onClick={() => navigate("/")}>Back to Login</button>
-          <div className="request-note">This usually takes 1-2 business days</div>
-        </div>
-      </div>
-    );
-  }
   const handleCancel = () => {
     navigate(-1);
   }
@@ -88,7 +39,7 @@ function Forget() {
     <>
       <section className="forget-main forget-section">
 
-  <form id="loginForm" className="forget-box" onSubmit={handleSubmit}>
+        <form id="loginForm" className="forget-box">
           <div className="forget-header">
             <header>Reset Password</header>
             <div>Create a new secure password</div>
@@ -126,7 +77,7 @@ function Forget() {
             <header>Confirm Password</header>
             <input
               type="password"
-              id="confirmPassword"
+              id="password"
               className="input-field"
               placeholder="Confirm new password"
               value={confirmPassword}
@@ -182,7 +133,7 @@ function Forget() {
                 type="submit"
                 className="submit-btn btn"
                 id="submit"
-                disabled={loading || !allValid}
+                onClick={handleSubmit}
                 ></button>
               <label htmlFor="submit">Confirm</label>
             </div>

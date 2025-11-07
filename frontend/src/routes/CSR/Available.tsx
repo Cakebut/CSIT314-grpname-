@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import React, { useState } from "react";
 import { MapPin } from "lucide-react";  // Importing relevant icons from lucide-react
 import "./Available.css";
 
-// Define the structure for a request (normalized from backend)
+// Define the structure for a request
 interface Request {
   id: string;
   title: string;
@@ -14,8 +13,121 @@ interface Request {
   region: string;
   status?: "Available" | "Pending" | "Completed";
   details?: string;
-  views?: number;
+  views: number;
 }
+
+const initialRequests: Request[] = [
+  {
+    id: "REQ-001",
+    title: "Technical Support",
+    priority: "Low Priority",
+    requestType: "Support",
+    pinName: "Alice Johnson",
+    pinId: "PIN-1234",
+    region: "North Region",
+    status: "Available",
+    details: "Help needed to troubleshoot connectivity issues and set up VPN.",
+    views: 13,
+  },
+  {
+    id: "REQ-002",
+    title: "Account Setup Assistance",
+    priority: "Low Priority",
+    requestType: "Account",
+    pinName: "Bob Smith",
+    pinId: "PIN-5678",
+    region: "South Region",
+    views: 8,
+  },
+  {
+    id: "REQ-003",
+    title: "Document Preparation",
+    priority: "High Priority",
+    requestType: "Documentation",
+    pinName: "Carol Davis",
+    pinId: "PIN-9012",
+    region: "East Region",
+    status: "Pending",
+    details: "Need someone to format and proofread a set of legal documents.",
+    views: 15,
+  },
+  {
+    id: "REQ-004",
+    title: "Software Training",
+    priority: "Low Priority",
+    requestType: "Training",
+    pinName: "David Wilson",
+    pinId: "PIN-3456",
+    region: "West Region",
+    views: 5,
+  },
+  {
+    id: "REQ-005",
+    title: "Data Entry Help",
+    priority: "High Priority",
+    requestType: "Data Entry",
+    pinName: "Emma Brown",
+    pinId: "PIN-7890",
+    region: "Central Region",
+    status: "Available",
+    details: "Assist with entering survey data into spreadsheet and verifying accuracy.",
+    views: 20,
+  },
+  {
+    id: "REQ-006",
+    title: "Transportation Assistance",
+    priority: "High Priority",
+    requestType: "Logistics",
+    pinName: "Frank Lee",
+    pinId: "PIN-2345",
+    region: "North Region",
+    views: 7,
+  },
+  {
+    id: "REQ-007",
+    title: "Home Cleaning Support",
+    priority: "Low Priority",
+    requestType: "Home",
+    pinName: "Grace Tan",
+    pinId: "PIN-6789",
+    region: "East Region",
+    views: 11,
+  },
+  {
+    id: "REQ-008",
+    title: "Grocery Shopping Help",
+    priority: "Low Priority",
+    requestType: "Errands",
+    pinName: "Henry Ng",
+    pinId: "PIN-3457",
+    region: "West Region",
+    views: 9,
+  },
+  {
+    id: "REQ-009",
+    title: "Medical Appointment Companion",
+    priority: "High Priority",
+    requestType: "Medical",
+    pinName: "Iris Lim",
+    pinId: "PIN-8901",
+    region: "Central Region",
+    status: "Completed",
+    details: "Accompanied to appointment on 05/11; follow-up required.",
+    views: 18,
+  },
+  {
+    id: "REQ-010",
+    title: "Technology Tutoring",
+    priority: "Low Priority",
+    requestType: "Tutoring",
+    pinName: "Jack Wong",
+    pinId: "PIN-4568",
+    region: "South Region",
+    status: "Available",
+    details: "One-hour session to cover basic computer skills and email setup.",
+    views: 6,
+  },
+];
 
 import CSRRequestDetails from "./CSRRequestDetails";
 
@@ -23,82 +135,10 @@ const Available: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filterLocation, setFilterLocation] = useState<string>("All Locations");
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [locations, setLocations] = useState<string[]>([]);
   const [interestedIds, setInterestedIds] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(false);
-
-  // Map backend request shape to UI Request
-  const normalize = (r: any): Request => ({
-    id: String(r.requestId || r.id || r.request_id),
-    title: r.title || r.name || "Untitled",
-    priority: r.urgencyLevel ? (String(r.urgencyLevel).toLowerCase().includes("urgent") || String(r.urgencyLevel).toLowerCase().includes("high") ? "High Priority" : "Low Priority") : "Low Priority",
-    requestType: r.categoryName || r.requestType || "General",
-    pinName: r.pinName || r.pinUsername || r.pinName || "",
-    pinId: String(r.pinId || r.pin_id || ""),
-    region: r.location || r.region || "",
-    status: r.status || "Available",
-    details: r.message || r.details || "",
-    views: r.view_count || 0,
-  });
-
-  const fetchRequests = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/csr/requests/open', { method: 'GET', credentials: 'include' });
-      if (!res.ok) throw new Error('Failed to fetch available requests');
-      const payload = await res.json();
-      const items = (payload.requests || []) as any[];
-      setRequests(items.map(normalize));
-    } catch (err) {
-      console.error('Error loading requests', err);
-      toast.error('Failed to load available requests');
-      setRequests([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchLocations = async () => {
-    try {
-      const res = await fetch('/api/csr/locations', { method: 'GET', credentials: 'include' });
-      if (!res.ok) throw new Error('Failed to fetch locations');
-      const payload = await res.json();
-      setLocations(['All Locations', ...(payload.locations || [])]);
-    } catch (err) {
-      console.error('Error loading locations', err);
-      toast.error('Failed to load locations');
-      setLocations(['All Locations']);
-    }
-  };
-
-  // Fetch interested list for the current CSR (to mark toggles)
-  const fetchInterested = async () => {
-    try {
-      const csrId = Number(localStorage.getItem('userId')) || 0;
-      if (!csrId) return;
-      const res = await fetch(`/api/csr/${csrId}/interested`, { method: 'GET', credentials: 'include' });
-      if (!res.ok) throw new Error('Failed to fetch interested list');
-      const payload = await res.json();
-      const items = (payload.interestedRequests || payload.requests || []) as any[];
-      const map: Record<string, boolean> = {};
-      items.forEach((it) => map[String(it.requestId || it.id || it.request_id)] = true);
-      setInterestedIds(map);
-    } catch (err) {
-      console.error('Error fetching interested list', err);
-      toast.error('Failed to load your interested list');
-    }
-  };
-
-  useEffect(() => {
-    fetchRequests();
-    fetchLocations();
-    fetchInterested();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Filter requests based on search query and location
-  const filteredRequests = requests.filter((request) => {
+  const filteredRequests = initialRequests.filter((request) => {
     const matchesQuery = request.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          request.pinName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLocation = filterLocation === "All Locations" || request.region === filterLocation;
@@ -106,33 +146,11 @@ const Available: React.FC = () => {
   });
 
   const openDetails = (request: Request) => setSelectedRequest(request);
+
   const closeDetails = () => setSelectedRequest(null);
 
-  const toggleInterested = async (id: string) => {
-    const csrId = Number(localStorage.getItem('userId')) || 0;
-    if (!csrId) {
-      console.warn('CSR id not found in localStorage');
-      return;
-    }
-    const already = !!interestedIds[id];
-    try {
-      if (!already) {
-        const res = await fetch(`/api/csr/${csrId}/interested/${id}`, { method: 'POST', credentials: 'include' });
-        if (res.ok) setInterestedIds((prev) => ({ ...prev, [id]: true }));
-        else {
-          const body = await res.text();
-          console.error('Failed to mark interested', body);
-          toast.error('Failed to mark interested');
-        }
-      } else {
-        const res = await fetch(`/api/csr/${csrId}/interested/${id}`, { method: 'DELETE', credentials: 'include' });
-        if (res.ok) setInterestedIds((prev) => { const n = { ...prev }; delete n[id]; return n; });
-        else console.error('Failed to remove interested');
-      }
-    } catch (err) {
-      console.error('Error toggling interested', err);
-      toast.error('Error updating interest');
-    }
+  const toggleInterested = (id: string) => {
+    setInterestedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -158,7 +176,12 @@ const Available: React.FC = () => {
           onChange={(e) => setFilterLocation(e.target.value)}
           className="filter-available"
         >
-          {locations.map((loc) => <option key={loc}>{loc}</option>)}
+          <option>All Locations</option>
+          <option>North Region</option>
+          <option>South Region</option>
+          <option>East Region</option>
+          <option>West Region</option>
+          <option>Central Region</option>
         </select>
         <button className="reset-available btn" onClick={() => { setFilterLocation("All Locations"); setSearchQuery(""); }}>
           Reset
@@ -166,7 +189,7 @@ const Available: React.FC = () => {
       </div>
 
       <div className="available-request-list">
-        {loading ? <div className="loading">Loading...</div> : filteredRequests.map((request) => (
+        {filteredRequests.map((request) => (
           <div key={request.id} onClick={() => openDetails(request)} className={`available-request-card ${request.priority.toLowerCase().includes("high") ? 'priority-high-card' : ''}`}>
             <span className={`available-request-priority ${request.priority.toLowerCase().includes("high") ? 'priority-high' : 'priority-low'}`}>
               {request.priority}

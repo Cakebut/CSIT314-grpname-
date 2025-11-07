@@ -25,10 +25,8 @@ function Login() {
         // Store username and role for dashboard
         localStorage.setItem('currentUsername', username);
         localStorage.setItem('currentRole', data.role);
-        if (data.id) localStorage.setItem('userId', String(data.id));
-        if (data.username) localStorage.setItem('username', data.username);
         if (data.role === "User Admin") {
-          navigate("/admin");
+          navigate("/useradmin");
         } 
         else if (data.role === "Person In Need") {
           navigate("/pin");
@@ -37,7 +35,7 @@ function Login() {
           navigate("/csr");
         }
         else if (data.role === "Platform Manager") {
-          navigate("/pm");
+          navigate("/platform");
         }
       } else {
           let errorMsg = "Login attempt failed.";
