@@ -133,7 +133,7 @@ const Reports: React.FC = () => {
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="requests" fill="#8884d8">
-                  {regionData.map((entry, index) => (
+                  {regionData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "#4caf50" : "#2196f3"} />
                   ))}
                 </Bar>

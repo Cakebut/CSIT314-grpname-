@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, Heart, Check, Send } from "lucide-react";
+import React from "react";
+import { X} from "lucide-react";
 import "./pinRequestDetails.css";
 
 interface Request {
@@ -29,7 +29,7 @@ interface Props {
 }
 
 const PINRequestDetails: React.FC<Props> = ({ request, open, onClose }) => {
-  const [ setAwaitingOffer ] = useState(false);
+ 
 
   if (!open) return null;
 

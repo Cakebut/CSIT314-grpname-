@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./ForgetPage.css";
 
 function Forget({ 
-  onCancel, 
+
   onSubmit 
 }: {
   onCancel? : () => void; 

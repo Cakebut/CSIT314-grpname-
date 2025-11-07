@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MapPin, X, Check } from "lucide-react"; // Importing icons for location and actions
+import {  X, Check } from "lucide-react"; // Importing icons for location and actions
 import "./PendingOffers.css";
 
 // Define the structure for a request
