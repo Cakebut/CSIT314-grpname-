@@ -1,4 +1,4 @@
-/* User status colors in table */
+/* 
 .status-active {
   color: #43a047;
   font-weight: 600;
@@ -13,7 +13,7 @@
   padding: 0.3rem 0.8rem;
   border-radius: 8px;
 }
-/* Status bar styles */
+
 .status-bar {
   width: 100%;
   text-align: center;
@@ -31,7 +31,7 @@
   background-color: #43a047;
   color: #fff;
 }
-/* Suspend/Reactivate button styles */
+
 .suspend-btn {
   background-color: red;
   color: white;
@@ -259,4 +259,4 @@ td {
 }
 .back-btn:active {
   background-color: #d80606;
-}
+} */

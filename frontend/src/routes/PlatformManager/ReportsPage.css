@@ -1,4 +1,4 @@
-.pm-reports { padding: 16px; color: #111827; }
+/* .pm-reports { padding: 16px; color: #111827; }
 .form { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(220px, 1fr)); align-items: end; }
 .form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #334; }
 .form input[type="date"], .form select { padding: 8px 10px; border: 1px solid #d0d5dd; border-radius: 6px; background: #fff; }
@@ -20,4 +20,4 @@
 .simple th, .simple td { border: 1px solid #e5e7eb; padding: 8px 10px; }
 .simple thead th { background: #f8fafc; color: #334155; text-align: left; font-weight: 600; }
 .simple tbody tr:nth-child(odd) { background: #fcfcfd; }
-.chart { width: 100%; height: 200px; margin: 12px 0; }
+.chart { width: 100%; height: 200px; margin: 12px 0; } */

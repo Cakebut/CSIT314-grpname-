@@ -1,4 +1,4 @@
-.header {
+/* .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -201,10 +201,10 @@ form textarea {
   text-align:center;
   padding:28px 8px;
   color:#666;
-}
+} */
 
 /* My Requests filter row styles to ensure straight alignment */
-.my-requests-filter-row {
+/* .my-requests-filter-row {
   display: flex !important;
   gap: 10px !important;
   align-items: center !important;
@@ -246,10 +246,10 @@ form textarea {
   border-radius: 12px !important;
   background: #fff !important;
   pointer-events: auto !important;
-}
+} */
 
 /* Calendar internal styles */
-.calendar-popup .day-cell {
+/* .calendar-popup .day-cell {
   height: 28px !important;
 }
 .calendar-popup .day-button {
@@ -275,5 +275,5 @@ form textarea {
 }
 .calendar-popup .button.primary {
   padding: 6px 12px !important;
-}
+} */
 

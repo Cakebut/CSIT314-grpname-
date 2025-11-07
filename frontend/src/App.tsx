@@ -5,8 +5,9 @@ import React from 'react';
 
 // LOGIN PAGE
 import Login from './routes/LoginPage';
-import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
+// FORGOT PASSWORD PAGE
+import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
@@ -16,29 +17,28 @@ import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPag
 import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
 import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboardPage';
 
-
-//Person In Need
+// PERSON IN NEED PAGE
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
 
-// Platform Manager
+// CSR PAGE
+import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
+
+// PLATFORM MANAGER PAGE
 import PlatformManagerHome from './routes/PlatformManager';
 import CategoriesPage from './routes/PlatformManager/CategoriesPage';
 import ReportsPage from './routes/PlatformManager/ReportsPage';
 import AnnouncementsPage from './routes/PlatformManager/AnnouncementsPage';
 
-// CSR Rep
-import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
-
-//===========================================================================
 // CSS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+
 
 function App() {
   useEffect (() => {
     document.title = "Volunteering Service in Singapore"
   })
-
 
   // ProtectedRoute component for all actors
 function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, allowedRole: string }) {
