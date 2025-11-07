@@ -48,10 +48,32 @@ jobs:
             node -e "const { Client } = require('pg'); (async ()=>{try{const c=new Client({connectionString: process.env.DATABASE_URL}); await c.connect(); await c.end(); console.log('pg ready'); process.exit(0);}catch(e){process.exit(1)}})()" && break || sleep 1
           done
 
+      - name: Apply backend migrations
+        working-directory: ./backend
+        run: |
+          echo "Applying drizzle migrations"
+          npm run db:migrate --if-present
+
       - name: Seed backend database
         working-directory: ./backend
         run: |
+          echo "Seeding database (if seed script exists)"
           npm run db:seed --if-present || true
+
+      - name: Check drizzle migration status
+        working-directory: ./backend
+        run: |
+          echo "Checking drizzle migration status"
+          npx drizzle-kit status --config ./drizzle.config.ts | tee drizzle-status.out || true
+          # If output explicitly contains 'No pending' we consider it clean. If it contains 'Pending' but not 'No pending', fail.
+          if grep -i "no pending" drizzle-status.out >/dev/null 2>&1; then
+            echo "No pending migrations"
+          elif grep -i "pending" drizzle-status.out >/dev/null 2>&1; then
+            echo "Pending migrations detected:" && cat drizzle-status.out
+            exit 1
+          else
+            echo "Unable to determine pending migrations from drizzle output; showing output:" && cat drizzle-status.out
+          fi
 
       - name: Build backend
         working-directory: ./backend
