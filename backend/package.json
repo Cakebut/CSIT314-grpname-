@@ -26,8 +26,8 @@
     "dev": "nodemon",
     "db:migrate:add_deleted": "tsx scripts/add_deleted_to_service_type.ts",
     "db:seed": "ts-node src/db/Seeding/seedData.ts",
-    "db:delete": "ts-node src/db/Seeding/deleteData.ts",
-    //"test": "jest"
+    "db:delete": "ts-node src/db/Seeding/deleteData.ts"
+  
   },
   "repository": {
     "type": "git",
