@@ -67,11 +67,13 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     localStorage.removeItem('dummyUsers');
     localStorage.removeItem('currentUsername');
     localStorage.removeItem('currentRole');
-    if (onLogout) {
-      onLogout();
-    } else {
-      window.location.replace("/");
+    // Call optional external onLogout handler if provided, then navigate
+    try {
+      if (typeof onLogout === 'function') onLogout();
+    } catch (e) {
+      console.error('onLogout handler threw', e);
     }
+    navigate('/'); // Redirect to login
   };
 
   return (
@@ -149,7 +151,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
         <div className="content-inner">
           {activeSection === "userAccounts" && <ViewUserAccountPage  />}
           {activeSection === "roles" && <Roles />}
-            {activeSection === "passwordRequests" && <ViewResetDashboardPage />}
+          {activeSection === "passwordRequests" && <ViewResetDashboardPage />}
           {activeSection === "activityLogs" && <SystemActivityLogs />}
         </div>
       </div>

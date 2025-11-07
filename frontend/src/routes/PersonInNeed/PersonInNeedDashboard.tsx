@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import "./PersonInNeedDashboard.css";
+import { ClipboardList } from "lucide-react";
 
 // Centralized status color logic
 function getStatusColor(status?: string) {
@@ -103,84 +104,9 @@ const PersonInNeedDashboard: React.FC = () => {
   const [myRequestsFilterType, setMyRequestsFilterType] = useState("");
   const [myRequestsFilterStatus, setMyRequestsFilterStatus] = useState("");
   const [myRequestsFilterUrgency, setMyRequestsFilterUrgency] = useState("");
-  const [myRequestsFilterDate, setMyRequestsFilterDate] = useState("");
   const [myRequestsSortViews, setMyRequestsSortViews] = useState("asc");
   const [myRequestsSortShortlists, setMyRequestsSortShortlists] = useState("asc");
   const [myRequestsPrimarySort, setMyRequestsPrimarySort] = useState<'views'|'shortlists'>('views');
-  // Calendar popup state for My Requests date filter
-  const [showMyRequestsCalendar, setShowMyRequestsCalendar] = useState(false);
-  const [calendarViewDate, setCalendarViewDate] = useState<Date>(new Date());
-  const [tempCalendarSelected, setTempCalendarSelected] = useState<Date | null>(null);
-  const myRequestsCalendarRef = React.useRef<HTMLDivElement | null>(null);
-  const myRequestsDateButtonRef = React.useRef<HTMLButtonElement | null>(null);
-  const [myRequestsCalendarPos, setMyRequestsCalendarPos] = useState<{ top: number; left: number } | null>(null);
-
-  // Calendar helpers for My Requests date picker
-  const formatYMD = (d: Date) => d.toISOString().slice(0, 10);
-  const daysInMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  const buildCalendar = (view: Date) => {
-    const year = view.getFullYear();
-    const month = view.getMonth();
-    const firstDay = new Date(year, month, 1).getDay(); // 0-6
-    const total = daysInMonth(view);
-    const cells: (Date | null)[] = [];
-    // leading blanks
-    for (let i = 0; i < firstDay; i++) cells.push(null);
-    for (let d = 1; d <= total; d++) cells.push(new Date(year, month, d));
-    // trailing blanks to make full weeks
-    while (cells.length % 7 !== 0) cells.push(null);
-    return cells;
-  };
-
-  // Close calendar when clicking outside
-  useEffect(() => {
-    if (!showMyRequestsCalendar) return;
-    function onDocClick(e: MouseEvent) {
-      const el = myRequestsCalendarRef.current;
-      const btn = myRequestsDateButtonRef.current;
-      if (!(e.target instanceof Node)) return;
-      // if click is inside calendar popup or the date button, ignore
-      if (el && el.contains(e.target)) return;
-      if (btn && btn.contains(e.target)) return;
-      setShowMyRequestsCalendar(false);
-    }
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [showMyRequestsCalendar]);
-
-  // After the portal popup renders, adjust position if it overflows (measure actual popup size)
-  useEffect(() => {
-    if (!showMyRequestsCalendar) return;
-    if (!myRequestsCalendarPos) return;
-    // Wait for popup to render
-    const raf = requestAnimationFrame(() => {
-      const el = myRequestsCalendarRef.current;
-      const btn = myRequestsDateButtonRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      let top = myRequestsCalendarPos.top;
-      let left = myRequestsCalendarPos.left;
-      // Shift left if overflowing right
-      if (left + rect.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - rect.width - 8);
-      // If overflowing bottom, try placing above the button
-      if (top + rect.height > window.innerHeight - 8) {
-        if (btn) {
-          const b = btn.getBoundingClientRect();
-          top = b.top - rect.height - 6;
-        } else {
-          top = Math.max(8, window.innerHeight - rect.height - 8);
-        }
-      }
-      // Clamp
-      if (top < 8) top = 8;
-      if (left < 8) left = 8;
-      // Only update if changed meaningfully
-      if (Math.abs(top - myRequestsCalendarPos.top) > 1 || Math.abs(left - myRequestsCalendarPos.left) > 1) {
-        setMyRequestsCalendarPos({ top, left });
-      }
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [showMyRequestsCalendar, myRequestsCalendarPos]);
   const [showCreate, setShowCreate] = useState(false);
   const [categoryID, setCategoryID] = useState("");
   const [title, setTitle] = useState("");
@@ -506,10 +432,6 @@ const PersonInNeedDashboard: React.FC = () => {
     if (myRequestsFilterType && r.categoryName !== myRequestsFilterType) return false;
     if (myRequestsFilterStatus && r.status !== myRequestsFilterStatus) return false;
     if (myRequestsFilterUrgency && (r.urgencyLabel || '') !== myRequestsFilterUrgency) return false;
-    if (myRequestsFilterDate) {
-      const created = r.createdAt ? r.createdAt.slice(0,10) : '';
-      if (created !== myRequestsFilterDate) return false;
-    }
     return true;
   });
   // Helper to get shortlist count either from detailed csr_shortlists array or from shortlist_count
@@ -559,75 +481,8 @@ const PersonInNeedDashboard: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="container">
-      {/* PIN Dashboard Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '18px 0 8px 0', background: '#f1f5f9', borderBottom: '1px solid #e0e7ef', marginBottom: 16 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
-          <h1 style={{ color: '#2563eb', fontWeight: 700, fontSize: '2rem', margin: 0 }}>PIN Dashboard</h1>
-          <p style={{ color: '#64748b', fontSize: '1.08rem', margin: 0 }}>Welcome {username}</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, position: 'relative' }}>
-          {/* Notification bell and popover already present here */}
-          {/* Logout button already present here */}
-        </div>
-      </div>
-      {/* Filter Bar - inserted directly after header */}
-  <div style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'flex-end', flexWrap: 'nowrap' }}>
-        {/* Text filter bar on the left */}
-        <div>
-          <label style={{ fontWeight: 600, marginRight: 6 }}>Search:</label>
-          <input
-            type="text"
-            value={filterText}
-            onChange={e => setFilterText(e.target.value)}
-            placeholder="Type to filter by title..."
-            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #d1d5db', width: 180 }}
-          />
-        </div>
-        <div>
-          <label style={{ fontWeight: 600, marginRight: 6 }}>Status:</label>
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
-            <option value="">All</option>
-            <option value="Available">Available</option>
-            <option value="Pending">Pending</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
-        <div>
-          <label style={{ fontWeight: 600, marginRight: 6 }}>Type:</label>
-          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
-            <option value="">All</option>
-            {serviceTypes.map(type => (
-              <option key={type.id} value={type.id}>{type.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label style={{ fontWeight: 600, marginRight: 6 }}>Location:</label>
-          <select value={filterLocation} onChange={e => setFilterLocation(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
-            <option value="">All</option>
-            {locations.map(loc => (
-              <option key={loc.id} value={loc.id}>{loc.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label style={{ fontWeight: 600, marginRight: 6 }}>Urgency:</label>
-          <select value={filterUrgency} onChange={e => setFilterUrgency(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
-            <option value="">All</option>
-            {urgencyLevels.map(u => (
-              <option key={u.id} value={u.label}>{u.label}</option>
-            ))}
-          </select>
-        </div>
-        <button className="button" style={{ marginLeft: 8 }} onClick={() => {
-          setFilterText("");
-          setFilterStatus("");
-          setFilterCategory("");
-          setFilterLocation("");
-          setFilterUrgency("");
-        }}>Clear</button>
-      </div>
+
+
       {/* Notification Button and Popover */}
       <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
         <button
@@ -704,12 +559,88 @@ const PersonInNeedDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
-      <div className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-        <h2>All Person-In-Need Requests</h2>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button className="button primary" onClick={openMyRequests}>My Requests</button>
-          <button className="button" style={{ backgroundColor: '#0ea5e9', color: 'white' }} onClick={openMyOffers}>My Offers</button>
+      
+      <div className="pin-container">
+        <div>
+        <header className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}></header>
+          <h2>All Person-In-Need Requests</h2>
+          <p>Manage user accounts and permissions</p>
+        </div>
+      </div>
+
+      <div className="pin-actions">
+        {/* Filter Bar - inserted directly after header */}
+          
+          {/* Text filter bar on the left */}
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Search:</label>
+          <input
+            type="text"
+            value={filterText}
+            onChange={e => setFilterText(e.target.value)}
+            placeholder="Type to filter by title..."
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #d1d5db', width: 180 }}
+          />
+
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Status:</label>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            <option value="Available">Available</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+          </select>
+
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Type:</label>
+          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            {serviceTypes.map(type => (
+              <option key={type.id} value={type.id}>{type.name}</option>
+            ))}
+          </select>
+
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Location:</label>
+          <select value={filterLocation} onChange={e => setFilterLocation(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            {locations.map(loc => (
+              <option key={loc.id} value={loc.id}>{loc.name}</option>
+            ))}
+          </select>
+
+
+          <label style={{ fontWeight: 600, marginRight: 6 }}>Urgency:</label>
+          <select value={filterUrgency} onChange={e => setFilterUrgency(e.target.value)} style={{ minWidth: 110, padding: '6px 8px', borderRadius: 6 }}>
+            <option value="">All</option>
+            {urgencyLevels.map(u => (
+              <option key={u.id} value={u.label}>{u.label}</option>
+            ))}
+          </select>
+
+          <button className="button" style={{ marginLeft: 8 }} onClick={() => {
+            setFilterText("");
+            setFilterStatus("");
+            setFilterCategory("");
+            setFilterLocation("");
+            setFilterUrgency("");
+          }}>Clear</button>
+        
+        <button 
+          type="button" 
+          className="button primary" 
+          onClick={openMyRequests}>
+            My Requests
+          </button>
+
+        <button 
+          type="button" 
+          className="button" 
+          style={{ backgroundColor: '#0ea5e9', color: 'white' }} 
+          onClick={openMyOffers}>
+            My Offers
+        </button>
+      </div>
+
       {/* My Offers Modal */}
       {showMyOffers && (
         <div className="modal" onClick={() => setShowMyOffers(false)}>
@@ -804,6 +735,10 @@ const PersonInNeedDashboard: React.FC = () => {
         </div>
       )}
 
+
+
+
+
       {/* Feedback Modal - always rendered at root, independent of My Offers */}
       {showFeedbackModal && (
         <div className="modal" onClick={handleCancelFeedback}>
@@ -841,17 +776,7 @@ const PersonInNeedDashboard: React.FC = () => {
           </div>
         </div>
       )}
-          <button
-            className="button"
-            style={{ backgroundColor: '#64748b', color: 'white' }}
-            onClick={() => {
-              localStorage.clear();
-              navigate('/');
-            }}
-          >Logout</button>
-        </div>
-      </div>
-      
+
       {loading ? (
         <div>Loading...</div>
       ) : error ? (
@@ -1055,79 +980,6 @@ const PersonInNeedDashboard: React.FC = () => {
                   <option key={ul.id} value={ul.label}>{ul.label}</option>
                 ))}
               </select>
-              <div style={{ position: 'relative' }}>
-                <button
-                  type="button"
-                  ref={myRequestsDateButtonRef}
-                  onClick={() => {
-                    // position popup relative to button (page coordinates)
-                    const btn = myRequestsDateButtonRef.current;
-                    if (btn) {
-                      const rect = btn.getBoundingClientRect();
-                      // Use viewport coordinates for fixed positioning (no scroll offsets)
-                      // Ensure the popup stays within the viewport (avoid clipping)
-                      const POPUP_W = 240;
-                      const POPUP_H = 300;
-                      let left = rect.left;
-                      // shift left if overflowing right edge
-                      if (left + POPUP_W > window.innerWidth - 8) left = Math.max(8, window.innerWidth - POPUP_W - 8);
-                      // default top below button
-                      let top = rect.bottom + 6;
-                      // if popup would overflow bottom, position above the button
-                      if (top + POPUP_H > window.innerHeight - 8) {
-                        top = rect.top - POPUP_H - 6;
-                        if (top < 8) top = 8; // clamp to viewport
-                      }
-                      setMyRequestsCalendarPos({ top, left });
-                    } else {
-                      setMyRequestsCalendarPos({ top: 100, left: 100 });
-                    }
-                    // open calendar and initialize temp selection to current filter
-                    setTempCalendarSelected(myRequestsFilterDate ? new Date(myRequestsFilterDate) : null);
-                    setCalendarViewDate(myRequestsFilterDate ? new Date(myRequestsFilterDate) : new Date());
-                    setShowMyRequestsCalendar(s => !s);
-                  }}
-                  className="filter-control filter-button"
-                >
-                  <span style={{ color: myRequestsFilterDate ? '#0f172a' : '#6b7280', fontSize: 14 }}>{myRequestsFilterDate ? new Date(myRequestsFilterDate).toLocaleDateString() : 'Date'}</span>
-                </button>
-                {showMyRequestsCalendar && myRequestsCalendarPos ? createPortal(
-                  <div ref={el => { myRequestsCalendarRef.current = el; }} className="calendar-popup" style={{ position: 'fixed', top: myRequestsCalendarPos.top, left: myRequestsCalendarPos.left, zIndex: 9999999 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <button aria-label="Previous month" type="button" onClick={() => setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} style={{ border: 'none', background: 'transparent', fontSize: 18, padding: '4px 8px', color: '#0f172a' }}>‹</button>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{calendarViewDate.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>
-                      <button aria-label="Next month" type="button" onClick={() => setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={{ border: 'none', background: 'transparent', fontSize: 18, padding: '4px 8px', color: '#0f172a' }}>›</button>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 8, textAlign: 'center', color: '#64748b', fontSize: 12 }}>
-                      {['S','M','T','W','T','F','S'].map(d => <div key={d} style={{ fontSize: 12 }}>{d}</div>)}
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 8 }}>
-                      {buildCalendar(calendarViewDate).map((dt, idx) => {
-                        const selected = dt && tempCalendarSelected && dt.toDateString() === tempCalendarSelected.toDateString();
-                        return (
-                          <div key={idx} className="day-cell">
-                            {dt ? (
-                              <button type="button" onClick={() => setTempCalendarSelected(dt)} className={`day-button${selected ? ' selected' : ''}`}>{dt.getDate()}</button>
-                            ) : <div />}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button type="button" onClick={() => setShowMyRequestsCalendar(false)} className="button">Cancel</button>
-                      <button type="button" onClick={() => {
-                        if (tempCalendarSelected) {
-                          setMyRequestsFilterDate(formatYMD(tempCalendarSelected));
-                        } else {
-                          setMyRequestsFilterDate('');
-                        }
-                        setShowMyRequestsCalendar(false);
-                      }} className="button primary" style={{ background: '#2563eb', color: '#fff' }}>Apply</button>
-                    </div>
-                  </div>,
-                  document.body
-                ) : null}
-              </div>
               <button
                 type="button"
                 className="filter-button"
@@ -1440,7 +1292,6 @@ const PersonInNeedDashboard: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
   </>
   );
 };

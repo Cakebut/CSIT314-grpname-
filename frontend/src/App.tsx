@@ -16,7 +16,9 @@ import AdminDashboard from './routes/UserAdmin/AdminDashboard';
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
 
 // CSR PAGE
+import CSRDashboard from './routes/CSRRep/CSRDashboard';
 import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
+
 
 // PLATFORM MANAGER PAGE
 import PlatformManagerHome from './routes/PlatformManager';
@@ -28,6 +30,8 @@ import AnnouncementsPage from './routes/PlatformManager/AnnouncementsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import PINDashboard from './routes/PersonInNeed/PINDashboard';
+
 
 
 function App() {
@@ -66,11 +70,10 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
           <Route path="/useradmin" element={<ProtectedRoute allowedRole="User Admin"><AdminDashboard /></ProtectedRoute>} />
 
           {/* Person In Need */}
-          <Route path="/PIN" element={<ProtectedRoute allowedRole="Person In Need"><PersonInNeedDashboard /></ProtectedRoute>} />
+          <Route path="/PIN" element={<ProtectedRoute allowedRole="Person In Need"><PINDashboard /></ProtectedRoute>} />
           
           {/* CSR Rep */}
-          <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRRepDashboard /></ProtectedRoute>} />
-
+          <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRDashboard /></ProtectedRoute>} />
 
           {/* Platform Manager (Dashboard + nested pages) */}
           <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PlatformManagerHome /></ProtectedRoute>}>

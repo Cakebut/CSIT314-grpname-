@@ -1,0 +1,269 @@
+/* Container for the entire CSR Dashboard */
+.CSR-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative; /* To allow positioning of the notification button */
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar header */
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-title {
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.sidebar-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
+/* Sidebar navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: 20px;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #4b5563;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-button:hover {
+  background-color: #f3f4f6;
+}
+
+.nav-button.active {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+/* Sidebar footer (Logout button) */
+.sidebar-footer {
+  padding: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.logout-button {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  gap: 12px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #4b5563;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #f3f4f6;
+}
+
+.logout-button:focus {
+  outline: none;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f3f4f6;
+}
+
+/* Notification popover (fixed top-right) */
+.CSR-notification-popover-wrapper {
+  position: fixed;
+  top: 50px;
+  right: 50px;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-start;
+}
+
+.CSR-notification-button {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.12);
+  width: 44px;
+  height: 44px;
+  border-radius: 4px; /* sharper, more square corners */
+  display: grid; /* use grid to guarantee perfect centering of the icon */
+  place-items: center;
+  cursor: pointer;
+  padding: 0; /* remove padding so icon centers perfectly */
+  color: #000000; /* ensure icon is black by default */
+  position: relative;
+}
+
+.CSR-notification-button:hover {
+  background: #fbfbfd;
+}
+
+.CSR-notification-button:focus {
+  outline: none;
+  /* subtle neutral focus ring instead of a blue one */
+  box-shadow: 0 0 0 4px rgba(2,6,23,0.06);
+}
+
+.CSR-notification-button:active {
+  background: #ffffff;
+}
+
+.CSR-notification-popover {
+  margin-top: 10px;
+  margin-right: 0;
+  width: 1000px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.CSR-notification-popover-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.CSR-notification-popover-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.CSR-notification-popover-body {
+  padding: 28px 16px 20px 16px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.CSR-notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #9ca3af;
+}
+
+.CSR-notification-empty .CSR-empty-icon {
+  width: 44px;
+  height: 44px;
+  color: #d1d5db;
+}
+
+.CSR-notification-empty .CSR-empty-text {
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+
+.CSR-notification-button .icon {
+  width: 18px;
+  height: 18px;
+  color: #000000;
+  display: block; /* ensure it doesn't behave like inline element */
+  margin: 0; /* remove any stray margins */
+}
+
+/* unread badge */
+.CSR-badge {
+  position: absolute;
+  top: -10px;
+  right: -13px;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 5px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  line-height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.CSR-notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 95%;
+}
+
+.CSR-notification-item {
+  padding: 10px 30px;
+  border-radius: 6px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid black;
+}
+
+.CSR-notification-item.unread {
+  background: #f8fafc;
+}
+
+.CSR-notification-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.CSR-notification-time {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+@media (max-width: 640px) {
+  .CSR-notification-popover {
+    right: 10px;
+    width: 280px;
+  }
+}
