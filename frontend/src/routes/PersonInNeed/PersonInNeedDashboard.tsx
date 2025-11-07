@@ -103,84 +103,10 @@ const PersonInNeedDashboard: React.FC = () => {
   const [myRequestsFilterType, setMyRequestsFilterType] = useState("");
   const [myRequestsFilterStatus, setMyRequestsFilterStatus] = useState("");
   const [myRequestsFilterUrgency, setMyRequestsFilterUrgency] = useState("");
-  const [myRequestsFilterDate, setMyRequestsFilterDate] = useState("");
   const [myRequestsSortViews, setMyRequestsSortViews] = useState("asc");
   const [myRequestsSortShortlists, setMyRequestsSortShortlists] = useState("asc");
   const [myRequestsPrimarySort, setMyRequestsPrimarySort] = useState<'views'|'shortlists'>('views');
-  // Calendar popup state for My Requests date filter
-  const [showMyRequestsCalendar, setShowMyRequestsCalendar] = useState(false);
-  const [calendarViewDate, setCalendarViewDate] = useState<Date>(new Date());
-  const [tempCalendarSelected, setTempCalendarSelected] = useState<Date | null>(null);
-  const myRequestsCalendarRef = React.useRef<HTMLDivElement | null>(null);
-  const myRequestsDateButtonRef = React.useRef<HTMLButtonElement | null>(null);
-  const [myRequestsCalendarPos, setMyRequestsCalendarPos] = useState<{ top: number; left: number } | null>(null);
-
-  // Calendar helpers for My Requests date picker
-  const formatYMD = (d: Date) => d.toISOString().slice(0, 10);
-  const daysInMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  const buildCalendar = (view: Date) => {
-    const year = view.getFullYear();
-    const month = view.getMonth();
-    const firstDay = new Date(year, month, 1).getDay(); // 0-6
-    const total = daysInMonth(view);
-    const cells: (Date | null)[] = [];
-    // leading blanks
-    for (let i = 0; i < firstDay; i++) cells.push(null);
-    for (let d = 1; d <= total; d++) cells.push(new Date(year, month, d));
-    // trailing blanks to make full weeks
-    while (cells.length % 7 !== 0) cells.push(null);
-    return cells;
-  };
-
-  // Close calendar when clicking outside
-  useEffect(() => {
-    if (!showMyRequestsCalendar) return;
-    function onDocClick(e: MouseEvent) {
-      const el = myRequestsCalendarRef.current;
-      const btn = myRequestsDateButtonRef.current;
-      if (!(e.target instanceof Node)) return;
-      // if click is inside calendar popup or the date button, ignore
-      if (el && el.contains(e.target)) return;
-      if (btn && btn.contains(e.target)) return;
-      setShowMyRequestsCalendar(false);
-    }
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [showMyRequestsCalendar]);
-
-  // After the portal popup renders, adjust position if it overflows (measure actual popup size)
-  useEffect(() => {
-    if (!showMyRequestsCalendar) return;
-    if (!myRequestsCalendarPos) return;
-    // Wait for popup to render
-    const raf = requestAnimationFrame(() => {
-      const el = myRequestsCalendarRef.current;
-      const btn = myRequestsDateButtonRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      let top = myRequestsCalendarPos.top;
-      let left = myRequestsCalendarPos.left;
-      // Shift left if overflowing right
-      if (left + rect.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - rect.width - 8);
-      // If overflowing bottom, try placing above the button
-      if (top + rect.height > window.innerHeight - 8) {
-        if (btn) {
-          const b = btn.getBoundingClientRect();
-          top = b.top - rect.height - 6;
-        } else {
-          top = Math.max(8, window.innerHeight - rect.height - 8);
-        }
-      }
-      // Clamp
-      if (top < 8) top = 8;
-      if (left < 8) left = 8;
-      // Only update if changed meaningfully
-      if (Math.abs(top - myRequestsCalendarPos.top) > 1 || Math.abs(left - myRequestsCalendarPos.left) > 1) {
-        setMyRequestsCalendarPos({ top, left });
-      }
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [showMyRequestsCalendar, myRequestsCalendarPos]);
+  
   const [showCreate, setShowCreate] = useState(false);
   const [categoryID, setCategoryID] = useState("");
   const [title, setTitle] = useState("");
@@ -506,10 +432,7 @@ const PersonInNeedDashboard: React.FC = () => {
     if (myRequestsFilterType && r.categoryName !== myRequestsFilterType) return false;
     if (myRequestsFilterStatus && r.status !== myRequestsFilterStatus) return false;
     if (myRequestsFilterUrgency && (r.urgencyLabel || '') !== myRequestsFilterUrgency) return false;
-    if (myRequestsFilterDate) {
-      const created = r.createdAt ? r.createdAt.slice(0,10) : '';
-      if (created !== myRequestsFilterDate) return false;
-    }
+    
     return true;
   });
   // Helper to get shortlist count either from detailed csr_shortlists array or from shortlist_count
@@ -1055,79 +978,7 @@ const PersonInNeedDashboard: React.FC = () => {
                   <option key={ul.id} value={ul.label}>{ul.label}</option>
                 ))}
               </select>
-              <div style={{ position: 'relative' }}>
-                <button
-                  type="button"
-                  ref={myRequestsDateButtonRef}
-                  onClick={() => {
-                    // position popup relative to button (page coordinates)
-                    const btn = myRequestsDateButtonRef.current;
-                    if (btn) {
-                      const rect = btn.getBoundingClientRect();
-                      // Use viewport coordinates for fixed positioning (no scroll offsets)
-                      // Ensure the popup stays within the viewport (avoid clipping)
-                      const POPUP_W = 240;
-                      const POPUP_H = 300;
-                      let left = rect.left;
-                      // shift left if overflowing right edge
-                      if (left + POPUP_W > window.innerWidth - 8) left = Math.max(8, window.innerWidth - POPUP_W - 8);
-                      // default top below button
-                      let top = rect.bottom + 6;
-                      // if popup would overflow bottom, position above the button
-                      if (top + POPUP_H > window.innerHeight - 8) {
-                        top = rect.top - POPUP_H - 6;
-                        if (top < 8) top = 8; // clamp to viewport
-                      }
-                      setMyRequestsCalendarPos({ top, left });
-                    } else {
-                      setMyRequestsCalendarPos({ top: 100, left: 100 });
-                    }
-                    // open calendar and initialize temp selection to current filter
-                    setTempCalendarSelected(myRequestsFilterDate ? new Date(myRequestsFilterDate) : null);
-                    setCalendarViewDate(myRequestsFilterDate ? new Date(myRequestsFilterDate) : new Date());
-                    setShowMyRequestsCalendar(s => !s);
-                  }}
-                  className="filter-control filter-button"
-                >
-                  <span style={{ color: myRequestsFilterDate ? '#0f172a' : '#6b7280', fontSize: 14 }}>{myRequestsFilterDate ? new Date(myRequestsFilterDate).toLocaleDateString() : 'Date'}</span>
-                </button>
-                {showMyRequestsCalendar && myRequestsCalendarPos ? createPortal(
-                  <div ref={el => { myRequestsCalendarRef.current = el; }} className="calendar-popup" style={{ position: 'fixed', top: myRequestsCalendarPos.top, left: myRequestsCalendarPos.left, zIndex: 9999999 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <button aria-label="Previous month" type="button" onClick={() => setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} style={{ border: 'none', background: 'transparent', fontSize: 18, padding: '4px 8px', color: '#0f172a' }}>‹</button>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{calendarViewDate.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>
-                      <button aria-label="Next month" type="button" onClick={() => setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={{ border: 'none', background: 'transparent', fontSize: 18, padding: '4px 8px', color: '#0f172a' }}>›</button>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 8, textAlign: 'center', color: '#64748b', fontSize: 12 }}>
-                      {['S','M','T','W','T','F','S'].map(d => <div key={d} style={{ fontSize: 12 }}>{d}</div>)}
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 8 }}>
-                      {buildCalendar(calendarViewDate).map((dt, idx) => {
-                        const selected = dt && tempCalendarSelected && dt.toDateString() === tempCalendarSelected.toDateString();
-                        return (
-                          <div key={idx} className="day-cell">
-                            {dt ? (
-                              <button type="button" onClick={() => setTempCalendarSelected(dt)} className={`day-button${selected ? ' selected' : ''}`}>{dt.getDate()}</button>
-                            ) : <div />}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button type="button" onClick={() => setShowMyRequestsCalendar(false)} className="button">Cancel</button>
-                      <button type="button" onClick={() => {
-                        if (tempCalendarSelected) {
-                          setMyRequestsFilterDate(formatYMD(tempCalendarSelected));
-                        } else {
-                          setMyRequestsFilterDate('');
-                        }
-                        setShowMyRequestsCalendar(false);
-                      }} className="button primary" style={{ background: '#2563eb', color: '#fff' }}>Apply</button>
-                    </div>
-                  </div>,
-                  document.body
-                ) : null}
-              </div>
+              
               <button
                 type="button"
                 className="filter-button"

@@ -67,6 +67,12 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     localStorage.removeItem('dummyUsers'); // Clear dummy users
     localStorage.removeItem('currentUsername');
     localStorage.removeItem('currentRole');
+    // Call optional external onLogout handler if provided, then navigate
+    try {
+      if (typeof onLogout === 'function') onLogout();
+    } catch (e) {
+      console.error('onLogout handler threw', e);
+    }
     navigate('/'); // Redirect to login
   };
 
