@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
 
-function AdminDashboard() {
+export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const navigate = useNavigate();
   const username = localStorage.getItem('currentUsername');
   const role = localStorage.getItem('currentRole');
