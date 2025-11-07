@@ -116,10 +116,7 @@ function Login() {
           </div>
           <div className="forgot">
         
-            <section>
-              <input type="checkbox" id="check" />
-              <label htmlFor="check">Remember Me</label>
-            </section>
+           
             <section>
               <a className="forgot-text" href="/forgot-password">
                 Forgot Password?
