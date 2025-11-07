@@ -11,11 +11,6 @@ import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
-import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
-import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
-import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
-import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
-import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboardPage';
 
 // PERSON IN NEED PAGE
 import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
@@ -61,17 +56,15 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
     <Router>
       <div className="app-wrapper">
         <Routes>
+          {/* Login */}
           <Route path="/" element={<Login />} />
+
+          {/* Forgot Password */}
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
           {/* User Admin */}
           <Route path="/useradmin" element={<ProtectedRoute allowedRole="User Admin"><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/useradmin/ViewUserList" element={<ProtectedRoute allowedRole="User Admin"><ViewUserAccountPage /></ProtectedRoute>} />
-          <Route path="/useradmin/ViewUserRoles" element={<ProtectedRoute allowedRole="User Admin"><ViewUserRolesPage /></ProtectedRoute>} />
-          <Route path="/useradmin/create" element={<ProtectedRoute allowedRole="User Admin"><CreateNewUserAccountPage /></ProtectedRoute>} />
-          <Route path="/useradmin/SystemLog" element={<ProtectedRoute allowedRole="User Admin"><UserAdminSystemLogPage /></ProtectedRoute>} />
-          <Route path="/useradmin/PasswordResetRequests" element={<ProtectedRoute allowedRole="User Admin"><AdminPasswordResetDashboard /></ProtectedRoute>} />
 
-          
           {/* Person In Need */}
           <Route path="/PIN" element={<ProtectedRoute allowedRole="Person In Need"><PersonInNeedDashboard /></ProtectedRoute>} />
           
