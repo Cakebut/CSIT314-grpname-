@@ -902,6 +902,7 @@ function CSRShortlist() {
   const [shortlist, setShortlist] = useState<any[]>([]);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [selected, setSelected] = useState<any | null>(null);
+  const [interestedIds, setInterestedIds] = useState<number[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterUrgency, setFilterUrgency] = useState<string>("");
@@ -929,6 +930,14 @@ function CSRShortlist() {
     setLoadingId(null);
     await load();
   };
+  // Load interested list for this CSR so we can show Interested/Unmark in the shortlist modal
+  const loadInterested = async () => {
+    if (!csrId) return;
+    const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
+    const json = await res.json();
+    setInterestedIds((json.interestedRequests || []).map((r: any) => r.requestId ?? r.pin_request_id));
+  };
+  useEffect(() => { loadInterested(); }, [csrId]);
   useEffect(() => { load(); }, [csrId]);
   // Fetch category and location options from backend
   useEffect(() => {
@@ -1120,6 +1129,34 @@ function CSRShortlist() {
             <div><b>Description:</b></div>
             <div className="desc-box">{selected.message || '(No description)'}</div>
             <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
+              <button
+                className={interestedIds.includes(selected.requestId) ? "csr-btn-danger" : "csr-btn"}
+                style={{ minWidth: 140 }}
+                disabled={selected.status === 'Pending'}
+                onClick={async () => {
+                  if (!csrId) { alert("You must be logged in as a CSR rep to mark interest."); return; }
+                  try {
+                    let resp;
+                    if (interestedIds.includes(selected.requestId)) {
+                      resp = await fetch(`http://localhost:3000/api/csr/${csrId}/interested/${selected.requestId}`, { method: "DELETE" });
+                    } else {
+                      resp = await fetch(`http://localhost:3000/api/csr/${csrId}/interested/${selected.requestId}`, { method: "POST" });
+                    }
+                    if (!resp.ok) {
+                      const err = await resp.text();
+                      alert(`Failed to update interested: ${err}`);
+                      return;
+                    }
+                    // refresh both lists
+                    await loadInterested();
+                    await load();
+                  } catch (e) {
+                    alert(`Error updating interested: ${e}`);
+                  }
+                }}
+              >
+                {interestedIds.includes(selected.requestId) ? 'Unmark Interested' : 'Interested'}
+              </button>
               <button className="csr-btn-danger" style={{ minWidth: 110 }} onClick={async () => { await remove(selected.requestId); setSelected(null); }} disabled={loadingId === selected.requestId}>
                 {loadingId === selected.requestId ? "Removing..." : "Remove from Shortlist"}
               </button>
