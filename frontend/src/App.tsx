@@ -13,25 +13,18 @@ import ForgotPasswordPage from './routes/ForgotPasswordPage';
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
 
 // PERSON IN NEED PAGE
-import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
+import PINDashboard from './routes/PersonInNeed/PINDashboard';
 
 // CSR PAGE
 import CSRDashboard from './routes/CSRRep/CSRDashboard';
-import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
-
 
 // PLATFORM MANAGER PAGE
-import PlatformManagerHome from './routes/PlatformManager';
-import CategoriesPage from './routes/PlatformManager/CategoriesPage';
-import ReportsPage from './routes/PlatformManager/ReportsPage';
-import AnnouncementsPage from './routes/PlatformManager/AnnouncementsPage';
+import PMDashboard from './routes/PlatformManager/PMDashboard';
 
 // CSS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import PINDashboard from './routes/PersonInNeed/PINDashboard';
-
 
 
 function App() {
@@ -76,13 +69,8 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
           <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRDashboard /></ProtectedRoute>} />
 
           {/* Platform Manager (Dashboard + nested pages) */}
-          <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PlatformManagerHome /></ProtectedRoute>}>
-            <Route index element={<Navigate to="reports" replace />} />
-            <Route path="categories" element={<ProtectedRoute allowedRole="Platform Manager"><CategoriesPage /></ProtectedRoute>} />
-            <Route path="reports" element={<ProtectedRoute allowedRole="Platform Manager"><ReportsPage /></ProtectedRoute>} />
-            <Route path="announcements" element={<ProtectedRoute allowedRole="Platform Manager"><AnnouncementsPage /></ProtectedRoute>} />
-          </Route>
-         
+          <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PMDashboard /></ProtectedRoute>} />
+
         </Routes>
         <ToastContainer />
       </div>
