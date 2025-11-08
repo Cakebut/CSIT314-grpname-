@@ -9,6 +9,17 @@
 .pm-logout-btn { background: transparent; color: #1e3a8a; border: 1px solid #1e3a8a; padding: 8px 14px; border-radius:8px; cursor:pointer; font-weight:600; }
 .pm-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
 
+/* Charts grid and cards */
+.pm-charts-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.pm-card { background: #fff; border: 1px solid #000; border-radius: 12px; padding: 14px; box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
+.pm-chart-title { font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 16px; }
+.pm-card .recharts-wrapper { width: 100% !important; height: 220px !important; }
+
+/* mobile: stack */
+@media (max-width: 900px) {
+	.pm-charts-grid { grid-template-columns: 1fr; }
+}
+
 /* Popover */
 .pm-noti-popover { position: absolute; right: 24px; top: 84px; min-width: 320px; background: #fff; box-shadow: 0 6px 20px rgba(15,23,42,0.12); border-radius:12px; padding: 14px 18px 12px 18px; z-index: 1000; }
 .pm-noti-header { font-weight:700; font-size:1.05rem; margin-bottom:8px; }

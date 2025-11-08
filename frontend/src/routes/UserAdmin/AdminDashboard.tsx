@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import * as Popover from "@radix-ui/react-popover";
 import { LogOut, Users, Key, FileText, Tags, Bell } from "lucide-react";
 
@@ -10,7 +10,11 @@ import Roles from "./Roles";
 
 import "./AdminDashboard.css";
 
- 
+
+interface AdminDashboardProps {
+  onLogout?: () => void;
+}
+
 type ActiveSection = "userAccounts" | "roles" | "passwordRequests" | "activityLogs";
 
 
@@ -18,13 +22,13 @@ type ActiveSection = "userAccounts" | "roles" | "passwordRequests" | "activityLo
 export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [activeSection, setActiveSection] = useState<ActiveSection>("userAccounts");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-
+  const navigate = useNavigate();
+  const username = localStorage.getItem('currentUsername');
+  const role = localStorage.getItem('currentRole');
   const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [adminNotifs, setAdminNotifs] = useState<Array<{ id: number; user_id: number; username: string; message: string; createdAt: string; read: number }>>([]);
   const unreadCount = adminNotifs.filter((n) => n.read === 0).length;
-  const [badgePulse, setBadgePulse] = useState(false);
-  const prevUnreadRef = useRef<number>(0);
 
   // Load platform announcements
   useEffect(() => {
@@ -54,44 +58,6 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
       .catch(err => console.error('Failed to fetch admin notifications', err));
   }, [notificationsOpen]);
 
-  // Poll for admin notifications periodically so the badge updates when new rows are added.
-  useEffect(() => {
-    let mounted = true;
-    const fetchNotifs = () => {
-      fetch('/api/userAdmin/admin-notifications')
-        .then(r => r.json())
-        .then(data => {
-          if (!mounted) return;
-          if (data && data.success) setAdminNotifs(data.notifications || []);
-        })
-        .catch(err => {
-          // swallow poll errors but log for debugging
-          console.debug('Polling admin notifications failed', err);
-        });
-    };
-
-    // initial fetch
-    fetchNotifs();
-
-    // poll every 15 seconds
-    const id = setInterval(fetchNotifs, 15000);
-    return () => {
-      mounted = false;
-      clearInterval(id);
-    };
-  }, []);
-
-  // Pulse the badge briefly when unread count increases
-  useEffect(() => {
-    let timer: number | undefined;
-    if (unreadCount > prevUnreadRef.current) {
-      setBadgePulse(true);
-      timer = window.setTimeout(() => setBadgePulse(false), 900);
-    }
-    prevUnreadRef.current = unreadCount;
-    return () => { if (timer) clearTimeout(timer); };
-  }, [unreadCount]);
-
   const handleLogout = async () => {
     try {
       await fetch('/api/userAdmin/logout', { method: 'POST', credentials: 'include' });
@@ -101,15 +67,13 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     localStorage.removeItem('dummyUsers');
     localStorage.removeItem('currentUsername');
     localStorage.removeItem('currentRole');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
-    localStorage.removeItem('latestAnnouncementSeenAt');
-    
-    if (onLogout) {
-      onLogout();
-    } else {
-      window.location.replace("/");
+    // Call optional external onLogout handler if provided, then navigate
+    try {
+      if (typeof onLogout === 'function') onLogout();
+    } catch (e) {
+      console.error('onLogout handler threw', e);
     }
+    navigate('/'); // Redirect to login
   };
 
   return (
@@ -187,7 +151,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
         <div className="content-inner">
           {activeSection === "userAccounts" && <ViewUserAccountPage  />}
           {activeSection === "roles" && <Roles />}
-            {activeSection === "passwordRequests" && <ViewResetDashboardPage />}
+          {activeSection === "passwordRequests" && <ViewResetDashboardPage />}
           {activeSection === "activityLogs" && <SystemActivityLogs />}
         </div>
       </div>
@@ -204,7 +168,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
             >
               <Bell className="icon" />
               {unreadCount > 0 && (
-                <span className={`user-admin-badge ${badgePulse ? 'pulse' : ''}`} aria-hidden>
+                <span className="user-admin-badge" aria-hidden>
                   {unreadCount}
                 </span>
               )}

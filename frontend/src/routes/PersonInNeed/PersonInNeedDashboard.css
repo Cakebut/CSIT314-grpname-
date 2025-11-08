@@ -14,6 +14,7 @@
   padding: 0.55rem 1.2rem;
   font-size: 1rem;
   cursor: pointer;
+  cursor: pointer;
   margin-right: 0.5rem;
   transition: background 0.18s, color 0.18s;
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
@@ -23,6 +24,15 @@
   color: #fff;
   font-weight: 500;
 }
+
+  /* When layout narrows (mobile) we collapse into vertical flow via media query below. */
+
+  /* Left sidebar (fixed width) */
+   .container > .sidebar {
+    flex: 0 0 250px;
+    height: 100vh; /* full viewport height so sidebar can be independently scrollable */ 
+    overflow-y: auto;
+  }
 .button:hover {
   background: #b6c6e3;
 }
@@ -58,10 +68,20 @@ form textarea {
 .modal-content .button:last-child {
   margin-right: 0;
 }
+  .container > :not(.sidebar):not(.right-column) {
+    order: 1;
+    flex: 1 1 0; 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    box-sizing: border-box;
+    min-width: 0;
+  }
 .modal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(30, 41, 59, 0.18);
+  inset: 0;
+  background: rgba(30, 41, 59, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,8 +90,8 @@ form textarea {
 .modal-content {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.13);
-  padding: 2rem 2.5rem 2rem 2.5rem;
+  box-shadow: 0 8px 40px rgba(2,6,23,0.18);
+  padding: 2rem 2.5rem;
   min-width: 320px;
   max-width: 95vw;
   max-height: 90vh;
@@ -92,11 +112,77 @@ form textarea {
   margin-top: 4px;
   white-space: pre-wrap;
 }
+
+/* PIN page aliases (pin- prefix) - duplicate existing styling so the PIN TSX can use scoped classNames */
+.pin-modal {
+  position: fixed;
+  inset: 0; top:0; right:0; bottom:0; left:0;
+  background: rgba(30, 41, 59, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.pin-modal-content {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 40px rgba(2,6,23,0.18);
+  padding: 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+.pin-desc-box {
+  background: #f3f3f3;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  margin-top: 4px;
+  white-space: pre-wrap;
+}
+
+.pin-button {
+  background: #e0e7ef;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: background 0.18s, color 0.18s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.pin-button.primary {
+  background: #2563eb;
+  color: #fff;
+  font-weight: 500;
+}
+.pin-button:hover { background: #b6c6e3; }
+.pin-button.primary:hover { background: #1749b1; }
+
+.pin-row-muted { color: #666; font-size: 13px; }
+
+.pin-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; }
+
+/* table alias */
+.pin-table { width:100%; border-collapse: collapse; margin-top: 12px; }
+.pin-table th, .pin-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e6e6e6; font-size: 14px; }
+.pin-table th { color:#333; font-weight:600; }
+
+/* My requests filter row aliases */
+.pin-my-requests-filter-row { display:flex !important; gap:10px !important; align-items:center !important; flex-wrap:nowrap !important; margin-bottom:12px !important; }
+.pin-my-requests-filter-row .pin-filter-control { height:36px !important; padding:0 10px !important; border-radius:8px !important; border:1px solid #e5e7eb !important; font-size:14px !important; box-sizing:border-box !important; background:#fff !important; display:inline-flex !important; align-items:center !important; }
+.pin-my-requests-filter-row .pin-filter-control[type="text"] { min-width:160px !important; }
+.pin-my-requests-filter-row .pin-filter-title { min-width:160px !important; }
+.pin-my-requests-filter-row .pin-filter-select { min-width:140px !important; }
+.pin-my-requests-filter-row .pin-filter-button { height:36px !important; padding:0 14px !important; border-radius:8px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }
 .container {
-  padding: 20px;
-  max-width: 1100px;
-  margin: 0 auto;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  min-height: 100vh;
+  position: relative; /* To allow positioning of the notification button */
+  align-items: flex-start;
 }
 
 .header {
@@ -201,7 +287,7 @@ form textarea {
   text-align:center;
   padding:28px 8px;
   color:#666;
-}
+} 
 
 /* My Requests filter row styles to ensure straight alignment */
 .my-requests-filter-row {
@@ -277,3 +363,88 @@ form textarea {
   padding: 6px 12px !important;
 }
 
+/* PIN request card styles (list / table alternative) */
+.pin-request-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(30,41,59,0.08);
+  padding: 28px 40px;
+  width: 100%;
+  margin: 0 auto 18px auto;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  border: 1px solid #000; /* 1px black border per request */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.pin-request-card:hover {
+  box-shadow: 0 8px 20px rgba(2,6,23,0.1);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+.pin-request-card.priority-high-card { background-color: rgba(255,0,0,0.08); }
+.pin-request-left { flex: 3; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pin-request-title { font-size: 1.45rem; font-weight: 700; color: #1e293b; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.pin-request-category { font-size: 1.05rem; color: #64748b; font-weight: 500; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.pin-request-location { font-size: 1.02rem; color: #0ea5e9; font-weight: 500; margin: 2px 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.pin-request-pinname { font-size: 1.05rem; color: #475569; font-weight: 600; margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.pin-badges { position: absolute; top: 12px; right: 16px; display: flex; gap: 8px; align-items: center; }
+.pin-badge { padding: 0.35em 0.9em; border-radius: 999px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(2,6,23,0.06); }
+.pin-badge .status { font-weight: 700; }
+.pin-badge.pin-badge-status { background: #e6ffef; color: #006d3f; }
+.pin-badge.pin-badge-priority { background: #6b7280; color: #fff; }
+.pin-badge.pin-badge-priority.high { background: #ef4444; color: #fff; }
+.pin-badge.pin-badge-priority.low { background: #22c55e; color: #fff; }
+
+/* Responsive fallback */
+@media (max-width: 640px) {
+  .pin-request-card { padding: 18px 16px; }
+  .pin-badges { top: 8px; right: 10px; }
+}
+
+.pin-container {
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto; /* To center */
+  font-family: "Montserrat", sans-serif;
+}
+
+.pin-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* Header  CSS ---------------------------------------------------------------------------------------------- */
+
+.pin-header {
+  margin-bottom: 20px;
+}
+
+.pin-header h2 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.pin-header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Filters CSS ---------------------------------------------------------------------------------------------- */
+
+.pin-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 1px black;
+  background-color: #F9FAFB;
+  margin-top: 30px;
+}

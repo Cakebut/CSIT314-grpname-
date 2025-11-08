@@ -132,48 +132,48 @@ const Roles: React.FC = () => {
 
   return (
     <div className="roles-container">
-      {/* Back to Dashboard button removed */}
-
-      <div style={{ marginBottom: 18 }}>
-        <h1 style={{ margin: 0, fontSize: 28 }}>Roles</h1>
-        <p style={{ margin: '6px 0 14px', color: '#6b7280' }}>Manage roles and permissions</p>
+      
+      <div className="roles-top">
+        <div>
+          <header className="roles-header"></header>
+          <h1>Roles</h1>
+          <p>Manage all available roles and permissions</p>
+        </div>
       </div>
 
-      {/* Search / controls panel (design from AdminDashboard) */}
-      <div style={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 12, padding: 16, background: '#fff', marginBottom: 18 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="Search by role"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid #d1d5db', flex: 1, minWidth: 220 }}
-          />
+      {/* Search / controls panel (styles live in Roles.css) */}
+      <div className="roles-actions">
+        <input
+          type="text"
+          placeholder="Search by role"
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="search-roles"
+        />
 
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ padding: '12px 14px', borderRadius: 10, border: '1px solid #d1d5db', minWidth: 150 }}
-          >
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="filter-roles"
+        >
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
 
-          <button
-            onClick={() => { setFilterStatus('All Status'); setSearchQuery(''); fetchRoles(); }}
-            style={{ background: '#000', color: '#fff', borderRadius: 10, padding: '10px 14px', border: 'none', cursor: 'pointer' }}
-          >
-            Reset
-          </button>
+        <button
+          onClick={() => { setFilterStatus('All Status'); setSearchQuery(''); fetchRoles(); }}
+          className="reset-roles btn"
+        >
+          Reset
+        </button>
 
-          <button
-            onClick={() => setShowCreateModal(true)}
-            style={{ background: '#000', color: '#fff', borderRadius: 10, padding: '10px 14px', border: 'none', cursor: 'pointer' }}
-          >
-            Create Role
-          </button>
-        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="create-roles btn"
+        >
+          Create Role
+        </button>
       </div>
 
       {showCreateModal && (
@@ -227,13 +227,13 @@ const Roles: React.FC = () => {
                 <td>
                   <button
                     onClick={() => handleSuspendRole(role)}
-                    style={{ marginRight: '0.5rem', background: '#1e90ff', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 1rem', fontWeight: 500, cursor: 'pointer' }}
+                    className="disable-roles"
                   >
                     {role.issuspended ? 'Enable' : 'Disable'}
                   </button>
                   <button
                     onClick={() => handleDeleteRole(role.id)}
-                    style={{ marginRight: '0.5rem', background: '#000', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 1rem', fontWeight: 500, cursor: 'pointer' }}
+                    className="delete-roles"
                   >
                     Delete
                   </button>

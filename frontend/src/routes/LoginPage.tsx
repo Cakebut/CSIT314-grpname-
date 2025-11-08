@@ -57,20 +57,16 @@ function Login() {
     }
   };
 
-
-
-
-
   return (
     <>
+
       <section className="login-main login-section">
-    
         {showSuspendedModal && (
           <div className="modal-overlay" style={{ background: 'rgba(44,62,80,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1000 }}>
             <div className="modal-content" style={{ background: 'white', borderRadius: '18px', padding: '2rem 2.5rem', boxShadow: '0 8px 32px rgba(44,62,80,0.18)', textAlign: 'center' }}>
               <h3 style={{ color: '#d7263d', fontWeight: 700, marginBottom: '0.5rem' }}>Account Suspended</h3>
-              <p style={{ color: '#2d3748', marginBottom: '1.2rem' }}>Your account is currently suspended.</p>
-              <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn" style={{ background: '#0077cc', color: 'white', borderRadius: '10px', padding: '0.7rem 2.2rem', fontWeight: 600, fontSize: '1rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)' }}>Close</button>
+              <p style={{ color: '#2d3748', marginBottom: '1.2rem' }}>Your account is currently suspended</p>
+              <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn" style={{ background: 'black', color: 'white', borderRadius: '10px', padding: '0.7rem 2.2rem', fontWeight: 600, fontSize: '1rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)' }}>Close</button>
             </div>
           </div>
         )}
@@ -81,7 +77,7 @@ function Login() {
             <div>Sign in to your account</div>
           </div>
 
-          <div className="input-box">
+            <div className="input-box">
             <header>Username</header>
             <input
               type="text"
@@ -92,9 +88,6 @@ function Login() {
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="off"
               required
-              style={{ padding: '1rem 1.2rem', borderRadius: '16px', border: '1.5px solid #bfc8d6', fontSize: '1.08rem', width: '100%', background: '#f3f6fb', boxSizing: 'border-box', transition: 'border 0.2s', outline: 'none' }}
-              onFocus={e => e.currentTarget.style.border = '1.5px solid #0077cc'}
-              onBlur={e => e.currentTarget.style.border = '1.5px solid #bfc8d6'}
             />
           </div>
 
@@ -109,26 +102,25 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="off"
               required
-              style={{ padding: '1rem 1.2rem', borderRadius: '16px', border: '1.5px solid #bfc8d6', fontSize: '1.08rem', width: '100%', background: '#f3f6fb', boxSizing: 'border-box', transition: 'border 0.2s', outline: 'none' }}
-              onFocus={e => e.currentTarget.style.border = '1.5px solid #0077cc'}
-              onBlur={e => e.currentTarget.style.border = '1.5px solid #bfc8d6'}
             />
           </div>
+
           <div className="forgot">
-        
-           
+            <section>
+              <label htmlFor="check"></label>
+            </section>
             <section>
               <a className="forgot-text" href="/forgot-password">
                 Forgot Password?
               </a>
             </section>
           </div>
-          <div className="input-submit" style={{ marginBottom: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+          <div className="input-submit">
             <button
               type="submit"
               className="submit-btn btn"
               id="submit"
-              style={{ background: '#0077cc', color: 'white', border: 'none', borderRadius: '16px', padding: '1rem 0', fontWeight: 700, fontSize: '1.3rem', width: '90%', marginTop: '0.2rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)', cursor: 'pointer', letterSpacing: '0.02em', transition: 'background 0.2s', display: 'block', textAlign: 'center' }}
               onClick={handleLogin}
             ></button>
             <label htmlFor="submit">SIGN IN</label>

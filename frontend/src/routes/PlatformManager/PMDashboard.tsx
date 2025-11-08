@@ -1,20 +1,69 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogOut, FileText, Megaphone, Tag } from "lucide-react";
 
-import Reports from "./Reports";
-import Announcements from "./Announcements";
-import Categories from "./Categories";
+import ReportsPage from "./ReportsPage";
+import AnnouncementsPage from "./AnnouncementsPage";
+import CategoriesPage from "./CategoriesPage";
 
 import "./PMDashboard.css";
 
-interface PMDashboardProps {
-  onLogout?: () => void;
-}
-
 type ActiveSection = "Reports" | "Announcements" | "Categories";
 
-function PMDashboard({ onLogout }: PMDashboardProps) {
+function PMDashboard() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("Reports");
+  const [showPmNoti, setShowPmNoti] = useState(false);
+  const [pmNoti, setPmNoti] = useState<{ message?: string; createdAt?: string } | null>(null);
+  const [pmLoading, setPmLoading] = useState(false);
+  const [pmError, setPmError] = useState<string | null>(null);
+  const notiBtnRef = useRef<HTMLButtonElement | null>(null);
+  const notiPopRef = useRef<HTMLDivElement | null>(null);
+
+    // Fetch latest announcement when opening the popover
+  async function fetchLatestAnnouncement() {
+    setPmLoading(true);
+    setPmError(null);
+    try {
+      const res = await fetch('/api/pm/announcements/latest');
+      const data = await res.json();
+      setPmNoti(data?.latest ?? null);
+    } catch (err) {
+      setPmError('Failed to load announcements');
+    } finally {
+      setPmLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (showPmNoti) fetchLatestAnnouncement();
+  }, [showPmNoti]);
+
+  // click-away for popover
+  useEffect(() => {
+    if (!showPmNoti) return;
+    function onDocClick(e: MouseEvent) {
+      const btn = notiBtnRef.current;
+      const pop = notiPopRef.current;
+      if (!(e.target instanceof Node)) return;
+      if (btn && btn.contains(e.target)) return;
+      if (pop && pop.contains(e.target)) return;
+      setShowPmNoti(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+    }, [showPmNoti]);
+
+  const onLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Clear auth-related localStorage keys used across the app
+    localStorage.removeItem('currentRole');
+    localStorage.removeItem('currentUsername');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username');
+    localStorage.removeItem('CSR_ID');
+    localStorage.removeItem('PIN_ID');
+    // Redirect to root (login)
+    window.location.href = '/';
+  };
 
   return (
     <div className="PM-dashboard-container">
@@ -23,7 +72,7 @@ function PMDashboard({ onLogout }: PMDashboardProps) {
 
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">PM Dashboard</h1>
+          <h1 className="sidebar-title">Platform Manager Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 
@@ -70,9 +119,9 @@ function PMDashboard({ onLogout }: PMDashboardProps) {
 
       {/* Main Content */}
       <div className="main-content">
-        {activeSection === "Reports" && <Reports />}
-        {activeSection === "Announcements" && <Announcements />}
-        {activeSection === "Categories" && <Categories />}
+        {activeSection === "Reports" && <ReportsPage />}
+        {activeSection === "Announcements" && <AnnouncementsPage />}
+        {activeSection === "Categories" && <CategoriesPage />}
       </div>
     </div>
   );

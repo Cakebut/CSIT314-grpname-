@@ -1,20 +1,17 @@
 import { useState, useEffect } from "react";
-import { LogOut, Users, FileText, ClipboardList, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { LogOut, ClipboardList, Bell } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 
-import AllRequests from "./AllRequests";
-import PendingOffers from "./PendingOffers";
-import MyRequests from "./MyRequests";
 import "./PINDashboard.css";
+import PersonInNeedDashboard from "./PersonInNeedDashboard";
 
-interface PINDashboardProps {
-  onLogout?: () => void;
-}
 
-type ActiveSection = "AllRequests" | "PendingOffers" | "MyRequests";
+type ActiveSection = "PersonInNeedDashboard";
 
-function PINDashboard({ onLogout }: PINDashboardProps) {
-  const [activeSection, setActiveSection] = useState<ActiveSection>("AllRequests");
+function PINDashboard() {
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<ActiveSection>("PersonInNeedDashboard");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
       const [notifications, setNotifications] = useState([
         { id: 1, title: "New offer received", time: "2h ago", read: false },
@@ -44,27 +41,11 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
         <nav className="sidebar-nav">
           <div className="nav-links">
             <button
-              onClick={() => setActiveSection("AllRequests")}
-              className={`nav-button ${activeSection === "AllRequests" ? "active" : ""}`}
+              onClick={() => setActiveSection("PersonInNeedDashboard")}
+              className={`nav-button ${activeSection === "PersonInNeedDashboard" ? "active" : ""}`}
             >
               <ClipboardList className="icon" />
               <span>Available Requests</span>
-            </button>
-
-            <button
-              onClick={() => setActiveSection("PendingOffers")}
-              className={`nav-button ${activeSection === "PendingOffers" ? "active" : ""}`}
-            >
-              <Users className="icon" />
-              <span>Pending Offers</span>
-            </button>
-            
-            <button
-              onClick={() => setActiveSection("MyRequests")}
-              className={`nav-button ${activeSection === "MyRequests" ? "active" : ""}`}
-            >
-              <FileText className="icon" />
-              <span>My Requests</span>
             </button>
           </div>
         </nav>
@@ -72,8 +53,9 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
         {/* Logout Button */}
         <div className="sidebar-footer">
           <button
-            onClick={onLogout}
+            onClick={() => { localStorage.clear(); navigate('/');}}
             className="logout-button"
+            
           >
             <LogOut className="icon" />
             Logout
@@ -83,9 +65,7 @@ function PINDashboard({ onLogout }: PINDashboardProps) {
 
       {/* Main Content */}
       <div className="main-content">
-        {activeSection === "AllRequests" && <AllRequests />}
-        {activeSection === "PendingOffers" && <PendingOffers />}
-        {activeSection === "MyRequests" && <MyRequests />}
+        {activeSection === "PersonInNeedDashboard" && <PersonInNeedDashboard />}
       </div>
 
       {/* Notification popover */}

@@ -290,5 +290,10 @@ button {
   cursor: pointer;
 }
 
-.roles-modal-create:hover { opacity: 0.95 }
-.roles-modal-cancel:hover { background: #f4f4f4 }
+.roles-modal-create:hover { 
+  opacity: 0.95 
+}
+
+.roles-modal-cancel:hover { 
+  background: #f4f4f4 
+}

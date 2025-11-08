@@ -1,0 +1,390 @@
+/* Container CSS ---------------------------------------------------------------------------------------------- */
+
+.available-container {
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto; /* To center */
+  font-family: "Montserrat", sans-serif;
+}
+
+.available-top {
+  display: flex;  
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* Header  CSS ---------------------------------------------------------------------------------------------- */
+
+.available-header {
+  margin-bottom: 20px;
+}
+
+.available-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.available-header p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Filters CSS ---------------------------------------------------------------------------------------------- */
+
+.available-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 1px black;
+  background-color: #F9FAFB;
+  margin-top: 30px;
+}
+
+.search-available {
+  padding: 5px 10px;
+  border-radius: 10px;
+  height: 50px;
+  width: 400px;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
+}
+
+.filter-available {
+  padding: 5px 40px; /* left:(top bottom) right:(left right) */
+  border-radius: 10px;
+  height: 50px;
+  border: none;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
+  text-align: left;
+}
+
+.reset-available {
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.reset-available:hover {
+  background-color: #111111;
+}
+
+/* List CSS ---------------------------------------------------------------------------------------------- */
+
+.available-request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.available-request-card {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  position: relative;
+}
+
+.available-request-card:hover {
+  box-shadow: 0 8px 20px rgba(2,6,23,0.1);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+/* highlight card background when priority is high */
+.available-request-card.priority-high-card {
+  background-color: rgba(255, 0, 0, 0.08);
+}
+
+/* Apply same high-priority background to the request row variant used in Offers.tsx */
+.available-req-row.priority-high-card {
+  background-color: rgba(255, 0, 0, 0.08);
+}
+
+.available-request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.available-request-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.available-request-priority {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.825rem;
+}
+.available-request-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.available-request-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  /* let the parent control spacing via gap for consistent alignment */
+}
+
+.available-request-type strong,
+.available-request-pin strong {
+  color: #111827;
+}
+
+.available-request-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #374151;
+  padding-top: 15px;
+}
+
+.available-request-priority {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  display: inline-block;
+  line-height: 1;
+}
+
+.priority-high {
+  background-color: #b41928;
+}
+.priority-low {
+  background-color: #6b7280;
+}
+
+.available-section-title {
+  margin: 0 0 6px 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.available-muted {
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.available-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.available-empty {
+  padding: 24px;
+  border-radius: 12px;
+  background: #fbfbfd;
+  color: #64748b;
+  text-align: center;
+}
+
+.available-req-row {
+  background: #ffffff;
+  border: 1px solid black;
+  border-radius: 12px;
+  padding: 16px 18px;
+  /* reserve room on the right for status + urgency badges */
+  padding-right: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow .18s ease, transform .12s ease;
+  position: relative; /* contain absolutely-positioned badges */
+}
+
+.available-req-row:hover {
+  box-shadow: 0 12px 32px rgba(2,6,23,0.08);
+  transform: translateY(-2px);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+.available-req-row-top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+.available-req-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* allow truncation */
+  flex: 1; /* take remaining left-side width */
+}
+
+.available-req-title-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.available-req-id {
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.available-chip {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #fff;
+  line-height: 1;
+}
+.available-chip-urgency.high { background-color: #b41928; }
+.available-chip-urgency.low { background-color: #6b7280; }
+
+/* Container for the top-right badges: status (left) and urgency (right) */
+.available-badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 30;
+}
+
+/* Status badges (display inline inside .available-badges) */
+.available-req-row .status-available,
+.available-req-row .status-pending,
+.available-req-row .status-rejected,
+.available-req-row .status-completed {
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+  line-height: 1;
+}
+.available-req-row .status-available { color: #16a34a; background: rgba(34,197,94,0.08); }
+.available-req-row .status-pending { color: #b45309; background: rgba(245,158,66,0.08); }
+.available-req-row .status-rejected { color: #991b1b; background: rgba(255,230,230,0.9); }
+.available-req-row .status-completed { color: #6b7280; background: rgba(107,114,128,0.06); }
+
+.available-req-views {
+  color: #0ea5e9;
+  font-weight: 600;
+}
+
+.available-req-row-bottom {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.available-req-row-bottom .available-muted {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Meta column on the bottom-left: category then location under it */
+.available-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.available-location {
+  margin-top: 15px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: inline-flex; /* align icon and text vertically */
+  align-items: center;
+}
+
+/* Modal overlay for CSRRequestDetails */
+.available-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.available-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Make small-screen filters wrap nicely */
+@media (max-width: 760px) {
+  .available-actions, .roles-actions {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .search-available, .filter-available, .reset-available {
+    width: 100%;
+    max-width: 520px;
+  }
+}
+
+/* Status color classes (used by Available.tsx) ----------------------------------------------- */
+.status-available {
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.status-pending {
+  color: #f59e42;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.status-rejected, .status-completed {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+
