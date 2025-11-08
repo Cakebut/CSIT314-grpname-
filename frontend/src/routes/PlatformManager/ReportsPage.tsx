@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./ReportsPage.css";
 
-type TrendRow = { date: string; total: number; Pending?: number; InProgress?: number; Completed?: number; Cancelled?: number };
+type TrendRow = { date: string; total: number; Pending?: number; Completed?: number; Cancelled?: number };
 type Summary = {
   totalRequests: number;
   byStatus: Record<string, number>;
@@ -18,7 +18,7 @@ type Summary = {
 
 
 // Removed unused ActiveStats type
-type QuickBucket = { total: number; Pending: number; InProgress: number; Completed: number; Cancelled: number };
+type QuickBucket = { total: number; Pending: number; Completed: number; Cancelled: number };
 type QuickStats = { day: QuickBucket | null; week: QuickBucket | null; month: QuickBucket | null };
 
 export default function ReportsPage() {
@@ -66,9 +66,9 @@ export default function ReportsPage() {
         const monthJson = await monthRes.json();
         const monthTotal = monthRes.ok ? (monthJson.totalRequests ?? 0) : 0;
 
-        setQuick({ day: { total: Number(dayTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
-                   week: { total: Number(weekTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
-                   month: { total: Number(monthTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 } });
+  setQuick({ day: { total: Number(dayTotal), Pending: 0, Completed: 0, Cancelled: 0 },
+       week: { total: Number(weekTotal), Pending: 0, Completed: 0, Cancelled: 0 },
+       month: { total: Number(monthTotal), Pending: 0, Completed: 0, Cancelled: 0 } });
       } catch {
         // ignore
       }

@@ -1,5 +1,6 @@
  
 import { drizzle } from "drizzle-orm/node-postgres";
+import { sql } from "drizzle-orm";
 import { Pool } from "pg";
 import { faker } from "@faker-js/faker";
 import {
@@ -163,26 +164,69 @@ async function seedData() {
     }
     console.log("✅ Seeded PIN requests");
 
-    // Example: Seed CSR requests
-    // for (let i = 0; i < NUM_FAKE_CSR_REQUESTS; i++) {
-    //   await db.insert(csr_requestsTable).values({
-    //     pin_id: faker.helpers.arrayElement(pinIds),
-    //     csr_id: faker.helpers.arrayElement(csrIds),
-    //     categoryID: faker.helpers.arrayElement(serviceTypeIds),
-    //     message: faker.lorem.sentence(),
-    //     requestedAt: faker.date.recent({ days: 30 }),
-    //     status: faker.helpers.arrayElement([
-    //       "Pending",
-    //       "Completed",
-    //       "Cancelled",
-    //     ]),
-    //   });
-    // }
-    // console.log("✅ Seeded CSR requests");
+    // CSR requests seeding moved below (needs pinRequestIds computed first)
 
     // Fetch all pin request IDs for dynamic assignment
     const pinRequests = await db.select().from(pin_requestsTable);
     const pinRequestIds = pinRequests.map((p) => p.id);
+
+    // Example: Seed CSR requests (guarded to avoid FK constraint failures)
+    // Use realistic randomized timestamps (within the last 90 days)
+    const CSR_REQUEST_LOOKBACK_DAYS = 90;
+    // Maximum unique pairs available
+    const maxUniquePairs = csrIds.length * pinRequestIds.length;
+    const csrRequestCount = Math.min(NUM_FAKE_CSR_REQUESTS, maxUniquePairs);
+
+    if (csrRequestCount <= 0) {
+      console.log("⚠️ Skipping CSR requests seeding: insufficient CSR/PIN users or pin requests.");
+    } else {
+      const usedRequestPairs = new Set<string>();
+      for (let i = 0; i < csrRequestCount; i++) {
+        // attempt to find a unique (csr_id, pin_request_id) pair
+        let attempts = 0;
+        let csr_id: number | undefined;
+        let pin_request_id: number | undefined;
+        let pair: string | undefined;
+        do {
+          csr_id = faker.helpers.arrayElement(csrIds);
+          pin_request_id = faker.helpers.arrayElement(pinRequestIds);
+          pair = `${csr_id},${pin_request_id}`;
+          attempts++;
+        } while (usedRequestPairs.has(pair) && attempts < 20);
+
+        if (!pair || usedRequestPairs.has(pair)) {
+          // couldn't find a unique pair after several attempts; skip
+          continue;
+        }
+
+        usedRequestPairs.add(pair);
+
+        // Generate a realistic random requestedAt between now - CSR_REQUEST_LOOKBACK_DAYS and now
+        const from = new Date(Date.now() - CSR_REQUEST_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+        const to = new Date();
+        const requestedAt = faker.date.between({ from, to });
+
+        // Insert a CSR request pointing to an existing pin_request (pin_request_id) and csr user (csr_id)
+        await db.insert(csr_requestsTable).values({
+          pin_request_id: pin_request_id!,
+          csr_id: csr_id!,
+          message: faker.lorem.sentences(1),
+          requestedAt,
+          status: faker.helpers.arrayElement(["Pending", "Completed", "Cancelled"]),
+        });
+      }
+      console.log(`✅ Seeded ${usedRequestPairs.size} CSR requests`);
+    }
+
+    // Log CSR requestedAt range to help verify report windows
+    try {
+      const rangeRes = await db.execute(sql`SELECT MIN("requestedAt") AS min_req, MAX("requestedAt") AS max_req FROM ${csr_requestsTable}`);
+      const minReq = rangeRes.rows?.[0]?.min_req ?? null;
+      const maxReq = rangeRes.rows?.[0]?.max_req ?? null;
+      console.log('ℹ️ CSR requestedAt range:', { minReq, maxReq });
+    } catch (e) {
+      console.warn('⚠️ Could not query CSR requestedAt range:', e);
+    }
 
     // Example: Seed CSR shortlist (avoid duplicate pairs)
     const usedShortlistPairs = new Set();

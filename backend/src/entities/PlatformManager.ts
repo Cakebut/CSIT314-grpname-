@@ -122,7 +122,6 @@ export class PlatformManagerEntity {
       SELECT 'day' AS period,
              COUNT(*)::int AS total,
              SUM((cr.status='Pending')::int)::int      AS "Pending",
-             SUM((cr.status='InProgress')::int)::int   AS "InProgress",
              SUM((cr.status='Completed')::int)::int    AS "Completed",
              SUM((cr.status='Cancelled')::int)::int    AS "Cancelled"
       FROM ${csr_requestsTable} cr, bounds b
@@ -131,20 +130,18 @@ export class PlatformManagerEntity {
       UNION ALL
       SELECT 'week',
              COUNT(*)::int,
-             SUM((cr.status='Pending')::int)::int,
-             SUM((cr.status='InProgress')::int)::int,
-             SUM((cr.status='Completed')::int)::int,
-             SUM((cr.status='Cancelled')::int)::int
+        SUM((cr.status='Pending')::int)::int,
+        SUM((cr.status='Completed')::int)::int,
+        SUM((cr.status='Cancelled')::int)::int
       FROM ${csr_requestsTable} cr, bounds b
       WHERE cr."requestedAt" >= b.week_start
         AND cr."requestedAt" <  b.week_start + interval '1 week'
       UNION ALL
       SELECT 'month',
              COUNT(*)::int,
-             SUM((cr.status='Pending')::int)::int,
-             SUM((cr.status='InProgress')::int)::int,
-             SUM((cr.status='Completed')::int)::int,
-             SUM((cr.status='Cancelled')::int)::int
+        SUM((cr.status='Pending')::int)::int,
+        SUM((cr.status='Completed')::int)::int,
+        SUM((cr.status='Cancelled')::int)::int
       FROM ${csr_requestsTable} cr, bounds b
       WHERE cr."requestedAt" >= b.month_start
         AND cr."requestedAt" <  b.month_start + interval '1 month'
@@ -155,7 +152,6 @@ export class PlatformManagerEntity {
       quick[r.period] = {
         total: Number(r.total || 0),
         Pending: Number(r.Pending || 0),
-        InProgress: Number(r.InProgress || 0),
         Completed: Number(r.Completed || 0),
         Cancelled: Number(r.Cancelled || 0),
       };
@@ -251,7 +247,6 @@ export class PlatformManagerEntity {
       SELECT to_char(date_trunc('day', cr."requestedAt"), 'YYYY-MM-DD') AS d,
              COUNT(*)::int AS total,
              SUM((cr.status='Pending')::int)::int AS "Pending",
-             SUM((cr.status='InProgress')::int)::int AS "InProgress",
              SUM((cr.status='Completed')::int)::int AS "Completed",
              SUM((cr.status='Cancelled')::int)::int AS "Cancelled"
       FROM ${csr_requestsTable} cr
@@ -265,7 +260,6 @@ export class PlatformManagerEntity {
       date: r.d,
       total: r.total,
       Pending: r.Pending,
-      InProgress: r.InProgress,
       Completed: r.Completed,
       Cancelled: r.Cancelled,
     }));
@@ -324,7 +318,7 @@ export class PlatformManagerEntity {
       SELECT cr."requestedAt" AS requestedAt,
              st.name          AS serviceType,
              cr.status        AS status,
-             cr.pin_id        AS pin_id,
+             pr.pin_id        AS pin_id,
              cr.csr_id        AS csr_id,
              cr.message       AS message
       FROM ${csr_requestsTable} cr

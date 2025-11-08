@@ -106,14 +106,13 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
     const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
     const { trendDaily } = await ctrl.getRequestsReportSummary({ start, end, typeNames: typeList });
 
-    const header = ["date", "total", "Pending", "InProgress", "Completed", "Cancelled"];
+    const header = ["date", "total", "Pending", "Completed", "Cancelled"];
     const lines = [header.join(",")];
     for (const d of trendDaily) {
       lines.push([
         d.date,
         d.total,
         d.Pending || 0,
-        d.InProgress || 0,
         d.Completed || 0,
         d.Cancelled || 0,
       ].join(","));
@@ -124,7 +123,7 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
     res.send(csv);
   } catch (e: any) {
     // Always return a CSV, even on error
-    const header = ["date", "total", "Pending", "InProgress", "Completed", "Cancelled"];
+    const header = ["date", "total", "Pending", "Completed", "Cancelled"];
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", "attachment; filename=custom-report.csv");
     res.send(header.join(",") + "\n");
