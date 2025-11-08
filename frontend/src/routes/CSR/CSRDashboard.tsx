@@ -23,7 +23,7 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
       { id: 2, title: "Password request approved", time: "1d ago", read: true },
     ]);
     const unreadCount = notifications.filter((n) => !n.read).length;
-  8
+  
     // When the popover opens, mark notifications as read (clears badge)
     useEffect(() => {
       if (notificationsOpen && unreadCount > 0) {
