@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import * as Popover from "@radix-ui/react-popover";
 import { LogOut, Users, Key, FileText, Tags, Bell } from "lucide-react";
@@ -23,6 +23,8 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [adminNotifs, setAdminNotifs] = useState<Array<{ id: number; user_id: number; username: string; message: string; createdAt: string; read: number }>>([]);
   const unreadCount = adminNotifs.filter((n) => n.read === 0).length;
+  const [badgePulse, setBadgePulse] = useState(false);
+  const prevUnreadRef = useRef<number>(0);
 
   // Load platform announcements
   useEffect(() => {
@@ -78,6 +80,17 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
       clearInterval(id);
     };
   }, []);
+
+  // Pulse the badge briefly when unread count increases
+  useEffect(() => {
+    let timer: number | undefined;
+    if (unreadCount > prevUnreadRef.current) {
+      setBadgePulse(true);
+      timer = window.setTimeout(() => setBadgePulse(false), 900);
+    }
+    prevUnreadRef.current = unreadCount;
+    return () => { if (timer) clearTimeout(timer); };
+  }, [unreadCount]);
 
   const handleLogout = async () => {
     try {
@@ -191,7 +204,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
             >
               <Bell className="icon" />
               {unreadCount > 0 && (
-                <span className="user-admin-badge" aria-hidden>
+                <span className={`user-admin-badge ${badgePulse ? 'pulse' : ''}`} aria-hidden>
                   {unreadCount}
                 </span>
               )}
