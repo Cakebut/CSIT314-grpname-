@@ -1,6 +1,6 @@
 import { and, between, count, eq, inArray, ilike, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { service_typeTable, csr_requestsTable, useraccountTable, roleTable, pin_requestsTable, csr_interestedTable } from "../db/schema/aiodb";
+import { service_typeTable, csr_requestsTable, useraccountTable, roleTable, pin_requestsTable } from "../db/schema/aiodb";
 
 type ReportQuery = { start?: string; end?: string; typeNames?: string[] };
 
@@ -186,8 +186,6 @@ export class PlatformManagerEntity {
     };
     const startStr = toTS(start);
     const endStr = toTS(end);
-  // Debug: surface incoming range and the timestamp strings used in SQL
-  try { console.debug('[Reports] getRequestsReportSummary called', { start: q.start, end: q.end, startStr, endStr }); } catch (e) {}
 
     let typeIds: number[] | null = null;
     if (q.typeNames && q.typeNames.length) {
@@ -200,16 +198,13 @@ export class PlatformManagerEntity {
     }
 
     const idFilterArr = typeIds && typeIds.length ? typeIds : null;
-    // Use date-only comparison to match quick stats and avoid timezone-of-day mismatches.
-    // Use LEFT JOIN so csr_requests without a matching pin_requests row are included (matches quick card counts).
     const totalRes = await this.db.execute(sql`
       SELECT COUNT(*)::int AS total
       FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilterArr ? sql`AND pr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
     `);
-    try { console.debug('[Reports] totalRes', { rows: totalRes.rows?.slice(0,3), total: Number(totalRes.rows?.[0]?.total ?? 0) }); } catch (e) {}
     const total = Number(totalRes.rows?.[0]?.total ?? 0);
 
     if (!total) return this.buildEmptyRequestsReportSummary();
@@ -217,8 +212,8 @@ export class PlatformManagerEntity {
     const rowsByStatusRes = await this.db.execute(sql`
       SELECT cr.status AS status, COUNT(*)::int AS n
       FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilterArr ? sql`AND pr."categoryID" IN (${sql.join(idFilterArr.map(id => sql`${id}`), sql`,`)})` : sql``}
       GROUP BY cr.status
     `);
@@ -233,9 +228,9 @@ export class PlatformManagerEntity {
     const rowsByType = await this.db.execute(sql`
       SELECT st.name as name, COUNT(*)::int as n
       FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      LEFT JOIN ${service_typeTable} st ON st.id = pr."categoryID"
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      JOIN ${service_typeTable} st ON st.id = pr."categoryID"
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       GROUP BY st.name
       ORDER BY n DESC
@@ -246,8 +241,8 @@ export class PlatformManagerEntity {
     const uniqRes = await this.db.execute(sql`
       SELECT COUNT(DISTINCT cr.csr_id)::int AS uniq
       FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
     `);
     const uniq = Number(uniqRes.rows?.[0]?.uniq ?? 0);
@@ -260,8 +255,8 @@ export class PlatformManagerEntity {
              SUM((cr.status='Completed')::int)::int AS "Completed",
              SUM((cr.status='Cancelled')::int)::int AS "Cancelled"
       FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       GROUP BY d
       ORDER BY d
@@ -275,49 +270,22 @@ export class PlatformManagerEntity {
       Cancelled: r.Cancelled,
     }));
 
-  const completed = byStatus["Completed"] ?? 0;
-  const completionRate = total ? Number((completed / total).toFixed(3)) : 0;
+    const completed = byStatus["Completed"] ?? 0;
+    const completionRate = total ? Number((completed / total).toFixed(3)) : 0;
+    const averageTimeToComplete = null;
+    const totalVolunteerHours = 0;
 
     // Get active PINs and CSRs
-    // Aggregate shortlist/view counts from the related pin_requests for the selected csr_requests
-    const shortlistRes = await this.db.execute(sql`
-      SELECT COALESCE(SUM(pr.shortlist_count),0)::int AS total_shortlist
-      FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
-      ${idFilter}
-    `);
-    const totalShortlist = Number(shortlistRes.rows?.[0]?.total_shortlist ?? 0);
-
-    const viewRes = await this.db.execute(sql`
-      SELECT COALESCE(SUM(pr.view_count),0)::int AS total_views
-      FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
-      ${idFilter}
-    `);
-    const totalViews = Number(viewRes.rows?.[0]?.total_views ?? 0);
-
-    const interestedRes = await this.db.execute(sql`
-      SELECT COUNT(*)::int AS total_interested
-      FROM ${csr_interestedTable} ci
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = ci.pin_request_id
-      WHERE ci."interestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
-      ${idFilter}
-    `);
-    const totalInterested = Number(interestedRes.rows?.[0]?.total_interested ?? 0);
-
     const activeStats = await this.countActiveUsersByRole();
     return {
       totalRequests: total,
       byStatus,
       byServiceType,
+      totalVolunteerHours,
       uniqueVolunteers: uniq,
       completionRate,
+      averageTimeToComplete,
       trendDaily,
-      totalShortlistCount: totalShortlist,
-      totalInterestedCount: totalInterested,
-      totalViewCount: totalViews,
       activePINs: activeStats.activePINs,
       activeCSRs: activeStats.activeCSRs,
     };
@@ -360,9 +328,9 @@ export class PlatformManagerEntity {
              cr.csr_id        AS csr_id,
              cr.message       AS message
       FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      LEFT JOIN ${service_typeTable} st ON st.id = pr."categoryID"
-      WHERE cr."requestedAt"::date BETWEEN ${startStr}::date AND ${endStr}::date
+      JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
+      JOIN ${service_typeTable} st ON st.id = pr."categoryID"
+      WHERE cr."requestedAt" BETWEEN ${startStr}::timestamp AND ${endStr}::timestamp
       ${idFilter}
       ORDER BY cr."requestedAt" ASC
     `);
@@ -377,75 +345,15 @@ export class PlatformManagerEntity {
     }>;
   }
 
-  // Debug helper: return counts and a small sample for a single calendar date
-  async getRequestsReportDebug(date?: string, typeNames?: string[]) {
-    if (!date) throw new Error('date is required');
-
-    // Resolve type names to ids if provided
-    let typeIds: number[] | null = null;
-    if (typeNames && typeNames.length) {
-      const rows = await this.db
-        .select({ id: service_typeTable.id, name: service_typeTable.name })
-        .from(service_typeTable)
-        .where(inArray(service_typeTable.name, typeNames));
-      typeIds = rows.map(r => r.id);
-    }
-
-    const idFilter = typeIds && typeIds.length
-      ? sql`AND pr."categoryID" IN (${sql.join(typeIds.map(id => sql`${id}`), sql`,`)})`
-      : sql``;
-
-    // Count by calendar date
-    const byDateRes = await this.db.execute(sql`
-      SELECT COUNT(*)::int AS total
-      FROM ${csr_requestsTable} cr
-      WHERE cr."requestedAt"::date = ${date}::date
-    `);
-
-    // Count by day bounds (what quick uses)
-    const truncRes = await this.db.execute(sql`
-      SELECT COUNT(*)::int AS total
-      FROM ${csr_requestsTable} cr
-      WHERE cr."requestedAt" >= date_trunc('day', now())
-        AND cr."requestedAt" < date_trunc('day', now()) + interval '1 day'
-    `);
-
-    // Count using LEFT JOIN to mirror custom-report behavior
-    const leftJoinRes = await this.db.execute(sql`
-      SELECT COUNT(*)::int AS total
-      FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date = ${date}::date
-      ${idFilter}
-    `);
-
-    // Small sample of rows for inspection
-    const sample = await this.db.execute(sql`
-      SELECT cr.pin_request_id, cr.csr_id, cr."requestedAt", cr.status, cr.message
-      FROM ${csr_requestsTable} cr
-      LEFT JOIN ${pin_requestsTable} pr ON pr.id = cr.pin_request_id
-      WHERE cr."requestedAt"::date = ${date}::date
-      ${idFilter}
-      ORDER BY cr."requestedAt" ASC
-      LIMIT 50
-    `);
-
-    return {
-      date,
-      byDate: Number(byDateRes.rows?.[0]?.total ?? 0),
-      byTruncToday: Number(truncRes.rows?.[0]?.total ?? 0),
-      byLeftJoin: Number(leftJoinRes.rows?.[0]?.total ?? 0),
-      sample: sample.rows || [],
-    };
-  }
-
   private buildEmptyRequestsReportSummary() {
     return {
       totalRequests: 0,
       byStatus: {},
       byServiceType: {},
+      totalVolunteerHours: 0,
       uniqueVolunteers: 0,
       completionRate: 0,
+      averageTimeToComplete: null,
       trendDaily: [],
     };
   }
