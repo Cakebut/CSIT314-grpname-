@@ -82,29 +82,43 @@ export default function AdminPasswordResetDashboard() {
   }
 
   return (
-    <div className="password-reset-dashboard">
+    <div className="password-reset-container">
  
-      <h2>Password Change Requests</h2>
-      <p>Review and manage user password change requests</p>
+      <div className="password-reset-top">
+        <div>
+          <header className="password-reset-header"></header>
+          <h1>Password Change Requests</h1>
+          <p>Review and manage user password change requests</p>
+        </div>
+      </div>
+
       <div className="dashboard-controls">
         <input
           type="text"
           placeholder="Search username..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          className="search-password-reset"
         />
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+
+        <select 
+          value={statusFilter} 
+          onChange={e => setStatusFilter(e.target.value)} 
+          className="filter-password-reset">
           <option value="">All Status</option>
           <option value="Pending">Pending</option>
           <option value="Approved">Approved</option>
           <option value="Rejected">Rejected</option>
         </select>
-        <button onClick={() => { setSearch(""); setStatusFilter(""); }}>Reset</button>
-        <button className="clear-logs-btn" onClick={handleClearLogs}>Clear Logs</button>
+
+        <button className="reset-password-reset btn"onClick={() => { setSearch(""); setStatusFilter(""); }}>Reset</button>
+        <button className="clear-logs-btn btn" onClick={handleClearLogs}>Clear Logs</button>
+        
         <div className="pending-count">
           <span>🕒 {requests.filter(r => r.status === "Pending").length} Pending</span>
         </div>
       </div>
+
       <table className="requests-table">
         <thead>
           <tr>

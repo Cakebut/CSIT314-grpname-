@@ -62,9 +62,9 @@ export default function ForgotPasswordPage() {
           <h2>Request Submitted</h2>
           <p>Your password reset request has been received</p>
           <ul className="request-status-list">
-            <li>✔ Your password change request has been successfully submitted</li>
-            <li>✔ Request is pending approval from the administrator</li>
-            <li>✔ You will receive confirmation once approved</li>
+            <li><CircleCheck className="circle-check"/> Your password change request has been successfully submitted.</li>
+            <li><CircleCheck className="circle-check"/> Request is pending approval from the administrator.</li>
+            <li><CircleCheck className="circle-check"/> You will receive confirmation once approved.</li>
           </ul>
           <button className="back-login-btn" onClick={() => navigate("/")}>Back to Login</button>
           <div className="request-note">This usually takes 1-2 business days</div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-
+import "./SearchHistory.css";
+import { BiColor } from 'react-icons/bi';
 
 
 function getCSRId() {
@@ -90,22 +91,22 @@ function SearchHistory() {
     URL.revokeObjectURL(url);
   };
   return (
-    <div className="csr-page">
-      <div className="csr-subnav">
-        <button className="csr-btn" onClick={downloadCsv} style={{ marginLeft: "auto" }}>
-          Download History
-        </button>
+    <div className="search-history csr-page">
+      <div className="search-history csr-header-row">
+        <div className="search-history csr-header-left">
+          <h2 className="search-history csr-section-title big">Search History</h2>
+          <p className="search-history csr-muted">View and filter your completed volunteer service activities</p>
+        </div>
+        {/* download button moved into filter panel to sit at right of filter options */}
       </div>
-      <h2 className="csr-section-title big">Search History</h2>
-      <p className="csr-muted">View and filter your completed volunteer service activities</p>
-      <div className="csr-history-counters">
-        <div className="csr-offer-counter">Total Services <span>{totals.total}</span></div>
-        <div className="csr-offer-counter">Pending <span>{totals.pending}</span></div>
-        <div className="csr-offer-counter">Completed <span>{totals.completed}</span></div>
+      <div className="search-history csr-history-counters">
+        <div className="search-history csr-offer-counter">Total Services <span>{totals.total}</span></div>
+        <div className="search-history csr-offer-counter">Pending <span>{totals.pending}</span></div>
+        <div className="search-history csr-offer-counter">Completed <span>{totals.completed}</span></div>
       </div>
-      <h3 className="csr-subtitle">Filter Options</h3>
-      <div className="csr-filters">
-        <select className="csr-select" value={svcType} onChange={e => setSvcType(e.target.value)}>
+      <h3 className="search-history csr-subtitle">Filter Options</h3>
+      <div className="search-history csr-filters">
+        <select className="search-history csr-select" value={svcType} onChange={e => setSvcType(e.target.value)}>
           {serviceTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -113,7 +114,7 @@ function SearchHistory() {
           <input
             id="csr-history-start"
             type="date"
-            className="csr-input"
+            className="search-history csr-input"
             value={start}
             onChange={e => setStart(e.target.value)}
           />
@@ -123,17 +124,18 @@ function SearchHistory() {
           <input
             id="csr-history-end"
             type="date"
-            className="csr-input"
+            className="search-history csr-input"
             value={end}
             onChange={e => setEnd(e.target.value)}
           />
         </div>
-        <button className="csr-btn" onClick={() => { /* live filtering */ }}>Apply Filter</button>
-        <button className="csr-btn-outline" onClick={clear}>Clear Filter</button>
+        <button className="search-history csr-btn" onClick={() => { /* live filtering */ }}>Apply Filter</button>
+        <button className="search-history csr-btn-outline" style={{background : 'black', color : 'white'}} onClick={clear}>Clear Filter</button>
+        <button className="search-history csr-btn search-history-download" onClick={downloadCsv}>Download History</button>
       </div>
-      <h3 className="csr-subtitle">Service Records</h3>
-      <div className="csr-table">
-        <div className="csr-thead">
+      <h3 className="search-history csr-subtitle">Service Records</h3>
+      <div className="search-history csr-table">
+        <div className="search-history csr-thead">
           <div>Service Name</div>
           <div>Date</div>
           <div>Location</div>
@@ -141,7 +143,7 @@ function SearchHistory() {
           <div>Status</div>
         </div>
         {filtered.map((r, i) => (
-          <div key={i} className="csr-trow">
+          <div key={i} className="search-history csr-trow">
             <div>{r.name}</div>
             <div>{r.date}</div>
             <div>{r.location}</div>
@@ -150,7 +152,7 @@ function SearchHistory() {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="csr-empty">No records for given filters.</div>
+          <div className="search-history csr-empty">No records for given filters.</div>
         )}
       </div>
     </div>

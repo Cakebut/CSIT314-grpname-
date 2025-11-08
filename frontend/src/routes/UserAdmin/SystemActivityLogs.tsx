@@ -115,7 +115,6 @@ const SystemActivityLogs: React.FC = () => {
 
       <div className="activity-logs-actions" style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Search />
           <input
             type="text"
             placeholder="Search logs..."
@@ -126,17 +125,6 @@ const SystemActivityLogs: React.FC = () => {
           />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Filter />
-            <select value={limit} onChange={(e) => setLimit(Number(e.target.value) || undefined)}>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-              <option value={0}>All</option>
-            </select>
-          </label>
           <select value={actionFilter} onChange={(e) => setActionFilter(e.target.value)} className="filter-activity-logs">
             <option value="">All Actions</option>
             <option value="suspend user">Suspend User</option>
@@ -149,10 +137,24 @@ const SystemActivityLogs: React.FC = () => {
             <option value="create role">Create Role</option>
             <option value="delete role">Delete Role</option>
           </select>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Filter />
+              <select value={limit} onChange={(e) => setLimit(Number(e.target.value) || undefined)}>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={0}>All</option>
+              </select>
+            </label>
+          </div>
+          
           <button className="reset-activity-logs btn" onClick={() => { setActionSearch(""); setActionFilter(""); setLimit(20); }}>
             Reset
           </button>
-        </div>
+
 
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           <button className="clear-activity-logs btn" onClick={handleClearLogs} disabled={clearing}>

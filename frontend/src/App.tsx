@@ -68,7 +68,7 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
           {/* CSR Rep */}
           <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRDashboard /></ProtectedRoute>} />
 
-          {/* Platform Manager (Dashboard + nested pages) */}
+          {/* Platform Manager */}
           <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PMDashboard /></ProtectedRoute>} />
 
         </Routes>

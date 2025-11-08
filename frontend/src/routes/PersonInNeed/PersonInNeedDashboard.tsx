@@ -467,12 +467,12 @@ const PersonInNeedDashboard: React.FC = () => {
     <>
       {/* Latest Announcement Modal */}
       {showAnnouncementModal && latestAnnouncement && (
-        <div className="modal" onClick={() => setShowAnnouncementModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+        <div className="pin-modal" onClick={() => setShowAnnouncementModal(false)}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
             <h3>Platform Announcement</h3>
             <div style={{ marginBottom: 12, fontWeight: 600 }}>{latestAnnouncement.message}</div>
             <div style={{ color: '#64748b', fontSize: 13, marginBottom: 18 }}>Posted: {latestAnnouncement.createdAt.slice(0, 10)}</div>
-            <button className="button primary" style={{ background: '#2563eb', color: '#fff' }}
+            <button className="pin-button primary" style={{ background: '#2563eb', color: '#fff' }}
               onClick={() => {
                 setShowAnnouncementModal(false);
                 localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement.createdAt);
@@ -487,7 +487,7 @@ const PersonInNeedDashboard: React.FC = () => {
       <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
         <button
           ref={notiButtonRef}
-          className="button"
+          className="pin-button"
           style={{ fontSize: 24, position: 'relative', background: '#e0e7ef', color: '#334155', borderRadius: 24, width: 44, height: 44, boxShadow: notiHasUnread ? '0 0 0 2px #ef4444' : undefined }}
           onClick={() => setShowNoti(s => !s)}
           aria-label="Notifications"
@@ -514,7 +514,7 @@ const PersonInNeedDashboard: React.FC = () => {
           <div ref={notiPopoverRef} style={{ position: 'absolute', top: 48, right: 0, minWidth: 320, background: '#fff', boxShadow: '0 4px 16px #cbd5e1', borderRadius: 12, zIndex: 200, padding: '14px 18px 12px 18px', animation: 'fadeIn 0.18s' }}>
             <div style={{ position: 'absolute', top: -10, right: 18, width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: '10px solid #fff' }} />
             <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Notifications</div>
-            {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? <div className="row-muted">No notifications yet.</div> : (
+            {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? <div className="pin-row-muted">No notifications yet.</div> : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: 320, overflowY: 'auto' }}>
                 {notifications.map(noti => (
                   <li
@@ -565,11 +565,11 @@ const PersonInNeedDashboard: React.FC = () => {
       
       <div className="pin-container">
         <div>
-        <header className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}></header>
+        <header className="pin-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}></header>
           <h2>All Person-In-Need Requests</h2>
           <p>Manage user accounts and permissions</p>
         </div>
-      </div>
+      
 
       <div className="pin-actions">
         {/* Filter Bar - inserted directly after header */}
@@ -617,7 +617,7 @@ const PersonInNeedDashboard: React.FC = () => {
             ))}
           </select>
 
-          <button className="button" style={{ marginLeft: 8 }} onClick={() => {
+          <button className="pin-button" style={{ marginLeft: 8 }} onClick={() => {
             setFilterText("");
             setFilterStatus("");
             setFilterCategory("");
@@ -627,14 +627,14 @@ const PersonInNeedDashboard: React.FC = () => {
         
         <button 
           type="button" 
-          className="button primary" 
+          className="pin-button primary" 
           onClick={openMyRequests}>
             My Requests
           </button>
 
         <button 
           type="button" 
-          className="button" 
+          className="pin-button" 
           style={{ backgroundColor: '#0ea5e9', color: 'white' }} 
           onClick={openMyOffers}>
             My Offers
@@ -643,17 +643,17 @@ const PersonInNeedDashboard: React.FC = () => {
 
       {/* My Offers Modal */}
       {showMyOffers && (
-        <div className="modal" onClick={() => setShowMyOffers(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 700, maxWidth: '98vw', minHeight: 400 }}>
+        <div className="pin-modal" onClick={() => setShowMyOffers(false)}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 700, maxWidth: '98vw', minHeight: 400 }}>
             <h3>My Offers (Interested CSRs for My Requests)</h3>
             {offersLoading ? (
               <div>Loading...</div>
             ) : offersError ? (
               <div style={{ color: '#b91c1c' }}>{offersError}</div>
             ) : offers.length === 0 ? (
-              <div className="row-muted">No offers found.</div>
+              <div className="pin-row-muted">No offers found.</div>
             ) : (
-              <table className="table">
+              <table className="pin-table">
                 <thead>
                   <tr>
                     <th>Request Title</th>
@@ -688,16 +688,16 @@ const PersonInNeedDashboard: React.FC = () => {
                         {offer.interestedCsrs.map(csr => (
                           <div key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
                             {/* Accept/Cancel buttons for non-assigned CSRs */}
-                            {offer.assignedCsrId !== csr.csr_id && (
-                              <>
-                                <button className="button" style={{ backgroundColor: '#22c55e', color: 'white' }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
-                                <button className="button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
-                              </>
-                            )}
+                                {offer.assignedCsrId !== csr.csr_id && (
+                                  <>
+                                    <button className="pin-button" style={{ backgroundColor: '#22c55e', color: 'white' }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
+                                    <button className="pin-button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
+                                  </>
+                                )}
                             {/* Mark Completed button for pending requests with assigned CSR */}
                             {offer.status === 'Pending' && offer.assignedCsrId === csr.csr_id && (
                               <button
-                                className="button"
+                                className="pin-button"
                                 style={{ backgroundColor: '#6b7280', color: 'white' }}
                                 onClick={async () => {
                                   if (window.confirm('Mark this request as completed?')) {
@@ -710,13 +710,13 @@ const PersonInNeedDashboard: React.FC = () => {
                                     }
                                   }
                                 }}
-                              >Mark Completed</button>
+                >Mark Completed</button>
                             )}
                             {/* Feedback button for completed offers, only for assigned CSR */}
                             {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
                               (!offer.feedback) ? (
                                 <button
-                                  className="button"
+                                  className="pin-button"
                                   style={{ backgroundColor: '#2563eb', color: 'white' }}
                                   onClick={() => openFeedbackModal(offer.requestId, csr.csr_id, csr.username)}
                                 >Feedback</button>
@@ -730,19 +730,16 @@ const PersonInNeedDashboard: React.FC = () => {
                 </tbody>
               </table>
             )}
-            <button className="button" onClick={() => setShowMyOffers(false)} style={{ marginTop: 16 }}>Close</button>
+            <button className="pin-button" onClick={() => setShowMyOffers(false)} style={{ marginTop: 16 }}>Close</button>
           </div>
         </div>
       )}
 
 
-
-
-
       {/* Feedback Modal - always rendered at root, independent of My Offers */}
       {showFeedbackModal && (
-        <div className="modal" onClick={handleCancelFeedback}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+        <div className="pin-modal" onClick={handleCancelFeedback}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
             <h3>Give Feedback to {feedbackCsrUsername}</h3>
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontWeight: 600 }}>Rating:</label>
@@ -768,8 +765,8 @@ const PersonInNeedDashboard: React.FC = () => {
               disabled={feedbackLoading}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-              <button className="button" onClick={handleCancelFeedback} disabled={feedbackLoading}>Cancel</button>
-              <button className="button primary" style={{ background: '#2563eb', color: '#fff' }} onClick={handleSubmitFeedback} disabled={feedbackLoading || feedbackRating === 0}>
+              <button className="pin-button" onClick={handleCancelFeedback} disabled={feedbackLoading}>Cancel</button>
+              <button className="pin-button primary" style={{ background: '#2563eb', color: '#fff' }} onClick={handleSubmitFeedback} disabled={feedbackLoading || feedbackRating === 0}>
                 {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
               </button>
             </div>
@@ -802,7 +799,7 @@ const PersonInNeedDashboard: React.FC = () => {
               });
             if (filteredRequests.length === 0) {
               return (
-                <div className="row-muted" style={{ fontSize: 18, color: '#64748b', padding: 32, borderRadius: 12, background: '#f3f4f6', width: '90%' }}>
+                <div className="pin-row-muted" style={{ fontSize: 18, color: '#64748b', padding: 32, borderRadius: 12, background: '#f3f4f6', width: '90%' }}>
                   No requests found.
                 </div>
               );
@@ -810,71 +807,22 @@ const PersonInNeedDashboard: React.FC = () => {
             return filteredRequests.map((r) => (
               <div
                 key={r.id}
-                style={{
-                  background: r.urgencyLabel && r.urgencyLabel.toLowerCase() === 'high priority' ? '#fee2e2' : '#fff',
-                  borderRadius: 14,
-                  boxShadow: '0 2px 12px 0 rgba(30,41,59,0.08)',
-                  padding: '28px 40px',
-                  width: '90%',
-                  maxWidth: 900,
-                  minWidth: 320,
-                  margin: '0 auto',
-                  cursor: 'pointer',
-                  transition: 'box-shadow 0.2s',
-                  border: '1.5px solid #e5e7eb',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  position: 'relative',
-                }}
+                className={`pin-request-card ${r.urgencyLabel && r.urgencyLabel.toLowerCase() === 'high priority' ? 'priority-high-card' : ''}`}
                 onClick={() => setSelected(r)}
               >
-                <div style={{ flex: 3, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#1e293b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {r.title}
-                  </div>
-                  <div style={{ fontSize: '1.05rem', color: '#64748b', fontWeight: 500, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {r.categoryName}
-                  </div>
-                  <div style={{ fontSize: '1.02rem', color: '#0ea5e9', fontWeight: 500, margin: '2px 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    Location: {r.locationName || '-'}
-                  </div>
-                  <div style={{ fontSize: '1.05rem', color: '#475569', fontWeight: 600, marginTop: 2, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {r.pinName}
-                  </div>
+                <div className="pin-request-left">
+                  <div className="pin-request-title">{r.title}</div>
+                  <div className="pin-request-category">{r.categoryName}</div>
+                  <div className="pin-request-location">Location: {r.locationName || '-'}</div>
+                  <div className="pin-request-pinname">{r.pinName}</div>
                 </div>
-                <div
-                  style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    fontWeight: 600,
-                    fontSize: '1.05rem',
-                  }}
-                >
-                  <StatusBadge status={r.status} />
-                </div>
-                <div style={{ flex: 1, textAlign: 'center' }}>
+
+                <div className="pin-badges">
+                  <div className="pin-badge pin-badge-status"><StatusBadge status={r.status} /></div>
                   {r.urgencyLabel && (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: 90,
-                        padding: '0.4em 1.2em',
-                        borderRadius: 18,
-                        color: 'white',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        backgroundColor:
-                          r.urgencyLabel.toLowerCase() === 'high priority' ? '#ef4444' :
-                          r.urgencyLabel.toLowerCase() === 'low priority' ? '#22c55e' : '#6b7280',
-                        textAlign: 'center',
-                        letterSpacing: 1,
-                      }}
-                    >
+                    <div className={`pin-badge pin-badge-priority ${r.urgencyLabel.toLowerCase() === 'high priority' ? 'high' : r.urgencyLabel.toLowerCase() === 'low priority' ? 'low' : ''}`}>
                       {r.urgencyLabel}
-                    </span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -884,8 +832,8 @@ const PersonInNeedDashboard: React.FC = () => {
       )}
 
       {selected && (
-        <div className="modal" onClick={() => setSelected(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+        <div className="pin-modal" onClick={() => setSelected(null)}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
             <h3>Request Details</h3>
             <div><b>PIN Name:</b> {selected.pinName}</div>
             <div><b>Title:</b> {selected.title}</div>
@@ -917,22 +865,22 @@ const PersonInNeedDashboard: React.FC = () => {
               )}</div>
             </div>
             <div><b>Description:</b></div>
-            <div className="desc-box">{selected.message || '(No description)'}</div>
-            <button className="button primary" style={{ marginTop: 16 }} onClick={() => setSelected(null)}>Close</button>
+            <div className="pin-desc-box">{selected.message || '(No description)'}</div>
+            <button className="pin-button primary" style={{ marginTop: 16 }} onClick={() => setSelected(null)}>Close</button>
           </div>
         </div>
       )}
 
       {showMyRequests && (
-        <div className="modal" onClick={() => setShowMyRequests(false)}>
+        <div className="pin-modal" onClick={() => setShowMyRequests(false)}>
           <div
-            className="modal-content"
+            className="pin-modal-content"
             onClick={e => e.stopPropagation()}
             style={{ width: '1000px', maxWidth: '98vw', minHeight: '500px' }}
           >
             <h3>My Requests</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <button className="button primary" onClick={() => setShowCreate(true)}>Create Request</button>
+              <button className="pin-button primary" onClick={() => setShowCreate(true)}>Create Request</button>
               <button
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={handleDownloadHistory}
@@ -942,16 +890,16 @@ const PersonInNeedDashboard: React.FC = () => {
               </button>
             </div>
             {/* Filter row for My Requests - placed directly below action buttons */}
-            <div className="my-requests-filter-row">
+            <div className="pin-my-requests-filter-row">
               {/** common control style */}
               <input
-                className="filter-control filter-title"
+                className="pin-filter-control pin-filter-title"
                 placeholder="Title"
                 value={myRequestsFilterTitle}
                 onChange={e => setMyRequestsFilterTitle(e.target.value)}
               />
               <select
-                className="filter-control filter-select"
+                className="pin-filter-control pin-filter-select"
                 value={myRequestsFilterType}
                 onChange={e => setMyRequestsFilterType(e.target.value)}
               >
@@ -961,7 +909,7 @@ const PersonInNeedDashboard: React.FC = () => {
                 ))}
               </select>
               <select
-                className="filter-control filter-select"
+                className="pin-filter-control pin-filter-select"
                 value={myRequestsFilterStatus}
                 onChange={e => setMyRequestsFilterStatus(e.target.value)}
               >
@@ -971,7 +919,7 @@ const PersonInNeedDashboard: React.FC = () => {
                 <option value="Completed">Completed</option>
               </select>
               <select
-                className="filter-control filter-select"
+                className="pin-filter-control pin-filter-select"
                 value={myRequestsFilterUrgency}
                 onChange={e => setMyRequestsFilterUrgency(e.target.value)}
               >
@@ -982,7 +930,7 @@ const PersonInNeedDashboard: React.FC = () => {
               </select>
               <button
                 type="button"
-                className="filter-button"
+                className="pin-filter-button"
                 style={{ background: myRequestsPrimarySort === 'views' ? '#0f6fd8' : '#1583e9', color: 'white', border: 'none', fontWeight: 600 }}
                 onClick={() => {
                   // make views the primary sort key and toggle its direction
@@ -994,7 +942,7 @@ const PersonInNeedDashboard: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="filter-button"
+                className="pin-filter-button"
                 style={{ background: myRequestsPrimarySort === 'shortlists' ? '#0f6fd8' : '#1583e9', color: 'white', border: 'none', fontWeight: 600 }}
                 onClick={() => {
                   // make shortlists the primary sort key and toggle its direction
@@ -1005,7 +953,7 @@ const PersonInNeedDashboard: React.FC = () => {
                 Shortlists {myRequestsSortShortlists === 'asc' ? '▲' : '▼'}
               </button>
             </div>
-            <table className="table">
+            <table className="pin-table">
               <thead>
                 <tr>
                   <th>Title</th>
@@ -1020,7 +968,7 @@ const PersonInNeedDashboard: React.FC = () => {
               </thead>
               <tbody>
                 {filteredSortedMyRequests.length === 0 ? (
-                  <tr><td colSpan={8} className="row-muted">No requests found.</td></tr>
+                  <tr><td colSpan={8} className="pin-row-muted">No requests found.</td></tr>
                 ) : (
                   filteredSortedMyRequests.map(r => (
                     <tr key={r.id}>
@@ -1074,7 +1022,7 @@ const PersonInNeedDashboard: React.FC = () => {
                         {/* Only show Edit button if not completed */}
                         {r.status !== 'Completed' && (
                           <button 
-                            className="button" 
+                            className="pin-button" 
                             style={{ backgroundColor: '#22c55e', color: 'white', marginRight: 8 }}
                             onClick={() => {
                               setEditRequest(r);
@@ -1088,7 +1036,7 @@ const PersonInNeedDashboard: React.FC = () => {
                           >Edit</button>
                         )}
                         <button 
-                          className="button" 
+                          className="pin-button" 
                           style={{ backgroundColor: '#ef4444', color: 'white' }}
                           onClick={async () => {
                             if (window.confirm('Are you sure you want to delete this request?')) {
@@ -1109,14 +1057,14 @@ const PersonInNeedDashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
-            <button className="button" onClick={() => setShowMyRequests(false)} style={{ marginTop: 16 }}>Close</button>
+            <button className="pin-button" onClick={() => setShowMyRequests(false)} style={{ marginTop: 16 }}>Close</button>
           </div>
         </div>
       )}
 
       {showCreate && (
-        <div className="modal" onClick={() => setShowCreate(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="pin-modal" onClick={() => setShowCreate(false)}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()}>
             <h3>Create New Request</h3>
             <form onSubmit={handleCreate}>
               <div>
@@ -1187,17 +1135,17 @@ const PersonInNeedDashboard: React.FC = () => {
                 </div>
                 {!urgencyLevelID && <div style={{ color: '#b91c1c', marginTop: 4, fontSize: 13 }}>Please select an urgency level</div>}
               </div>
-              <button className="button primary" type="submit" style={{ marginTop: 16 }}>Submit</button>
+              <button className="pin-button primary" type="submit" style={{ marginTop: 16 }}>Submit</button>
               {statusMsg && <div style={{ marginTop: 12 }}>{statusMsg}</div>}
             </form>
-            <button className="button" onClick={() => setShowCreate(false)} style={{ marginTop: 16 }}>Cancel</button>
+            <button className="pin-button" onClick={() => setShowCreate(false)} style={{ marginTop: 16 }}>Cancel</button>
           </div>
         </div>
       )}
 
       {editRequest && (
-        <div className="modal" onClick={() => setEditRequest(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="pin-modal" onClick={() => setEditRequest(null)}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()}>
             <h3>Edit Request</h3>
             <form onSubmit={async (e) => {
               e.preventDefault();
@@ -1285,13 +1233,14 @@ const PersonInNeedDashboard: React.FC = () => {
                   ))}
                 </select>
               </div>
-              <button className="button primary" type="submit" style={{ marginTop: 16 }}>Save Changes</button>
+              <button className="pin-button primary" type="submit" style={{ marginTop: 16 }}>Save Changes</button>
               {editStatusMsg && <div style={{ marginTop: 12 }}>{editStatusMsg}</div>}
             </form>
-            <button className="button" onClick={() => setEditRequest(null)} style={{ marginTop: 16 }}>Cancel</button>
+            <button className="pin-button" onClick={() => setEditRequest(null)} style={{ marginTop: 16 }}>Cancel</button>
           </div>
         </div>
       )}
+    </div>
   </>
   );
 };

@@ -107,8 +107,7 @@ function Login() {
 
           <div className="forgot">
             <section>
-              <input type="checkbox" id="check" />
-              <label htmlFor="check">Remember Me</label>
+              <label htmlFor="check"></label>
             </section>
             <section>
               <a className="forgot-text" href="/forgot-password">

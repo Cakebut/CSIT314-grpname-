@@ -48,7 +48,6 @@ function CSRRequestDetailsModal({ request, onClose, csrId, shortlistedIds, inter
           }}
           aria-label="Close"
         >
-          ×
         </button>
         <h3>Request Details</h3>
         <div><b>PIN Name:</b> {request.pinName || 'N/A'}</div>

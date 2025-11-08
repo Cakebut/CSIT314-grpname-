@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import "./Offers.css";
 
 
 function getCSRId() {
@@ -31,7 +32,7 @@ function Offers() {
   const [filterLocation, setFilterLocation] = useState<string>("");
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
-  const [filterStatus] = useState<OfferStatus | "">("");
+  const [filterStatus, setFilterStatus] = useState<OfferStatus | "">("");
   const csrId = getCSRId();
   useEffect(() => {
     const fetchOffers = async () => {
@@ -80,7 +81,7 @@ function Offers() {
   }, []);
   // --- Fetch offer counters from csr_requests ---
   // Show all offers, including rejected and duplicates
-  const total = offers.length;
+  const total = offers.length; // retained for potential UI counts
   // --- Filtering logic ---
   const filtered = useMemo(() => {
     let result = offers;
@@ -100,76 +101,89 @@ function Offers() {
   }, [tab, offers, filterCategory, filterLocation, filterStatus]);
     // Cancel action removed from this view; CSR cancel handled elsewhere if needed.
   return (
-    <div className="csr-page">
-      <h2 className="csr-section-title big">My Offers</h2>
-      <p className="csr-muted">Track and manage your offers</p>
-      <div style={{ display: 'flex', gap: 14, margin: '18px 0 8px 0', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-        {TABS.map((t) => (
-          <button key={t} className={`csr-tab ${tab === t ? "active" : ""}`} onClick={() => setTab(t)}>
-            {t === "All" ? `All (${total})` : `${t} (${offers.filter(o => o.status === t).length})`}
-          </button>
-        ))}
+    <div className="offers-container">
+      <div className="offers-top">
+        <div>
+          <h1 className="offers-header" style={{ margin: 0 }}>My Offers</h1>
+          <p>Track and manage your offers</p>
+        </div>
+      </div>
+
+      <div className="offers-actions">
         <select
-          id="offer-filter-category"
-          className="csr-select"
+          className="offer-filter-status"
+          value={tab}
+          onChange={e => setTab(e.target.value as OfferStatus)}
+        >
+          {TABS.map(t => (
+            <option key={t} value={t}>{t === "All" ? `All Status` : `${t} (${offers.filter(o => o.status === t).length})`}</option>
+          ))}
+        </select>
+
+        <select
+          className="offer-filter-category"
           value={filterCategory}
           onChange={e => setFilterCategory(e.target.value)}
-          style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}
         >
-          <option value="">Any Category</option>
+          <option value="">All Categories</option>
           {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
+        
         <select
-          id="offer-filter-location"
-          className="csr-select"
+          className="offer-filter-location"
           value={filterLocation}
           onChange={e => setFilterLocation(e.target.value)}
-          style={{ width: 160, padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 16 }}
         >
-          <option value="">Any Location</option>
+          <option value="">All Locations</option>
           {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
-        <button className="csr-btn-outline" style={{ minWidth: 110, height: 38 }} onClick={() => { setFilterCategory(""); setFilterLocation(""); }}>Clear Filter</button>
+        <button className="reset-offers btn" onClick={() => { setFilterStatus(""); setFilterCategory(""); setFilterLocation(""); }}>Clear Filter</button>
       </div>
-      <div className="csr-list">
-        {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).map((o) => (
-          <div key={o.id} className="csr-req-row">
-            <div className="csr-req-row-top">
-              <div className="csr-req-title">
-                <span className="csr-req-title-text">{o.title}</span>
-                <span className="csr-req-id">{o.reqNo}</span>
-                <span className={`csr-chip csr-chip-status-${o.status.toLowerCase()}`}>{o.status}</span>
+
+      <div className="available-list">
+        {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).map(o => (
+          <div key={o.id} className="available-req-row" style={{ padding: '30px'}}>
+            <div className="available-req-row-top">
+              <div className="available-req-title">
+                <span className="available-req-title-text">{o.title}</span>
+                <span className="available-req-id">{o.reqNo}</span>
+                <span className={`available-chip available-chip-status-${o.status.toLowerCase()}`}>{o.status}</span>
               </div>
-              <div className="csr-req-views">{o.date}</div>
+              <div className="available-req-views">
+                <div className="available-badges">
+                  <div className={`status-${(o.status||'').toLowerCase()}`}>{o.status}</div>
+                </div>
+                <div className="available-req-date">{o.date}</div>
+              </div>
             </div>
-            <div className="csr-req-row-bottom" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div className="csr-req-pin"><strong>PIN User:</strong> {o.pinUsername ? o.pinUsername : o.pinId}</div>
-              <div className="csr-req-category"><strong>Category:</strong> {o.categoryName ?? '-'}</div>
-              <div className="csr-req-location"><strong>Location:</strong> {o.location ?? '-'}</div>
+            <div className="available-req-row-bottom" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 5 }}>
+              <div className="available-req-pin"><strong>PIN User:</strong> {o.pinUsername ? o.pinUsername : o.pinId}</div>
+              <div className="available-req-category"><strong>Category:</strong> {o.categoryName ?? '-'}</div>
+              <div className="available-req-location"><strong>Location:</strong> {o.location ?? '-'}</div>
               {/* Feedback section: show only if feedback exists, else show 'No feedback yet.' */}
               {(o.feedbackRating || o.feedbackDescription || o.feedbackCreatedAt) ? (
-                <div className="csr-rating" style={{ marginTop: 8 }}>
-                  <strong>Feedback:</strong>
+                <div className="available-rating" style={{ marginTop: 8, padding: 10, border: '1px solid black', borderRadius: 8, width: '100%' }}>
+                  <strong>Feedbacks :</strong>
                   <div style={{ marginLeft: 8 }}>
                     {typeof o.feedbackRating === 'number' && (
-                      <span>Rating: {"★".repeat(o.feedbackRating)}{"☆".repeat(5 - o.feedbackRating)} ({o.feedbackRating}/5)</span>
+                      <span>Rating : {"★".repeat(o.feedbackRating)}{"☆".repeat(5 - o.feedbackRating)} ({o.feedbackRating}/5)</span>
                     )}
                     {o.feedbackDescription && (
-                      <div>Description: {o.feedbackDescription}</div>
+                      <div>Comments : {o.feedbackDescription}</div>
                     )}
                     {o.feedbackCreatedAt && (
-                      <div className="csr-muted small">Feedback created: {o.feedbackCreatedAt.slice(0,10)}</div>
+                      <div className="available-muted small">Feedback created: {o.feedbackCreatedAt.slice(0,10)}</div>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="csr-muted small" style={{ marginTop: 8 }}>No feedback yet.</div>
+                <div className="available-muted small" style={{ marginTop: 8 }}>No feedback yet.</div>
               )}
               {/* Cancel button removed per request: CSR cancels handled elsewhere or not allowed here */}
             </div>
           </div>
         ))}
-        {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).length === 0 && <div className="csr-empty">No items.</div>}
+        {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).length === 0 && <div className="available-empty">No items.</div>}
       </div>
     </div>
   );

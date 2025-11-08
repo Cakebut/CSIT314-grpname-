@@ -37,21 +37,21 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
     switch ((status || "").toLowerCase()) {
       case "pending":
         return (
-          <span className="badge pending">
+          <span className="view-password-badge pending">
             <Eye className="icon" />
             Pending Approval
           </span>
         );
       case "approved":
         return (
-          <span className="badge approved">
+          <span className="view-password-badge approved">
             <Check className="icon" />
             Approved
           </span>
         );
       case "rejected":
         return (
-          <span className="badge rejected">
+          <span className="view-password-badge rejected">
             <X className="icon" />
             Rejected
           </span>
@@ -155,13 +155,13 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
   if (!open) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <div className="view-password-modal-overlay" onClick={onClose}>
+      <div className="view-password-modal-content" onClick={e => e.stopPropagation()}>
         <h3>Review Password Change Request</h3>
         <p style={{ marginBottom: 20 }}><strong>Request ID:</strong> #{String(request.id).padStart(3, '0')}</p>
         <p><strong>Status:</strong> {getStatusBadge(request.status)}</p>
 
-        <div className="user-info">
+        <div className="view-passworduser-info">
           <h4>User Information</h4>
           <p><strong>Username:</strong> {request.username}</p>
           {request.user_role && <p><strong>Role:</strong> {request.user_role}</p>}
@@ -176,12 +176,12 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
           )}
         </div>
 
-        <div className="request-details">
+        <div className="view-password-request-details">
           <h4>Request Details</h4>
           {request.requested_at && <p><strong>Request Date:</strong> {new Date(request.requested_at).toLocaleString()}</p>}
           {request.new_password && (
-            <div className="password-section">
-              <div className="password-field">
+            <div className="view-password-section">
+              <div className="view-password-field">
                 <span>New Password:</span>
                 <span>{showPassword ? request.new_password : "••••••••••••"}</span>
                 <button onClick={() => setShowPassword(!showPassword)} className="show-password">
@@ -201,28 +201,28 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
             onChange={e => { if (notesEditable) setAdminNotes(e.target.value); }}
             placeholder="Add notes for the audit log"
             rows={4}
-            style={{ width: '100%' }}
+            style={{ width: '100%', padding: 8 }}
             readOnly={!notesEditable}
             aria-readonly={!notesEditable}
           />
         </div>
 
         {/* Action Buttons */}
-        <div className="actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+        <div className="view-password-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
           <div style={{ marginRight: 'auto' }}>
-            <button onClick={onClose} className="cancel-btn">Cancel</button>
+            <button onClick={onClose} className="cancel-view-password">Cancel</button>
           </div>
           <div>
             <button
               onClick={async () => { setShowConfirmDialog(true); }}
-              className="approve-btn"
+              className="approve-view-password"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
             >
               <Check className="icon" /> Approve
             </button>
             <button
               onClick={() => reject()}
-              className="reject-btn"
+              className="reject-view-password"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
               style={{ marginLeft: 8 }}
             >
@@ -234,13 +234,13 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
 
       {/* Confirm Action Dialog */}
       {showConfirmDialog && (
-        <div className="confirm-dialog">
-          <div className="confirm-content">
+        <div className="view-password-confirm-dialog">
+          <div className="view-password-confirm-content">
             <h4>Confirm Action</h4>
             <p>Are you sure you want to approve this password change request?</p>
             <p><strong>Username:</strong> {request.username}</p>
             <p><strong>Request ID:</strong> #{String(request.id).padStart(3, '0')}</p>
-            <div className="actions">
+            <div className="view-password-actions">
               <button onClick={() => setShowConfirmDialog(false)}>No, Cancel</button>
               <button onClick={confirmApprove}>Yes, Approve</button>
             </div>
@@ -250,8 +250,8 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
 
       {/* Success Dialog */}
       {showSuccessDialog && (
-        <div className="success-dialog">
-          <div className="success-content">
+        <div className="view-password-success-dialog">
+          <div className="view-password-success-content">
             {actionResult === 'approved' ? (
               <>
                 <h4>Success!</h4>
