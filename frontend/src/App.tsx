@@ -6,16 +6,12 @@ import React from 'react';
 // LOGIN PAGE
 import Login from './routes/LoginPage';
 
-// FORGET PASSWORD PAGE
-//import Forget from './routes/ForgetPage';
 // FORGOT PASSWORD PAGE
 import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
 
-//Person In Need
-import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
 // PERSON IN NEED PAGE
 import PINDashboard from './routes/PersonInNeed/PINDashboard';
 
@@ -72,15 +68,6 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
           {/* CSR Rep */}
           <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRDashboard /></ProtectedRoute>} />
 
-            
-          {/* Platform Manager (Dashboard + nested pages) */}
-          <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PlatformManagerHome /></ProtectedRoute>}>
-            <Route index element={<Navigate to="reports" replace />} />
-            <Route path="categories" element={<ProtectedRoute allowedRole="Platform Manager"><CategoriesPage /></ProtectedRoute>} />
-            <Route path="reports" element={<ProtectedRoute allowedRole="Platform Manager"><ReportsPage /></ProtectedRoute>} />
-            <Route path="announcements" element={<ProtectedRoute allowedRole="Platform Manager"><AnnouncementsPage /></ProtectedRoute>} />
-          </Route>
-         
           {/* Platform Manager */}
           <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PMDashboard /></ProtectedRoute>} />
 
