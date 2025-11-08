@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Download, Search, Filter } from "lucide-react"; // icons
+import { Download, Filter } from "lucide-react"; // icons
  
 import { toast } from "react-toastify";
 import "./SystemActivityLogs.css";

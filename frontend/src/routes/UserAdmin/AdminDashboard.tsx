@@ -11,9 +11,9 @@ import Roles from "./Roles";
 import "./AdminDashboard.css";
 
 
-interface AdminDashboardProps {
-  onLogout?: () => void;
-}
+// interface AdminDashboardProps {
+//   onLogout?: () => void;
+// }
 
 type ActiveSection = "userAccounts" | "roles" | "passwordRequests" | "activityLogs";
 
@@ -23,8 +23,8 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [activeSection, setActiveSection] = useState<ActiveSection>("userAccounts");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const navigate = useNavigate();
-  const username = localStorage.getItem('currentUsername');
-  const role = localStorage.getItem('currentRole');
+  // const username = localStorage.getItem('currentUsername');
+  // const role = localStorage.getItem('currentRole');
   const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [adminNotifs, setAdminNotifs] = useState<Array<{ id: number; user_id: number; username: string; message: string; createdAt: string; read: number }>>([]);

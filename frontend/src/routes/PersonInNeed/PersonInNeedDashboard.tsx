@@ -465,23 +465,19 @@ const PersonInNeedDashboard: React.FC = () => {
 
   return (
     <>
-      {/* Latest Announcement Modal */}
-      {showAnnouncementModal && latestAnnouncement && (
-        <div className="pin-modal" onClick={() => setShowAnnouncementModal(false)}>
-          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
-            <h3>Platform Announcement</h3>
-            <div style={{ marginBottom: 12, fontWeight: 600 }}>{latestAnnouncement.message}</div>
-            <div style={{ color: '#64748b', fontSize: 13, marginBottom: 18 }}>Posted: {latestAnnouncement.createdAt.slice(0, 10)}</div>
-            <button className="pin-button primary" style={{ background: '#2563eb', color: '#fff' }}
-              onClick={() => {
-                setShowAnnouncementModal(false);
-                localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement.createdAt);
-              }}
-            >Dismiss</button>
+         {/* Announcement modal */}
+      {latestAnnouncement && showAnnouncementModal && (
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', width: 'min(640px, 92vw)', boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
+            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Announcement</div>
+            <div style={{ whiteSpace: 'pre-wrap', color: '#111827' }}>{latestAnnouncement.message}</div>
+            <div style={{ color: '#6b7280', fontSize: 12, marginTop: 6 }}>at {new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+              <button className="button" onClick={() => { localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement!.createdAt); setShowAnnouncementModal(false); }} style={{ background: '#2563eb', color: '#fff' }}>Close</button>
+            </div>
           </div>
         </div>
       )}
-
 
       {/* Notification Button and Popover */}
       <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>

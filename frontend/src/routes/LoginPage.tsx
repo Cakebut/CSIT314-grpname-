@@ -73,7 +73,7 @@ function Login() {
 
         <form id="loginForm" className="login-box" onSubmit={handleLogin}>
           <div className="login-header">
-            <header>Welcome</header>
+            <header>Welcome </header>
             <div>Sign in to your account</div>
           </div>
 

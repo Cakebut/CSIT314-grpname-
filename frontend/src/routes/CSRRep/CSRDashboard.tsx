@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { LogOut, ClipboardList, Bookmark, Clock, CheckCircle, Bell } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
-
+import { useNavigate } from "react-router-dom";
 import Available from "./Available";
 import Shortlist from "./Shortlist";
 import Offers from "./Offers";
@@ -16,23 +16,96 @@ interface CSRDashboardProps {
 type ActiveSection = "Available" | "Shortlist" | "Offers" | "SearchHistory";
 
 function CSRDashboard({ onLogout }: CSRDashboardProps) {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<ActiveSection>("Available");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-    const [notifications, setNotifications] = useState([
+  const [notifications, setNotifications] = useState([
       { id: 1, title: "New offer received", time: "2h ago", read: false },
       { id: 2, title: "Password request approved", time: "1d ago", read: true },
     ]);
-    const unreadCount = notifications.filter((n) => !n.read).length;
-  8
-    // When the popover opens, mark notifications as read (clears badge)
-    useEffect(() => {
-      if (notificationsOpen && unreadCount > 0) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const unreadCount = notifications.filter((n) => !n.read).length;  
+
+
+
+  //Announcement modal
+  const API_BASE = "http://localhost:3000";
+  const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+
+
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/userAdmin/logout', { method: 'POST', credentials: 'include' });
+    } catch {
+      console.error("Logout error:");
+    }
+    localStorage.removeItem('dummyUsers');
+    localStorage.removeItem('currentUsername');
+    localStorage.removeItem('currentRole');
+    // Call optional external onLogout handler if provided, then navigate
+    try {
+      if (typeof onLogout === 'function') onLogout();
+    } catch (e) {
+      console.error('onLogout handler threw', e);
+    }
+    navigate('/'); // Redirect to login
+  };
+
+
+ 
+
+  
+  // Helper to load the latest platform announcement and update modal state
+  const fetchLatestAnnouncement = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/pm/announcements/latest`);
+      if (!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+      const latest = data?.latest ?? null;
+      setLatestAnnouncement(latest);
+      if (latest?.createdAt) {
+        const lastSeen = localStorage.getItem('latestAnnouncementSeenAt');
+        if (lastSeen !== latest.createdAt) {
+          setShowAnnouncementModal(true);
+        }
       }
-    }, [notificationsOpen]);
+    } catch (err) {
+      // Log for debugging but don't break the UI
+      console.error('Failed to fetch latest announcement', err);
+    }
+  };
+
+  // When the popover opens, mark notifications as read (clears badge)
+  useEffect(() => {
+    if (notificationsOpen && unreadCount > 0) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    }
+
+    // Load latest platform announcement for PIN users
+    fetchLatestAnnouncement();
+
+  }, [notificationsOpen, unreadCount]);
 
   return (
     <div className="CSR-dashboard-container">
+  
+        {/* Announcement modal */}
+      {latestAnnouncement && showAnnouncementModal && (
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', width: 'min(640px, 92vw)', boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
+            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Announcement</div>
+            <div style={{ whiteSpace: 'pre-wrap', color: '#111827' }}>{latestAnnouncement.message}</div>
+            <div style={{ color: '#6b7280', fontSize: 12, marginTop: 6 }}>at {new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+              <button className="button" onClick={() => { localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement!.createdAt); setShowAnnouncementModal(false); }} style={{ background: '#2563eb', color: '#fff' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
       {/* Sidebar */}
       <div className="sidebar">
 
@@ -82,7 +155,7 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
         {/* Logout Button */}
         <div className="sidebar-footer">
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="logout-button"
           >
             <LogOut className="icon" />

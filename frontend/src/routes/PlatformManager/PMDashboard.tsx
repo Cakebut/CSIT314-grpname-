@@ -26,7 +26,7 @@ function PMDashboard() {
       const res = await fetch('/api/pm/announcements/latest');
       const data = await res.json();
       setPmNoti(data?.latest ?? null);
-    } catch (err) {
+    } catch {
       setPmError('Failed to load announcements');
     } finally {
       setPmLoading(false);
@@ -67,6 +67,10 @@ function PMDashboard() {
 
   return (
     <div className="PM-dashboard-container">
+      
+
+
+
       {/* Sidebar */}
       <div className="sidebar">
 
