@@ -46,10 +46,34 @@ export default function ReportsPage() {
   // Removed unused active stats fetch
 
   useEffect(() => {
-    fetch('/api/pm/reports/quick')
-      .then(r => r.ok ? r.json() : Promise.reject(new Error('quick failed')))
-      .then(d => setQuick(d))
-      .catch(()=>{});
+    // Fetch quick stats based on the client's local calendar (so the UI "Today" matches the user's local day)
+    async function loadQuick() {
+      try {
+        const today = fmt(new Date());
+        const dayRes = await fetch(`/api/pm/reports/custom?start=${today}&end=${today}`);
+        const dayJson = await dayRes.json();
+        const dayTotal = dayRes.ok ? (dayJson.totalRequests ?? 0) : 0;
+
+        const weekStart = fmt(startOfWeek());
+        const weekEnd = fmt(endOfWeek());
+        const weekRes = await fetch(`/api/pm/reports/custom?start=${weekStart}&end=${weekEnd}`);
+        const weekJson = await weekRes.json();
+        const weekTotal = weekRes.ok ? (weekJson.totalRequests ?? 0) : 0;
+
+        const monthStart = fmt(startOfMonth());
+        const monthEnd = fmt(endOfMonth());
+        const monthRes = await fetch(`/api/pm/reports/custom?start=${monthStart}&end=${monthEnd}`);
+        const monthJson = await monthRes.json();
+        const monthTotal = monthRes.ok ? (monthJson.totalRequests ?? 0) : 0;
+
+        setQuick({ day: { total: Number(dayTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
+                   week: { total: Number(weekTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
+                   month: { total: Number(monthTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 } });
+      } catch {
+        // ignore
+      }
+    }
+    loadQuick();
   }, []);
 
   // Simple display-only representation; actual picking uses DateRangePicker below
