@@ -1,6 +1,6 @@
 import { db } from '../db/client';
-import { and, eq, ilike, is, not } from 'drizzle-orm';
-import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable, csr_interestedTable } from '../db/schema/aiodb';
+import { and, eq, ilike, is, not, desc } from 'drizzle-orm';
+import { pin_requestsTable, useraccountTable, service_typeTable, locationTable, urgency_levelTable, csr_interestedTable, notificationTable } from '../db/schema/aiodb';
 
 
 
@@ -391,5 +391,51 @@ export class PinRequestEntity {
         ));
     }
     return true;
+  }
+
+  // Fetch notifications for a CSR user
+  static async getNotificationsForCsr(csr_id: number) {
+    // Join notificationTable with useraccountTable (PIN) and pin_requestsTable for username and title
+    // Exclude notifications that are intended only for the PIN (e.g. 'interested_cancelled')
+    // so CSR won't get a notification for their own cancel action.
+    return await db
+      .select({
+        id: notificationTable.id,
+        pin_id: notificationTable.pin_id,
+        type: notificationTable.type,
+        csr_id: notificationTable.csr_id,
+        pin_request_id: notificationTable.pin_request_id,
+        createdAt: notificationTable.createdAt,
+        read: notificationTable.read,
+        pinUsername: useraccountTable.username,
+        requestTitle: pin_requestsTable.title,
+      })
+      .from(notificationTable)
+      .leftJoin(useraccountTable, eq(notificationTable.pin_id, useraccountTable.id))
+      .leftJoin(pin_requestsTable, eq(notificationTable.pin_request_id, pin_requestsTable.id))
+      .where(and(not(eq(notificationTable.type, 'interested_cancelled')), eq(notificationTable.csr_id, csr_id)))
+      .orderBy(desc(notificationTable.read), desc(notificationTable.createdAt));
+  }
+
+  // Fetch notifications for a PIN user
+  static async getNotifications(pin_id: number) {
+    // Join notificationTable with useraccountTable (CSR) and pin_requestsTable for username and title
+    return await db
+      .select({
+        id: notificationTable.id,
+        pin_id: notificationTable.pin_id,
+        type: notificationTable.type,
+        csr_id: notificationTable.csr_id,
+        pin_request_id: notificationTable.pin_request_id,
+        createdAt: notificationTable.createdAt,
+        read: notificationTable.read,
+        csrUsername: useraccountTable.username,
+        requestTitle: pin_requestsTable.title,
+      })
+      .from(notificationTable)
+      .leftJoin(useraccountTable, eq(notificationTable.csr_id, useraccountTable.id))
+      .leftJoin(pin_requestsTable, eq(notificationTable.pin_request_id, pin_requestsTable.id))
+      .where(eq(notificationTable.pin_id, pin_id))
+      .orderBy(desc(notificationTable.read), desc(notificationTable.createdAt));
   }
 }

@@ -356,13 +356,20 @@ export class CSRRepEntity {
 
 	// INTERESTED: Remove from interested and also delete from csr_requestsTable
 	static async removeFromInterested(csrId: number, requestId: number) {
-		// Do NOT delete from csr_interestedTable; keep the record for history
-		// Only update status to 'Rejected' in csr_requestsTable
-		await db.update(csr_requestsTable)
-			.set({ status: 'Rejected' })
+		// Delete the records from both csr_requestsTable and csr_interestedTable
+		// to reflect that the CSR has unmarked interest (no history kept in active lists).
+		const { and, eq } = require('drizzle-orm');
+		// Delete csr_requests entry for this csr/request
+		await db.delete(csr_requestsTable)
 			.where(and(
 				eq(csr_requestsTable.csr_id, csrId),
 				eq(csr_requestsTable.pin_request_id, requestId)
+			));
+		// Delete csr_interested entry for this csr/request
+		await db.delete(csr_interestedTable)
+			.where(and(
+				eq(csr_interestedTable.csr_id, csrId),
+				eq(csr_interestedTable.pin_request_id, requestId)
 			));
 		return { removed: true };
 	}

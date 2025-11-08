@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { createPortal } from 'react-dom';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -436,7 +435,7 @@ const PersonInNeedDashboard: React.FC = () => {
     return true;
   });
   // Helper to get shortlist count either from detailed csr_shortlists array or from shortlist_count
-  const getShortlistCount = (r: Request) => Array.isArray((r as any).csr_shortlists) ? (r as any).csr_shortlists.length : (r.shortlist_count ?? 0);
+  const getShortlistCount = (r: Request) => Array.isArray((r ).csr_shortlists) ? (r ).csr_shortlists.length : (r.shortlist_count ?? 0);
 
   // Apply sorting: primary key controlled by myRequestsPrimarySort
   filteredSortedMyRequests.sort((a, b) => {

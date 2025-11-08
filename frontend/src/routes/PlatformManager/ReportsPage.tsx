@@ -71,7 +71,7 @@ export default function ReportsPage() {
         setQuick({ day: { total: Number(dayTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
                    week: { total: Number(weekTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
                    month: { total: Number(monthTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 } });
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

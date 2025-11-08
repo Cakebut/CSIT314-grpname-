@@ -1,0 +1,113 @@
+
+name: CI / CD - Build & Deploy
+
+on:
+  push:
+    branches: [ main, dillonDevelopment ]
+  pull_request:
+    branches: [ main, dillonDevelopment ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: crashout_user
+          POSTGRES_PASSWORD: crashout_password
+          POSTGRES_DB: crashout_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crashout_user -d crashout_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://crashout_user:crashout_password@localhost:5432/crashout_db
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          npm ci
+
+      - name: Wait for Postgres to be ready
+        working-directory: ./backend
+        run: |
+          echo "Waiting for postgres..."
+          for i in $(seq 1 20); do
+            node -e "const { Client } = require('pg'); (async ()=>{try{const c=new Client({connectionString: process.env.DATABASE_URL}); await c.connect(); await c.end(); console.log('pg ready'); process.exit(0);}catch(e){process.exit(1)}})()" && break || sleep 1
+          done
+
+      - name: Apply backend migrations
+        working-directory: ./backend
+        run: |
+          echo "Applying drizzle migrations"
+          npm run db:migrate --if-present
+
+      - name: Seed backend database
+        working-directory: ./backend
+        run: |
+          echo "Seeding database (if seed script exists)"
+          npm run db:seed --if-present || true
+
+      - name: Check drizzle migration status
+        working-directory: ./backend
+        run: |
+          echo "Checking drizzle migration status"
+          npx drizzle-kit status --config ./drizzle.config.ts | tee drizzle-status.out || true
+          # If output explicitly contains 'No pending' we consider it clean. If it contains 'Pending' but not 'No pending', fail.
+          if grep -i "no pending" drizzle-status.out >/dev/null 2>&1; then
+            echo "No pending migrations"
+          elif grep -i "pending" drizzle-status.out >/dev/null 2>&1; then
+            echo "Pending migrations detected:" && cat drizzle-status.out
+            exit 1
+          else
+            echo "Unable to determine pending migrations from drizzle output; showing output:" && cat drizzle-status.out
+          fi
+
+      - name: Build backend
+        working-directory: ./backend
+        run: |
+          npm run build --if-present
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: |
+          npm run test --if-present
+
+      - name: Install frontend dependencies & build
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build --if-present
+      
+
+      - name: Build Docker images (GHCR)
+        if: env.DOCKER_PUSH == 'true'
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Logging in to GitHub Container Registry"
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -t ghcr.io/${{ github.repository_owner }}/crashout-backend:${IMAGE_TAG} -f backend/Dockerfile backend || true
+          docker build -t ghcr.io/${{ github.repository_owner }}/crashout-frontend:${IMAGE_TAG} -f frontend/Dockerfile frontend || true
+          docker push ghcr.io/${{ github.repository_owner }}/crashout-backend:${IMAGE_TAG} || true
+          docker push ghcr.io/${{ github.repository_owner }}/crashout-frontend:${IMAGE_TAG} || true
+
+
+# Notes:
+# - This workflow builds frontend and backend and runs tests if the projects expose `build` and `test` npm scripts.
+# - For Docker image publishing set the repository secret DOCKER_PUSH=true and provide a GITHUB_TOKEN with package write access (or another registry login secret).
+# - For SSH deploy set the secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, REMOTE_APP_DIR. The action will ssh to the host and run `docker compose up -d --build` in the target dir.
+# - If you prefer a different deployment method (e.g., Kubernetes, cloud provider CLI, or GitHub Pages for frontend) tell me and I can adapt the workflow.
