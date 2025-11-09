@@ -11,11 +11,6 @@ export class LoginController{
     return await this.userEntity.login(username, password);
   }
 }
-export class UpdateUserController {
-  private userEntity = new UserEntity()
-  public async updateUserInfo(id: number, username: string, roleid: number, issuspended: boolean) {
-    return await this.userEntity.updateUser(id, username, roleid, issuspended);
-  }
-}
+
 
  

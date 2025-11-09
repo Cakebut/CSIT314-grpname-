@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import "./ReportsPage.css";
 
-type TrendRow = { date: string; total: number; Pending?: number; InProgress?: number; Completed?: number; Cancelled?: number };
+type TrendRow = { date: string; total: number; Pending?: number; Completed?: number; Cancelled?: number };
 type Summary = {
   totalRequests: number;
   byStatus: Record<string, number>;
   byServiceType: Record<string, number>;
+  totalVolunteerHours: number;
   uniqueVolunteers: number;
   completionRate: number;
-  averageTimeToComplete?: number | null;
-  trendDaily?: TrendRow[];
-  totalShortlistCount?: number;
-  totalInterestedCount?: number;
-  totalViewCount?: number;
+  averageTimeToComplete: number | null;
+  trendDaily: TrendRow[];
   activePINs: number;
   activeCSRs: number;
 };
@@ -20,7 +18,7 @@ type Summary = {
 
 
 // Removed unused ActiveStats type
-type QuickBucket = { total: number; Pending: number; InProgress: number; Completed: number; Cancelled: number };
+type QuickBucket = { total: number; Pending: number; Completed: number; Cancelled: number };
 type QuickStats = { day: QuickBucket | null; week: QuickBucket | null; month: QuickBucket | null };
 
 export default function ReportsPage() {
@@ -68,9 +66,9 @@ export default function ReportsPage() {
         const monthJson = await monthRes.json();
         const monthTotal = monthRes.ok ? (monthJson.totalRequests ?? 0) : 0;
 
-        setQuick({ day: { total: Number(dayTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
-                   week: { total: Number(weekTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 },
-                   month: { total: Number(monthTotal), Pending: 0, InProgress: 0, Completed: 0, Cancelled: 0 } });
+  setQuick({ day: { total: Number(dayTotal), Pending: 0, Completed: 0, Cancelled: 0 },
+       week: { total: Number(weekTotal), Pending: 0, Completed: 0, Cancelled: 0 },
+       month: { total: Number(monthTotal), Pending: 0, Completed: 0, Cancelled: 0 } });
       } catch {
         // ignore
       }
@@ -128,7 +126,8 @@ export default function ReportsPage() {
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   }
-  // server-driven today is used for the quick daily report (see runQuickDay)
+  function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+  function endOfToday() { const d = new Date(); d.setHours(23,59,59,999); return d; }
   function startOfWeek() {
     const d = new Date();
     const day = d.getDay(); // 0=Sun..6=Sat
@@ -148,11 +147,7 @@ export default function ReportsPage() {
     onGenerate(sStr, eStr, { ignoreType: true });
   }
 
-  // Daily quick: use client-side calendar day so Generate Daily Report matches the displayed quick-card
-  function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
-  function endOfToday() { const d = new Date(); d.setHours(23,59,59,999); return d; }
   const runQuickDay = () => runQuickRange(startOfToday(), endOfToday());
-
   const runQuickWeek = () => runQuickRange(startOfWeek(), endOfWeek());
   const runQuickMonth = () => runQuickRange(startOfMonth(), endOfMonth());
 
@@ -198,7 +193,6 @@ export default function ReportsPage() {
           <button onClick={runQuickMonth} disabled={loading}>Generate Monthly Report</button>
         </div>
       </div>
-      <h2>Platform Manager — Reports</h2>
       {!showCustomForm && (
         <div className="buttons" style={{marginBottom:12}}>
           <button onClick={() => setShowCustomForm(true)} disabled={loading}>Generate Custom Report</button>
@@ -255,16 +249,8 @@ export default function ReportsPage() {
             <tbody>{Object.entries(summary.byServiceType).map(([k,v]) => <tr key={k}><td>{k}</td><td>{v}</td></tr>)}</tbody>
           </table>
 
-          <h3>Metrics</h3>
-          <div style={{ maxWidth: 700 }}>
-            <BarChartVertical
-              data={[
-                { label: 'Shortlist Count', value: Number(summary.totalShortlistCount ?? 0), color: palette[0] },
-                { label: 'Interested Count', value: Number(summary.totalInterestedCount ?? 0), color: palette[1] },
-                { label: 'View Count', value: Number(summary.totalViewCount ?? 0), color: palette[2] },
-              ]}
-            />
-          </div>
+          <h3>Daily Trend</h3>
+          <TrendChart data={summary.trendDaily} />
 
           <h3>Visualizations</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
@@ -434,7 +420,27 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
   );
 }
 
-// TrendChart removed — replaced by bar chart for shortlist/interested/view counts
+function TrendChart({ data }: { data: TrendRow[] }) {
+  if (!data.length) return <div className="empty">No data</div>;
+  const w = 600, h = 200, pad = 24;
+  const xs = data.map((_, i) => i);
+  const ys = data.map(d => d.total);
+  const maxY = Math.max(...ys) || 1;
+  const points = xs.map((x,i) => {
+    const px = pad + (x/(xs.length-1||1))*(w-2*pad);
+    const py = h - pad - (ys[i]/maxY)*(h-2*pad);
+    return `${px},${py}`;
+  }).join(" ");
+  return (
+    <svg width={w} height={h} className="chart">
+      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/>
+      {data.map((d,i) => {
+        const px = pad + (i/(data.length-1||1))*(w-2*pad);
+        return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
+      })}
+    </svg>
+  );
+}
 
 type ChartDatum = { label: string; value: number; color?: string };
 const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#dc2626', '#0ea5e9', '#22c55e'];

@@ -7,6 +7,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^24.7.0",
     "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.6",
@@ -29,7 +30,7 @@
     "db:delete": "ts-node src/db/Seeding/deleteData.ts",
     "db:migrate": "npx drizzle-kit push --config ./drizzle.config.ts",
     "db:migrate:generate": "npx drizzle-kit generate:migration --config ./drizzle.config.ts --name",
-    "test": "jest"
+    "test": "node scripts/run-jest.js"
   },
   "repository": {
     "type": "git",

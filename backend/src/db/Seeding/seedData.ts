@@ -29,19 +29,49 @@ const pool = new Pool({
 });
 const db = drizzle(pool);
 
+// CLI flags
+const DRY_RUN = process.argv.includes('--dry-run');
+
+function preview(obj: any) {
+  try {
+    return JSON.stringify(obj, null, 2).slice(0, 800);
+  } catch {
+    return String(obj);
+  }
+}
+
+async function maybeInsert(table: any, values: any, desc = 'items') {
+  if (DRY_RUN) {
+    if (Array.isArray(values)) {
+      console.log(`[dry-run] would insert ${values.length} ${desc}`);
+    } else {
+      console.log(`[dry-run] would insert 1 ${desc}: ${preview(values)}`);
+    }
+    return;
+  }
+  try {
+    await db.insert(table).values(values);
+    if (Array.isArray(values)) console.log(`✅ Inserted ${values.length} ${desc}`);
+    else console.log(`✅ Inserted ${desc}`);
+  } catch (e) {
+    console.error(`❌ Error inserting ${desc}:`, e);
+  }
+}
+
 // Set this variable to control how many fake users, pin requests, and csr requests to create
 // Defaults are large enough for a demo load (can be overridden via env vars)
 const NUM_FAKE_USERS = Number(process.env.NUM_FAKE_USERS ?? 100);
 const NUM_FAKE_PIN_REQUESTS = Number(process.env.NUM_FAKE_PIN_REQUESTS ?? 100);
 const NUM_FAKE_CSR_REQUESTS = Number(process.env.NUM_FAKE_CSR_REQUESTS ?? 100);
 
-// Custom user info
+// Custom user info: use role labels so we resolve actual role IDs from DB at runtime
 const customUsers = [
-  { username: "admin", password: "password", roleid: 1, issuspended: false },
-  { username: "pin", password: "password", roleid: 2, issuspended: false },
-  { username: "csr", password: "password", roleid: 3, issuspended: false },
-  { username: "pm", password: "password", roleid: 4, issuspended: false },
-  { username: "suspended_user", password: "password", roleid: 1, issuspended: true }
+  { username: "admin", password: "password", roleLabel: 'User Admin', issuspended: false },
+  { username: "pin", password: "password", roleLabel: 'Person In Need', issuspended: false },
+  { username: "csr", password: "password", roleLabel: 'CSR Rep', issuspended: false },
+  { username: "pm", password: "password", roleLabel: 'Platform Manager', issuspended: false },
+  { username: "suspended_user", password: "password", roleLabel: 'User Admin', issuspended: true },
+  { username: "Alex", password: "password", roleLabel: 'User Admin', issuspended: false },
 ];
 
 
@@ -73,12 +103,12 @@ async function seedRoles() {
   }
 }
 // Generate scalable fake users
-function generateFakeUsers(count: number) {
-  const roles = [1, 2, 3, 4];
+function generateFakeUsers(count: number, roleIds: number[]) {
+  const safeRoles = roleIds && roleIds.length ? roleIds : [1, 2, 3, 4];
   return Array.from({ length: count }, (_, i) => ({
     username: faker.internet.username() + i,
     password: "password",
-    roleid: faker.helpers.arrayElement(roles),
+    roleid: faker.helpers.arrayElement(safeRoles),
     issuspended: faker.datatype.boolean(),
   }));
 }
@@ -94,47 +124,67 @@ async function seedData() {
   }
   try {
     // Seed Service Types
-    await db.insert(service_typeTable).values([
-      { name: "Medical", deleted: false },
-      { name: "Transport", deleted: false },
-      { name: "Household Assistance", deleted: false },
-    ]);
+      await maybeInsert(service_typeTable, [
+        { name: "Medical", deleted: false },
+        { name: "Transport", deleted: false },
+        { name: "Household Assistance", deleted: false },
+      ], 'service types');
     console.log("✅ Seeded service types");
 
     // Seed Locations
-    await db
-      .insert(locationTable)
-      .values([
+      await maybeInsert(locationTable, [
         { name: "North" },
         { name: "South" },
         { name: "East" },
         { name: "West" },
-      ]);
+      ], 'locations');
     console.log("✅ Seeded locations");
 
     // Seed Urgency Levels
-    await db
-      .insert(urgency_levelTable)
-      .values([{ label: "Low Priority" }, { label: "High Priority" }]);
+      await maybeInsert(urgency_levelTable, [
+        { label: "Low Priority" },
+        { label: "High Priority" },
+      ], 'urgency levels');
     console.log("✅ Seeded urgency levels");
 
-    // Seed Users (custom + fake) - idempotent: only insert usernames that do not already exist
-    const fakeUsers = generateFakeUsers(NUM_FAKE_USERS);
+    // Ensure roles exist and resolve labels -> ids before creating users
+    let dbRoles = await db.select().from(roleTable);
+    if (!dbRoles.length) {
+      console.log('⚠️ Roles missing at this point — inserting defaults');
+      await maybeInsert(roleTable, roles, 'roles');
+      dbRoles = await db.select().from(roleTable);
+    }
+    const roleIds = dbRoles.map((r: any) => r.id);
+    const roleMap = new Map(dbRoles.map((r: any) => [r.label, r.id]));
+
+    // Map customUsers roleLabel -> actual roleid
+    const resolvedCustomUsers = customUsers.map(u => ({
+      username: u.username,
+      password: u.password,
+      roleid: roleMap.get(u.roleLabel) ?? roleIds[0] ?? 1,
+      issuspended: u.issuspended,
+    }));
+
+    // Generate fake users using actual role ids
+    const fakeUsers = generateFakeUsers(NUM_FAKE_USERS, roleIds);
+
     // Fetch existing usernames to avoid unique constraint violations
     const existingUsers = await db.select({ username: useraccountTable.username }).from(useraccountTable);
     const existingUsernames = new Set(existingUsers.map((u: any) => String(u.username)));
-    const usersToInsert = [...customUsers, ...fakeUsers].filter((u) => !existingUsernames.has(u.username));
+    const usersToInsert = [...resolvedCustomUsers, ...fakeUsers].filter((u) => !existingUsernames.has(u.username));
     if (usersToInsert.length) {
-      await db.insert(useraccountTable).values(usersToInsert);
-      console.log(`✅ Seeded user accounts (${usersToInsert.length} new)`);
+      await maybeInsert(useraccountTable, usersToInsert, 'users');
     } else {
       console.log('ℹ️ No new user accounts to seed (users already exist)');
     }
 
     // Fetch all user IDs for dynamic assignment
-    const users = await db.select().from(useraccountTable);
-    const csrUsers = users.filter((u) => u.roleid === 3);
-    const pinUsers = users.filter((u) => u.roleid === 2);
+  const users = await db.select().from(useraccountTable);
+  // Use resolved role IDs (do not assume numeric IDs like 2/3) so seeding works regardless of DB-assigned PKs
+  const csrRoleId = roleMap.get('CSR Rep');
+  const pinRoleId = roleMap.get('Person In Need');
+  const csrUsers = typeof csrRoleId !== 'undefined' ? users.filter((u) => u.roleid === csrRoleId) : [];
+  const pinUsers = typeof pinRoleId !== 'undefined' ? users.filter((u) => u.roleid === pinRoleId) : [];
     const csrIds = csrUsers.map((u) => u.id);
     const pinIds = pinUsers.map((u) => u.id);
 
@@ -150,28 +200,34 @@ async function seedData() {
     const serviceTypes = await db.select().from(service_typeTable);
     const serviceTypeIds = serviceTypes.map((s) => s.id);
 
-    // Example: Seed PIN requests
-    for (let i = 0; i < NUM_FAKE_PIN_REQUESTS; i++) {
-      await db.insert(pin_requestsTable).values({
-        pin_id: faker.helpers.arrayElement(pinIds),
-        csr_id: null,
-        title: faker.lorem.words(3),
-        categoryID: faker.helpers.arrayElement(serviceTypeIds),
-        requestType: faker.helpers.arrayElement([
-          "Medical",
-          "Transport",
-          "Household Assistance",
-        ]),
-        message: faker.lorem.sentence(),
-        locationID: faker.helpers.arrayElement(locationIds),
-        urgencyLevelID: faker.helpers.arrayElement(urgencyIds),
-        createdAt: faker.date.recent({ days: 30 }),
-        status: "Available",
-        view_count: fakeInt(0, 100),
-        shortlist_count: fakeInt(0, 10),
-      });
+    // Example: Seed PIN requests — only if we have PIN users and required reference data
+    if (!pinIds.length) {
+      console.log('⚠️ No PIN users available — skipping PIN request seeding');
+    } else if (!serviceTypeIds.length || !locationIds.length || !urgencyIds.length) {
+      console.log('⚠️ Missing service types / locations / urgencies — skipping PIN request seeding');
+    } else {
+      for (let i = 0; i < NUM_FAKE_PIN_REQUESTS; i++) {
+        await db.insert(pin_requestsTable).values({
+          pin_id: faker.helpers.arrayElement(pinIds),
+          csr_id: null,
+          title: faker.lorem.words(3),
+          categoryID: faker.helpers.arrayElement(serviceTypeIds),
+          requestType: faker.helpers.arrayElement([
+            "Medical",
+            "Transport",
+            "Household Assistance",
+          ]),
+          message: faker.lorem.sentence(),
+          locationID: faker.helpers.arrayElement(locationIds),
+          urgencyLevelID: faker.helpers.arrayElement(urgencyIds),
+          createdAt: faker.date.recent({ days: 30 }),
+          status: "Available",
+          view_count: fakeInt(0, 100),
+          shortlist_count: fakeInt(0, 10),
+        });
+      }
+      console.log("✅ Seeded PIN requests");
     }
-    console.log("✅ Seeded PIN requests");
 
     // CSR requests will be seeded after pin request IDs are available (below)
 
@@ -188,7 +244,12 @@ async function seedData() {
     const MAX_INTEREST_PER_REQUEST = 6;
     const FEEDBACK_PROB = Number(process.env.SEED_FEEDBACK_PROB ?? 0.6);
 
-    for (const pr of pinRequests) {
+    if (!pinRequests.length) {
+      console.log('⚠️ No pin requests to process for CSR interactions — skipping');
+    } else if (!csrIds.length) {
+      console.log('⚠️ No CSR users available — skipping CSR interactions seeding');
+    } else {
+      for (const pr of pinRequests) {
       // Decide PIN request lifecycle state (weighted)
       const r = Math.random();
       let pinState: 'Available' | 'Pending' | 'Completed' = 'Available';
@@ -263,16 +324,20 @@ async function seedData() {
           } catch (e) {}
         }
       }
+      }
+      console.log("✅ Seeded CSR requests and related interested/feedback data");
     }
-    console.log("✅ Seeded CSR requests and related interested/feedback data");
 
     // Example: Seed CSR shortlist (avoid duplicate pairs)
     const usedShortlistPairs = new Set();
-    for (
-      let i = 0;
-      i < Math.min(NUM_FAKE_CSR_REQUESTS, pinRequestIds.length, csrIds.length);
-      i++
-    ) {
+    if (!pinRequestIds.length || !csrIds.length) {
+      console.log('⚠️ Not enough pin requests or CSR users to seed shortlist — skipping');
+    } else {
+      for (
+        let i = 0;
+        i < Math.min(NUM_FAKE_CSR_REQUESTS, pinRequestIds.length, csrIds.length);
+        i++
+      ) {
       let csr_id,
         pin_request_id,
         pair,
@@ -290,27 +355,32 @@ async function seedData() {
       //   pin_request_id,
       //   shortlistedAt: faker.date.recent({ days: 30 }),
       // });
+      }
+      console.log("✅ Seeded CSR shortlist");
     }
-    console.log("✅ Seeded CSR shortlist");
     
 
     // --- Additional: Seed notifications to create realistic user-visible events ---
     const NUM_NOTIFICATIONS = Number(process.env.NUM_NOTIFICATIONS ?? 100);
     const notificationTypes = ['interested', 'shortlist', 'accepted', 'rejected', 'feedback'];
-    for (let i = 0; i < NUM_NOTIFICATIONS; i++) {
-      try {
-        const pin = faker.helpers.arrayElement(pinRequests);
-        const csr = faker.helpers.arrayElement(csrIds);
-        await db.insert(notificationTable).values({
-          pin_id: pin.pin_id,
-          csr_id: csr,
-          pin_request_id: pin.id,
-          type: faker.helpers.arrayElement(notificationTypes),
-          createdAt: faker.date.recent({ days: 30 }),
-          read: faker.datatype.boolean() ? 1 : 0,
-        });
-      } catch (e) {
-        // ignore unique/constraint errors
+    if (!pinRequests.length || !csrIds.length) {
+      console.log('⚠️ Not enough pin requests or CSR users to seed notifications — skipping');
+    } else {
+      for (let i = 0; i < NUM_NOTIFICATIONS; i++) {
+        try {
+          const pin = faker.helpers.arrayElement(pinRequests);
+          const csr = faker.helpers.arrayElement(csrIds);
+          await db.insert(notificationTable).values({
+            pin_id: pin.pin_id,
+            csr_id: csr,
+            pin_request_id: pin.id,
+            type: faker.helpers.arrayElement(notificationTypes),
+            createdAt: faker.date.recent({ days: 30 }),
+            read: faker.datatype.boolean() ? 1 : 0,
+          });
+        } catch (e) {
+          // ignore unique/constraint errors
+        }
       }
     }
 
@@ -321,6 +391,15 @@ async function seedData() {
     await pool.end();
   }
 }
-seedRoles();
-seedData();
+// Run seeding in sequence to avoid role FK races when inserting users
+async function runSeeders() {
+  try {
+    await seedRoles();
+    await seedData();
+  } catch (err) {
+    console.error('❌ Seeding failed:', err);
+  }
+}
+
+runSeeders();
 

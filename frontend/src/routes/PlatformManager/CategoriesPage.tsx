@@ -121,7 +121,9 @@ export default function CategoriesPage() {
   return (
     <div className="pm-categories">
       <h2>Service Categories</h2>
-      <div className="row">
+      <p>Manage and organize your service categories
+      </p>
+      <div className="categories-row">
         <input placeholder="Search categories" value={q} onChange={e=>setQ(e.target.value)} />
         <button onClick={load}>Search</button>
         <label style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
@@ -130,14 +132,14 @@ export default function CategoriesPage() {
         </label>
       </div>
 
-      <div className="row">
+      <div className="categories-row">
         <input placeholder="New category name" value={name} onChange={e=>setName(e.target.value)} />
         <button onClick={onCreate} disabled={busy}>Add</button>
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {error && <div className="categories-error">{error}</div>}
 
-      <table className="simple">
+      <table className="categories-simple">
         <thead>
           <tr><th>Name</th><th style={{width:200}}>Actions</th></tr>
         </thead>
@@ -170,7 +172,7 @@ export default function CategoriesPage() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && <tr><td colSpan={2}><div className="empty">No categories found</div></td></tr>}
+          {items.length === 0 && <tr><td colSpan={2}><div className="categories-empty">No categories found</div></td></tr>}
         </tbody>
       </table>
     </div>

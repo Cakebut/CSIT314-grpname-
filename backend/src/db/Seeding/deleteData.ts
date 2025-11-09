@@ -1,9 +1,10 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { service_typeTable , locationTable , urgency_levelTable , useraccountTable, csr_requestsTable, pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable, feedbackTable, adminNotificationsTable } from '../schema/aiodb';
+import { service_typeTable , roleTable,locationTable , urgency_levelTable , useraccountTable, csr_requestsTable, pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable, feedbackTable, adminNotificationsTable } from '../schema/aiodb';
 import { passwordResetRequestsTable } from '../schema/aiodb';
  
 import dotenv from 'dotenv';
+import { ro } from '@faker-js/faker/.';
 dotenv.config();
 
 const pool = new Pool({
@@ -148,8 +149,22 @@ async function deleteAdminNotifications() {
   }
 }
 
+
+// Delete admin notifications (references users) - must run before deleting users
+async function deleteRole() {
+  try {
+    console.log('🗑️ Deleting Roles...');
+    const result = await db.delete(roleTable);
+    console.log('✅ All roles deleted! Result:', result);
+  } catch (err) {
+    console.error('❌ Error deleting roles:', err);
+  }
+}
+
+
 async function deleteAllData() {
   console.log('--- Starting full database deletion process ---');
+ 
   await deleteCSR_Shortlist();
   await deleteCSR_Interested();
   await deleteCSR_Req();
@@ -160,7 +175,9 @@ async function deleteAllData() {
   // admin notifications reference users; delete them before deleting users
   await deleteAdminNotifications();
   await deleteResetPasswordRequests();   // remove dependent password-reset records before deleting users to avoid FK violations
+  // Delete users before roles to avoid FK constraint violations (users.roleid -> roles.id)
   await deleteAllUsers();
+  await deleteRole();
   await deleteServiceTypes();
   await deleteLocations();
   await deleteUrgencyLevels();

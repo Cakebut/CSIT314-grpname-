@@ -1,5 +1,5 @@
 import { UserEntity } from '../src/entities/userAccount';
-import { useraccountData } from '../src/shared/dataClasses';
+import { describe, it, expect, beforeAll } from '@jest/globals';
 import z, { infer } from 'zod'
 
 const userAccountDataSchema = z.object({
