@@ -97,20 +97,20 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
         body: JSON.stringify({ requestId: request.id, adminId, adminName, note: adminNotes }),
       });
       if (!res.ok) throw new Error(`Approve failed: ${res.status}`);
-  setShowConfirmDialog(false);
-  // update local copy so UI reflects reviewer and timestamp
-  const now = new Date().toISOString();
-  setLocalRequest({ ...localRequest, status: 'Approved', reviewed_by: adminId, admin_name: adminName, reviewed_at: now, admin_note: adminNotes });
-  setActionResult('approved');
-  setShowSuccessDialog(true);
-  if (onUpdated) onUpdated();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to approve request');
-    } finally {
-      setBusy(false);
-    }
-  };
+    setShowConfirmDialog(false);
+    // update local copy so UI reflects reviewer and timestamp
+    const now = new Date().toISOString();
+    setLocalRequest({ ...localRequest, status: 'Approved', reviewed_by: adminId, admin_name: adminName, reviewed_at: now, admin_note: adminNotes });
+    setActionResult('approved');
+    setShowSuccessDialog(true);
+    if (onUpdated) onUpdated();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to approve request');
+      } finally {
+        setBusy(false);
+      }
+    };
 
   const reject = async () => {
     if (!adminNotes) {
@@ -129,29 +129,23 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
         credentials: 'include',
         body: JSON.stringify({ requestId: request.id, adminId, adminName, note: adminNotes }),
       });
-  if (!res.ok) throw new Error(`Reject failed: ${res.status}`);
-  // update local copy so UI reflects reviewer and timestamp
-  const now = new Date().toISOString();
-  setLocalRequest({ ...localRequest, status: 'Rejected', reviewed_by: adminId, admin_name: adminName, reviewed_at: now, admin_note: adminNotes });
-  if (onUpdated) onUpdated();
-  // show a small success/rejection dialog and lock the notes
-  setActionResult('rejected');
-  setShowSuccessDialog(true);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to reject request');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const confirmApprove = () => {
-    // user confirmed in dialog
-    approve();
-  };
+    if (!res.ok) throw new Error(`Reject failed: ${res.status}`);
+    // update local copy so UI reflects reviewer and timestamp
+    const now = new Date().toISOString();
+    setLocalRequest({ ...localRequest, status: 'Rejected', reviewed_by: adminId, admin_name: adminName, reviewed_at: now, admin_note: adminNotes });
+    if (onUpdated) onUpdated();
+    // show a small success/rejection dialog and lock the notes
+    setActionResult('rejected');
+    setShowSuccessDialog(true);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to reject request');
+      } finally {
+        setBusy(false);
+      }
+    };
 
   // Removed 'Back to Dashboard' action — success dialog will close the modal instead
-
   if (!open) return null;
 
   return (
@@ -214,19 +208,19 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
           </div>
           <div>
             <button
-              onClick={async () => { setShowConfirmDialog(true); }}
-              className="approve-view-password"
-              disabled={busy || request.status?.toLowerCase() !== 'pending'}
-            >
-              <Check className="icon" /> Approve
-            </button>
-            <button
               onClick={() => reject()}
               className="reject-view-password"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
               style={{ marginLeft: 8 }}
             >
               <X className="icon" /> Reject
+            </button>
+            <button
+              onClick={async () => { setShowConfirmDialog(true); }}
+              className="approve-view-password"
+              disabled={busy || request.status?.toLowerCase() !== 'pending'}
+            >
+              <Check className="icon" /> Approve
             </button>
           </div>
         </div>
@@ -242,7 +236,7 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
             <p><strong>Request ID:</strong> #{String(request.id).padStart(3, '0')}</p>
             <div className="view-password-actions">
               <button onClick={() => setShowConfirmDialog(false)}>No, Cancel</button>
-              <button onClick={confirmApprove}>Yes, Approve</button>
+              <button onClick={approve}>Yes, Approve</button>
             </div>
           </div>
         </div>

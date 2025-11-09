@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./ViewResetDashboardPage.css";
 import ViewPasswordRequest from "./ViewPasswordRequests";
+import ReviewPasswordRequest from "./ReviewPasswordRequests";
 import { toast } from 'react-toastify';
 
 interface PasswordResetRequest {
@@ -156,13 +157,31 @@ export default function AdminPasswordResetDashboard() {
         </tbody>
       </table>
       {selectedRequest && (
-        <ViewPasswordRequest
-          open={!!selectedRequest}
-          request={selectedRequest}
-          onClose={() => setSelectedRequest(null)}
-          onUpdated={fetchRequests}
-        />
-      )}
+        selectedRequest.status === "Pending" ? (
+          <ViewPasswordRequest
+            open={true}
+            request={selectedRequest}
+            onClose={() => setSelectedRequest(null)}
+            onUpdated={fetchRequests}
+            />
+          ) : (
+          <ReviewPasswordRequest
+            open={true}
+            onClose={() => setSelectedRequest(null)}
+            request={{
+              id: String(selectedRequest.id),
+              username: selectedRequest.username || String(selectedRequest.user_id),
+              email: undefined,
+              role: selectedRequest.user_role,
+              accountStatus: selectedRequest.account_status,
+              lastLogin: undefined,
+              requestDate: selectedRequest.requested_at,
+              reason: selectedRequest.admin_note,
+              status: selectedRequest.status,
+            }}
+          />
+          )
+        )}
     </div>
   );
 }

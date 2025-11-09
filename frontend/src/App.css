@@ -63,7 +63,7 @@ html {
 
 /* Ensure all modal overlays and modal contents sit above other UI (popovers, badges, etc.) */
 /* We use very large z-index values and !important to avoid stacking-context surprises. */
-.modal-overlay,
+/* .modal-overlay,
 .pin-modal,
 .pin-modal-overlay,
 .available-modal-overlay,
@@ -71,9 +71,13 @@ html {
 .user-accounts-modal-overlay,
 .roles-modal-overlay,
 .view-password-modal-overlay,
+.view-password-confirm-dialog,
+.view-password-success-dialog,
+.view-password-modal-overlay,
 .modal {
   z-index: 200000 !important;
 }
+
 .modal-content,
 .pin-modal-content,
 .available-modal-content,
@@ -81,13 +85,17 @@ html {
 .user-accounts-modal-content,
 .roles-modal-content,
 .view-password-modal-content,
+.view-password-confirm-content,
+.view-password-success-content,
 .modal-content {
   z-index: 210000 !important;
 }
 
-/* Special-case: ensure any inline modal close buttons are above the content */
 .pin-modal .pin-modal-close,
 .modal-content .modal-close,
-.pin-modal-content .pin-modal-close {
+.pin-modal-content .pin-modal-close,
+.view-password-modal-content .modal-close,
+.view-password-confirm-content .modal-close,
+.view-password-success-content .modal-close {
   z-index: 220000 !important;
-}
+} */

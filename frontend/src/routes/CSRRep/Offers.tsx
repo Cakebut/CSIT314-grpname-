@@ -138,7 +138,6 @@ function Offers() {
           {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
         <button className="reset-offers btn" onClick={() => { setFilterStatus(""); setFilterCategory(""); setFilterLocation(""); }}>Clear Filter</button>
-        <button className="clear-logs-btn btn">Clear Logs</button> 
       </div>
 
       <div className="available-list" style={{ pointerEvents: "none" }}>

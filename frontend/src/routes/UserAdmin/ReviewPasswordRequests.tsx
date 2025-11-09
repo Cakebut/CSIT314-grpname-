@@ -22,20 +22,6 @@ interface ReviewPasswordRequestProps {
 function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequestProps) {
   // admin notes not used in the mock review component
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-
-  const handleApprove = () => {
-    setShowConfirmDialog(true);
-  };
-
-  const confirmApprove = () => {
-    // Handle approval logic here
-  console.log("Approved");
-    setShowConfirmDialog(false);
-    setShowSuccessDialog(true);
-  };
-
   // Removed 'Back to Dashboard' action — success dialog will just close the modal
 
   const getStatusBadge = (status: string) => {
@@ -69,8 +55,8 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
   if (!open) return null;  // Don't render if the modal isn't open
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose} >
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '30%' }}>
         <h3>Review Password Change Request</h3>
         <p style={{ marginBottom: 20 }}><strong>Request ID:</strong> #{request.id}</p>
         <p><strong>Status:</strong> {getStatusBadge(request.status || "pending")}</p>
@@ -100,63 +86,9 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="actions">
-          <div className="actions-left">
-            <button onClick={onClose} className="cancel-btn">Cancel</button>
-          </div>
-          <div className="actions-right">
-            <button
-              onClick={() => {
-                setTimeout(() => {
-                  console.log('Reject action');
-                  onClose();
-                }, 100);
-              }}
-              className="reject-btn"
-            >
-              <X className="icon" /> 
-              Reject
-            </button>
-            <button onClick={handleApprove} className="approve-btn">
-              <Check className="icon" />
-              Approve
-            </button>
-          </div>
-        </div>
+        
       </div>
 
-      {/* Confirm Action Dialog */}
-      {showConfirmDialog && (
-        <div className="confirm-dialog">
-          <div className="confirm-content">
-            <h4>Confirm Action</h4>
-            <p>Are you sure you want to approve this password change request?</p>
-            <p><strong>Username:</strong> {request.username}</p>
-            <p><strong>Request ID:</strong> #{request.id}</p>
-            <div className="actions">
-              <button onClick={() => setShowConfirmDialog(false)}>No, Cancel</button>
-              <button onClick={confirmApprove}>Yes, Approve</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Dialog */}
-      {showSuccessDialog && (
-        <div className="success-dialog">
-          <div className="success-content">
-            <h4>Success!</h4>
-            <p>Password change request approved</p>
-            <ul>
-              <li>User's password has been updated</li>
-              <li>Request marked as approved</li>
-            </ul>
-            <button onClick={() => { setShowSuccessDialog(false); onClose(); }}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
