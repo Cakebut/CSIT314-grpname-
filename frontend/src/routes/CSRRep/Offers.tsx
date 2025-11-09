@@ -138,9 +138,10 @@ function Offers() {
           {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
         <button className="reset-offers btn" onClick={() => { setFilterStatus(""); setFilterCategory(""); setFilterLocation(""); }}>Clear Filter</button>
+        <button className="clear-logs-btn btn">Clear Logs</button> 
       </div>
 
-      <div className="available-list">
+      <div className="available-list" style={{ pointerEvents: "none" }}>
         {filtered.filter(o => typeof o.id === 'number' && !isNaN(o.id)).map(o => (
           <div key={o.id} className="available-req-row" style={{ padding: '30px'}}>
             <div className="available-req-row-top">

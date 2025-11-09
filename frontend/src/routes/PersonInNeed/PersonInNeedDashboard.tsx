@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { createPortal } from 'react-dom';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import "./PersonInNeedDashboard.css";
-import { ClipboardList } from "lucide-react";
+import * as Popover from "@radix-ui/react-popover";import { Bell, MoveLeft } from "lucide-react";
+;
 
 // Centralized status color logic
 function getStatusColor(status?: string) {
@@ -129,16 +129,17 @@ const PersonInNeedDashboard: React.FC = () => {
     requestTitle?: string;
   }
   // Notification state (must be inside component to access userId)
-  const [showNoti, setShowNoti] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notiLoading, setNotiLoading] = useState(false);
   const [notiError, setNotiError] = useState("");
   const [notiHasUnread, setNotiHasUnread] = useState(false);
   const notiButtonRef = React.useRef<HTMLButtonElement>(null);
   const notiPopoverRef = React.useRef<HTMLDivElement>(null);
+ 
   // Outside click handler for notification popover
   useEffect(() => {
-    if (!showNoti) return;
+    if (!notificationsOpen) return;
     function handleClick(e: MouseEvent) {
       const btn = notiButtonRef.current;
       const pop = notiPopoverRef.current;
@@ -147,12 +148,12 @@ const PersonInNeedDashboard: React.FC = () => {
         !btn.contains(e.target as Node) &&
         !pop.contains(e.target as Node)
       ) {
-        setShowNoti(false);
+        setNotificationsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [showNoti]);
+  }, [notificationsOpen]);
 
   // Fetch notifications for PIN user
   const fetchNotifications = React.useCallback(() => {
@@ -174,18 +175,62 @@ const PersonInNeedDashboard: React.FC = () => {
       });
   }, [userId]);
 
+  const unreadCount = notifications.filter((n) => !n.read).length;
   useEffect(() => {
     fetchNotifications();
     // Optionally poll for new notifications every 60s
     // const interval = setInterval(fetchNotifications, 60000);
     // return () => clearInterval(interval);
   }, [userId, fetchNotifications]);
+
+  // When the popover opens, mark notifications as read (clears badge)
+  useEffect(() => {
+    if (notificationsOpen && unreadCount > 0) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: 1 })));
+    }
+
+  // Helper to load the latest platform announcement and update modal state
+  const fetchLatestAnnouncement = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/pm/announcements/latest`);
+      if (!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+      const latest = data?.latest ?? null;
+      setLatestAnnouncement(latest);
+      if (latest?.createdAt) {
+        const lastSeen = localStorage.getItem('latestAnnouncementSeenAt');
+        if (lastSeen !== latest.createdAt) {
+          setShowAnnouncementModal(true);
+        }
+      }
+    } catch (err) {
+      // Log for debugging but don't break the UI
+      console.error('Failed to fetch latest announcement', err);
+    }
+  };
+
+    // Load latest platform announcement
+    fetchLatestAnnouncement();
+
+  }, [notificationsOpen, unreadCount]);
+
+  // Ensure the badge is cleared immediately when the popover is opened via the trigger
+  const handleNotificationsOpenChange = (open: boolean) => {
+    setNotificationsOpen(open);
+    if (open && unreadCount > 0) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: 1 })));
+    }
+  };
+
+
   const [locationID, setLocationID] = useState("");
   const [urgencyLevelID, setUrgencyLevelID] = useState("");
   const [locations, setLocations] = useState<{ id: number; name: string; line: string }[]>([]);
   const [urgencyLevels, setUrgencyLevels] = useState<{ id: number; label: string; color: string }[]>([]);
   const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+
+  
   useEffect(() => {
     fetch(`${API_BASE}/api/pin/locations`)
       .then(res => res.json())
@@ -465,96 +510,111 @@ const PersonInNeedDashboard: React.FC = () => {
 
   return (
     <>
-         {/* Announcement modal */}
-      {latestAnnouncement && showAnnouncementModal && (
-        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', width: 'min(640px, 92vw)', boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
-            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Announcement</div>
-            <div style={{ whiteSpace: 'pre-wrap', color: '#111827' }}>{latestAnnouncement.message}</div>
-            <div style={{ color: '#6b7280', fontSize: 12, marginTop: 6 }}>at {new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="button" onClick={() => { localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement!.createdAt); setShowAnnouncementModal(false); }} style={{ background: '#2563eb', color: '#fff' }}>Close</button>
-            </div>
+      {/* Latest Announcement Modal */}
+      {showAnnouncementModal && latestAnnouncement && (
+        <div className="pin-modal" onClick={() => setShowAnnouncementModal(false)}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+            <h3>Platform Announcement</h3>
+            <div style={{ marginBottom: 12, fontWeight: 600 }}>{latestAnnouncement.message}</div>
+            <div style={{ color: '#64748b', fontSize: 13, marginBottom: 18 }}>Posted: {latestAnnouncement.createdAt.slice(0, 10)}</div>
+            <button className="pin-button primary" style={{ background: '#2563eb', color: '#fff' }}
+              onClick={() => {
+                setShowAnnouncementModal(false);
+                localStorage.setItem('latestAnnouncementSeenAt', latestAnnouncement.createdAt);
+              }}
+            >Dismiss</button>
           </div>
         </div>
       )}
 
-      {/* Notification Button and Popover */}
-      <div style={{ position: 'absolute', top: 18, right: 32, zIndex: 100 }}>
-        <button
-          ref={notiButtonRef}
-          className="pin-button"
-          style={{ fontSize: 24, position: 'relative', background: '#e0e7ef', color: '#334155', borderRadius: 24, width: 44, height: 44, boxShadow: notiHasUnread ? '0 0 0 2px #ef4444' : undefined }}
-          onClick={() => setShowNoti(s => !s)}
-          aria-label="Notifications"
-        >
-          <span style={{ position: 'relative' }}>
-            🔔
-            {notiHasUnread && (
-              <span style={{
-                position: 'absolute',
-                top: -2,
-                right: -6,
-                width: 12,
-                height: 12,
-                background: '#ef4444',
-                borderRadius: '50%',
-                border: '2px solid #fff',
-                boxShadow: '0 0 4px #ef4444',
-                display: 'inline-block',
-              }} />
-            )}
-          </span>
-        </button>
-        {showNoti && (
-          <div ref={notiPopoverRef} style={{ position: 'absolute', top: 48, right: 0, minWidth: 320, background: '#fff', boxShadow: '0 4px 16px #cbd5e1', borderRadius: 12, zIndex: 200, padding: '14px 18px 12px 18px', animation: 'fadeIn 0.18s' }}>
-            <div style={{ position: 'absolute', top: -10, right: 18, width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: '10px solid #fff' }} />
-            <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Notifications</div>
-            {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? <div className="pin-row-muted">No notifications yet.</div> : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: 320, overflowY: 'auto' }}>
-                {notifications.map(noti => (
-                  <li
-                    key={noti.id}
-                    style={{
-                      padding: '12px 0',
-                      borderBottom: '1px solid #e5e7eb',
-                      background: noti.read === 0 ? 'linear-gradient(90deg,#fef9c3 60%,#f3f4f6 100%)' : '#f3f4f6',
-                      cursor: 'pointer',
-                      borderRadius: 8,
-                      marginBottom: 2,
-                      boxShadow: noti.read === 0 ? '0 2px 8px #fef9c3' : 'none',
-                      transition: 'background 0.2s, box-shadow 0.2s',
-                      position: 'relative',
-                    }}
-                    title="Click to clear notification"
-                    onClick={async () => {
-                      try {
-                        await fetch(`${API_BASE}/api/pin/notifications/${noti.id}`, { method: 'DELETE' });
-                        setNotifications(prev => prev.filter(n => n.id !== noti.id));
-                        toast.success('Notification cleared');
-                      } catch {
-                        toast.error('Failed to clear notification');
-                      }
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, fontSize: '1.08rem', color: '#2563eb', marginBottom: 2 }}>
-                      {noti.type === 'interested' ? '👀 CSR Interested'
-                        : noti.type === 'shortlist' ? '❤️ CSR Shortlisted'
-                        : noti.type === 'accepted' ? `✅ CSR Accepted`
-                        : noti.type === 'rejected' ? `❌ CSR Rejected`
-                        : noti.type === 'feedback' ? '⭐ Feedback received'
-                        : noti.type}
+
+      {/* Notification popover (restored Radix design) */}
+        <div className="CSR-notification-popover-wrapper">
+          <Popover.Root open={notificationsOpen} onOpenChange={handleNotificationsOpenChange}>
+            <Popover.Trigger asChild>
+              <button
+                className="CSR-notification-button"
+                aria-haspopup="true"
+                aria-expanded={notificationsOpen}
+                title="Notifications"
+              >
+                <Bell className="icon" />
+                {unreadCount > 0 && (
+                  <span className="CSR-badge" aria-hidden>
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </Popover.Trigger>
+
+            <Popover.Portal>
+              <Popover.Content className="CSR-notification-popover" sideOffset={8} align="end">
+                <div className="CSR-notification-popover-header">
+                  <h3>Notifications</h3>
+                </div>
+
+                <div className="CSR-notification-popover-body">
+                  {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? (
+                    <div className="CSR-notification-empty">
+                      <Bell className="CSR-empty-icon" />
+                      <div className="CSR-empty-text">No notifications yet</div>
                     </div>
-                    <div style={{ fontSize: 15, color: '#334155', fontWeight: 500, marginBottom: 2 }}>CSR: <span style={{ color: '#0ea5e9' }}>{noti.csrUsername || noti.csr_id}</span> | Request: <span style={{ color: '#0ea5e9' }}>{noti.requestTitle || noti.pin_request_id}</span></div>
-                    <div style={{ fontSize: 13, color: '#64748b' }}>{noti.createdAt?.slice(0, 19).replace('T', ' ')}</div>
-                    <span style={{ position: 'absolute', top: 8, right: 12, color: '#ef4444', fontWeight: 700, fontSize: 18, cursor: 'pointer' }} title="Clear notification">×</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
+                  ) : (
+                    <ul className="CSR-notification-list">
+                      {notifications.map(noti => (
+                        <li
+                          key={noti.id}
+                          className={`CSR-notification-item ${noti.read ? 'read' : 'unread'}`}
+                          onClick={() => {
+                            // Mark this notification as read locally (do not remove it)
+                            setNotifications(prev => prev.map(p => p.id === noti.id ? { ...p, read: 1 } : p));
+                          }}
+                          title="Mark as read"
+                        >
+                          <div className="CSR-notification-title" style={{ fontWeight: 700, fontSize: '1.08rem', color: '#2563eb', marginBottom: 2 }}>
+                            {noti.type === 'interested' ? '👀 CSR Interested'
+                            : noti.type === 'shortlist' ? '❤️ CSR Shortlisted'
+                            : noti.type === 'accepted' ? `✅ CSR Accepted`
+                            : noti.type === 'rejected' ? `❌ CSR Rejected`
+                            : noti.type === 'feedback' ? '⭐ Feedback received'
+                            : noti.type}
+                          </div>
+                          <div style={{ fontSize: 15, color: '#334155', fontWeight: 500, marginBottom: 2 }}>
+                            CSR: <span style={{ color: '#0ea5e9' }}>{noti.csrUsername || noti.csr_id}</span> | Request: <span style={{ color: '#0ea5e9' }}>{noti.requestTitle || noti.pin_request_id}</span>
+                          </div>
+                          <div style={{ fontSize: 13, color: '#64748b' }}>{noti.createdAt?.slice(0, 19).replace('T', ' ')}</div>
+                          <button
+                            type="button"
+                            className="CSR-notification-close"
+                            aria-label="Clear notification"
+                            title="Clear notification"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              try {
+                                const res = await fetch(`http://localhost:3000/api/pin/notifications/${noti.id}`, { method: 'DELETE', credentials: 'include' });
+                                if (res.ok) {
+                                  setNotifications(prev => prev.filter(n => n.id !== noti.id));
+                                  toast.success('Notification cleared');
+                                } else {
+                                  toast.error('Failed to clear notification');
+                                }
+                              } catch (err) {
+                                toast.error('Failed to clear notification');
+                              }
+                            }}
+                          >
+                            ×
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <Popover.Close />
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
+        </div>
 
 
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
@@ -640,8 +700,8 @@ const PersonInNeedDashboard: React.FC = () => {
       {/* My Offers Modal */}
       {showMyOffers && (
         <div className="pin-modal" onClick={() => setShowMyOffers(false)}>
-          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 700, maxWidth: '98vw', minHeight: 400 }}>
-            <h3>My Offers (Interested CSRs for My Requests)</h3>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 1100, maxWidth: '90vw', padding: '30px 24px', borderRadius: 14}}>
+            <h3>CSR Offers for My Requests</h3>
             {offersLoading ? (
               <div>Loading...</div>
             ) : offersError ? (
@@ -687,7 +747,7 @@ const PersonInNeedDashboard: React.FC = () => {
                                 {offer.assignedCsrId !== csr.csr_id && (
                                   <>
                                     <button className="pin-button" style={{ backgroundColor: '#22c55e', color: 'white' }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
-                                    <button className="pin-button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Cancel</button>
+                                    <button className="pin-button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Reject</button>
                                   </>
                                 )}
                             {/* Mark Completed button for pending requests with assigned CSR */}
@@ -706,7 +766,7 @@ const PersonInNeedDashboard: React.FC = () => {
                                     }
                                   }
                                 }}
-                >Mark Completed</button>
+                              >Mark Completed</button>
                             )}
                             {/* Feedback button for completed offers, only for assigned CSR */}
                             {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
@@ -726,7 +786,7 @@ const PersonInNeedDashboard: React.FC = () => {
                 </tbody>
               </table>
             )}
-            <button className="pin-button" onClick={() => setShowMyOffers(false)} style={{ marginTop: 16 }}>Close</button>
+            <button className="pin-button" onClick={() => setShowMyOffers(false)} style={{ marginTop: 20, display: 'block', marginLeft: 'auto' }}>Close</button>
           </div>
         </div>
       )}
@@ -829,14 +889,49 @@ const PersonInNeedDashboard: React.FC = () => {
 
       {selected && (
         <div className="pin-modal" onClick={() => setSelected(null)}>
-          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 700, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14 }}>
+            <button
+              onClick={() => void setSelected(null)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 15,
+                background: 'none',
+                border: 'none',
+                fontSize: 26,
+                fontWeight: 700,
+                color: '#64748b',
+                cursor: 'pointer',
+                lineHeight: 1,
+                zIndex: 2
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          <div className="details" style={{ gap: 10, display: 'flex', flexDirection: 'column' }}>
             <h3>Request Details</h3>
-            <div><b>PIN Name:</b> {selected.pinName}</div>
-            <div><b>Title:</b> {selected.title}</div>
+            <div><b>PIN Name:</b> {selected.pinName || 'N/A'}</div>
+            <div><b>Title:</b> {selected.title || 'Untitled Request'}</div>
             <div><b>Request Type:</b> {selected.categoryName}</div>
-            <div><b>Location:</b> {selected.locationName || '-'}</div>
+            <div><b>Location:</b> { selected.locationName || '-'}</div>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '8px 0' }}>
-              <div><b>Status:</b> <StatusBadge status={selected.status} /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <strong>Status:</strong>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.25rem 0.8rem',
+                  borderRadius: 9999,
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  color: selected.status === 'Pending' ? '#b45309' : selected.status === 'Available' ? '#16a34a' : '#6b7280',
+                  backgroundColor: selected.status === 'Pending' ? 'rgba(245,158,66,0.08)' : selected.status === 'Available' ? 'rgba(34,197,94,0.08)' : 'rgba(107,114,128,0.06)'
+                }}>
+                  {selected.status || '-'}
+                </span>
+              </div>
               <div> {selected.urgencyLabel && (
                 <span
                   style={{
@@ -862,8 +957,8 @@ const PersonInNeedDashboard: React.FC = () => {
             </div>
             <div><b>Description:</b></div>
             <div className="pin-desc-box">{selected.message || '(No description)'}</div>
-            <button className="pin-button primary" style={{ marginTop: 16 }} onClick={() => setSelected(null)}>Close</button>
           </div>
+        </div>
         </div>
       )}
 
@@ -872,22 +967,13 @@ const PersonInNeedDashboard: React.FC = () => {
           <div
             className="pin-modal-content"
             onClick={e => e.stopPropagation()}
-            style={{ width: '1000px', maxWidth: '98vw', minHeight: '500px' }}
+            style={{ width: '1200px', maxWidth: '98vw', minHeight: '500px', padding: '40px 50px' }}
           >
-            <h3>My Requests</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <button className="pin-button primary" onClick={() => setShowCreate(true)}>Create Request</button>
-              <button
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={handleDownloadHistory}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download w-4 h-4 mr-2" aria-hidden="true"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
-                Download Past Service History
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8 }}>
+              <h3 style={{ marginRight: 'auto' }}>My Requests</h3>
             </div>
             {/* Filter row for My Requests - placed directly below action buttons */}
-            <div className="pin-my-requests-filter-row">
-              {/** common control style */}
+            <div className="pin-my-requests-filter-row" style={{ marginTop: 30, padding: 20, borderRadius: 12 }}>
               <input
                 className="pin-filter-control pin-filter-title"
                 placeholder="Title"
@@ -948,8 +1034,9 @@ const PersonInNeedDashboard: React.FC = () => {
               >
                 Shortlists {myRequestsSortShortlists === 'asc' ? '▲' : '▼'}
               </button>
+              <button className="btn" onClick={() => setShowCreate(true)} style={{ marginLeft: 'auto' }}>Create Request</button>
             </div>
-            <table className="pin-table">
+            <table className="pin-table" style={{ marginTop: 25 }}>
               <thead>
                 <tr>
                   <th>Title</th>
@@ -1053,7 +1140,17 @@ const PersonInNeedDashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
-            <button className="pin-button" onClick={() => setShowMyRequests(false)} style={{ marginTop: 16 }}>Close</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 40 }}>
+            <button
+                className="btn"
+                style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+                onClick={handleDownloadHistory}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download w-4 h-4 mr-2" aria-hidden="true"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+                Download Past Service History
+              </button>
+            <button className="pin-button" onClick={() => setShowMyRequests(false)}>Close</button>
+              </div>
           </div>
         </div>
       )}
@@ -1141,7 +1238,7 @@ const PersonInNeedDashboard: React.FC = () => {
 
       {editRequest && (
         <div className="pin-modal" onClick={() => setEditRequest(null)}>
-          <div className="pin-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="pin-modal-content" onClick={e => e.stopPropagation()} style={{ width: 600, maxWidth: '90vw', padding: '30px 24px', borderRadius: 14}}>
             <h3>Edit Request</h3>
             <form onSubmit={async (e) => {
               e.preventDefault();
@@ -1229,10 +1326,12 @@ const PersonInNeedDashboard: React.FC = () => {
                   ))}
                 </select>
               </div>
+              <div style={{ display : 'flex', justifyContent : 'space-between', marginTop: 20}}>
+              <button className="pin-button" onClick={() => setEditRequest(null)} style={{ marginTop: 16 }}>Cancel</button>
               <button className="pin-button primary" type="submit" style={{ marginTop: 16 }}>Save Changes</button>
               {editStatusMsg && <div style={{ marginTop: 12 }}>{editStatusMsg}</div>}
+              </div>
             </form>
-            <button className="pin-button" onClick={() => setEditRequest(null)} style={{ marginTop: 16 }}>Cancel</button>
           </div>
         </div>
       )}

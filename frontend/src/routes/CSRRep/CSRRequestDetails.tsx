@@ -27,13 +27,13 @@ function CSRRequestDetails({ request, onClose, csrId, shortlistedIds, interested
   }, [request?.requestId]);
   return (
     <div className="modal" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: 400, maxWidth: '90vw', padding: '28px 24px', borderRadius: 14, position: 'relative' }}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '720px', padding: '50px 50px 40px 50px', borderRadius: 8, position: 'relative' }}>
         <button
           onClick={onClose}
           style={{
             position: 'absolute',
             top: 12,
-            right: 12,
+            right: 15,
             background: 'none',
             border: 'none',
             fontSize: 26,
@@ -41,26 +41,40 @@ function CSRRequestDetails({ request, onClose, csrId, shortlistedIds, interested
             color: '#64748b',
             cursor: 'pointer',
             lineHeight: 1,
-            zIndex: 2,
+            zIndex: 2
           }}
           aria-label="Close"
         >
           ×
         </button>
+        <div className="details" style={{ gap: 10, display: 'flex', flexDirection: 'column' }}>
         <h3>Request Details</h3>
         <div><b>PIN Name:</b> {request.pinName || 'N/A'}</div>
         <div><b>Title:</b> {request.title || 'Untitled Request'}</div>
         <div><b>Request Type:</b> {request.categoryName}</div>
         <div><b>Location:</b> {request.location || request.locationName || '-'}</div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '8px 0' }}>
+        </div>
+        <div style={{ display: 'flex', gap: 5, alignItems: 'center', margin: '8px 0' }}>
           <div>
-            <b>Status:</b> <span style={{
+            <b>Status:</b>{' '}
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '6px 12px',
+              borderRadius: 999,
               color:
-                request.status === 'Pending' ? '#f59e42' :
-                request.status === 'Available' ? '#22c55e' :
+                request.status === 'Pending' ? '#b45309' :
+                request.status === 'Available' ? '#16a34a' :
                 '#6b7280',
+              backgroundColor:
+                request.status === 'Pending' ? 'rgba(245,158,66,0.08)' :
+                request.status === 'Available' ? 'rgba(34,197,94,0.08)' :
+                'rgba(107,114,128,0.06)',
               fontWeight: 700,
-              fontSize: '1.05rem',
+              fontSize: '0.95rem',
+              minWidth: 90,
+              textAlign: 'center',
             }}>{request.status || '-'}</span>
           </div>
           <div>
@@ -78,7 +92,7 @@ function CSRRequestDetails({ request, onClose, csrId, shortlistedIds, interested
                   fontSize: '0.8rem',
                   backgroundColor:
                     request.urgencyLevel.toLowerCase() === 'high priority' ? '#ef4444' :
-                    request.urgencyLevel.toLowerCase() === 'low priority' ? '#22c55e' : '#6b7280',
+                    request.urgencyLevel.toLowerCase() === 'low priority' ? '#6b7280' : '#6b7280',
                   textAlign: 'center',
                   letterSpacing: 1,
                 }}
@@ -90,11 +104,12 @@ function CSRRequestDetails({ request, onClose, csrId, shortlistedIds, interested
         </div>
         <div><b>Description:</b></div>
         <div className="desc-box">{request.message || '(No description)'}</div>
-        <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 12, marginTop: 25, justifyContent: 'flex-end' }}>
           <button
             className={interestedIds.includes(request.requestId) ? "csr-btn-danger" : "csr-btn"}
             style={{
               minWidth: 110,
+              padding: '10px 16px', 
               background: request.status === 'Pending' ? '#e5e7eb' : '#2563eb',
               color: request.status === 'Pending' ? '#a1a1aa' : '#fff',
               border: request.status === 'Pending' ? '1px solid #cbd5e1' : 'none',
@@ -130,7 +145,7 @@ function CSRRequestDetails({ request, onClose, csrId, shortlistedIds, interested
               }
             }}
           >
-            {interestedIds.includes(request.requestId) ? "Unmark Interested" : "Interested"}
+            {interestedIds.includes(request.requestId) ? "Remove Interest" : "Interested"}
           </button>
           <button
             className="csr-heart-btn"

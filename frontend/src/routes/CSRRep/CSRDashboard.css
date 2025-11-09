@@ -115,7 +115,8 @@
   position: fixed;
   top: 50px;
   right: 50px;
-  z-index: 1200;
+  /* ensure the popover sits above other components like badges */
+  z-index: 99999;
   display: flex;
   align-items: flex-start;
 }
@@ -157,6 +158,8 @@
   border-radius: 8px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.12);
   border: 1px solid rgba(0,0,0,0.06);
+  /* place on top of everything (overrides other local z-indexes) */
+  z-index: 100000;
   overflow: hidden;
 }
 
@@ -237,28 +240,71 @@
 }
 
 .CSR-notification-item {
-  padding: 10px 30px;
-  border-radius: 6px;
+  padding: 14px 40px;
+  border-radius: 8px;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1px solid black;
+  border: 1px solid #eef2f6;
+  transition: box-shadow 0.15s, transform 0.12s;
+  position: relative; /* anchor absolute children like the close button inside the card */
 }
 
 .CSR-notification-item.unread {
   background: #f8fafc;
 }
 
+.CSR-notification-item:hover {
+  box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+  transform: translateY(-3px);
+}
+
 .CSR-notification-title {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1.02rem;
   color: #0f172a;
 }
 
 .CSR-notification-time {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #6b7280;
+}
+
+/* Close (delete) button on each notification */
+.CSR-notification-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+  opacity: 0;
+  pointer-events: none; /* hidden until hover */
+}
+.CSR-notification-item:hover .CSR-notification-close {
+  opacity: 1;
+  pointer-events: auto;
+  color: #c2410c;
+}
+
+.CSR-notification-close:hover {
+  background: rgba(239,68,68,0.08);
+  transform: scale(1.02);
+}
+
+.CSR-notification-close:active {
+  opacity: 0.9;
 }
 
 @media (max-width: 640px) {
@@ -266,4 +312,12 @@
     right: 10px;
     width: 280px;
   }
+}
+
+/* Ensure modal overlays appear above the notification popover */
+.modal {
+  z-index: 200500 !important;
+}
+.modal-content {
+  z-index: 200501 !important;
 }

@@ -83,7 +83,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1100;
+  /* Ensure CSRRep modals render above the notification popover */
+  z-index: 200500 !important;
   padding: 20px;
 }
 
@@ -254,5 +255,58 @@
 
 .shortlist-delete-button .icon {
   margin-right: 6px;
+}
+
+/* Top-right badges container to match Available layout */
+.shortlist-badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 30;
+}
+
+.shortlist-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.shortlist-chip.status-available {
+  background: rgba(34,197,94,0.08);
+  color: #16a34a;
+}
+
+.shortlist-chip.urgency-high {
+  background: #ef4444;
+  color: white;
+}
+
+.shortlist-chip.urgency-low {
+  background: #6b7280;
+  color: white;
+}
+
+.shortlist-request-id {
+  color: #6b7280;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.shortlist-request-location .icon {
+  width: 16px; height: 16px;
+  color: #64748b;
+}
+
+.shortlist-request-card {
+  padding: 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.08);
 }
 

@@ -193,7 +193,6 @@ export default function ReportsPage() {
           <button onClick={runQuickMonth} disabled={loading}>Generate Monthly Report</button>
         </div>
       </div>
-      <h2>Platform Manager — Reports</h2>
       {!showCustomForm && (
         <div className="buttons" style={{marginBottom:12}}>
           <button onClick={() => setShowCustomForm(true)} disabled={loading}>Generate Custom Report</button>

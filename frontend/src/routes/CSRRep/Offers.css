@@ -243,6 +243,7 @@
 .available-req-date{ font-size:0.95rem; color:#374151 }
 .available-req-row .status-available,
 .available-req-row .status-pending,
+.available-req-row .status-accepted,
 .available-req-row .status-rejected,
 .available-req-row .status-completed {
   padding: 6px 10px;
@@ -254,6 +255,7 @@
 }
 .available-req-row .status-available { color: #16a34a; background: rgba(34,197,94,0.08); }
 .available-req-row .status-pending { color: #b45309; background: rgba(245,158,66,0.08); }
+.available-req-row .status-accepted { color: #16a34a; background: rgba(34,197,94,0.08); }
 .available-req-row .status-rejected { color: #991b1b; background: rgba(255,230,230,0.9); }
 .available-req-row .status-completed { color: #6b7280; background: rgba(107,114,128,0.06); }
 
