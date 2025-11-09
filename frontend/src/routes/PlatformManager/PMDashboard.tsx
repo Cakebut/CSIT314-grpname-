@@ -10,7 +10,7 @@ import "./PMDashboard.css";
 type ActiveSection = "Reports" | "Announcements" | "Categories";
 
 function PMDashboard() {
-  const [activeSection, setActiveSection] = useState<ActiveSection>("Reports");
+  const [activeSection, setActiveSection] = useState<ActiveSection>("Announcements");
   const [showPmNoti, setShowPmNoti] = useState(false);
   const [pmNoti, setPmNoti] = useState<{ message?: string; createdAt?: string } | null>(null);
   const [pmLoading, setPmLoading] = useState(false);
@@ -83,20 +83,21 @@ function PMDashboard() {
         {/* Navigation */}
         <nav className="sidebar-nav">
           <div className="nav-links">
-            <button
-              onClick={() => setActiveSection("Reports")}
-              className={`nav-button ${activeSection === "Reports" ? "active" : ""}`}
-            >
-              <FileText className="icon" />
-              <span>Reports</span>
-            </button>
-            
+
             <button
               onClick={() => setActiveSection("Announcements")}
               className={`nav-button ${activeSection === "Announcements" ? "active" : ""}`}
             >
               <Megaphone className="icon" />
               <span>Announcements</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveSection("Reports")}
+              className={`nav-button ${activeSection === "Reports" ? "active" : ""}`}
+            >
+              <FileText className="icon" />
+              <span>Reports</span>
             </button>
 
             <button

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import "./SearchHistory.css";
-import { BiColor } from 'react-icons/bi';
 
 
 function getCSRId() {
@@ -131,7 +130,7 @@ function SearchHistory() {
         </div>
         <button className="search-history csr-btn" onClick={() => { /* live filtering */ }}>Apply Filter</button>
         <button className="search-history csr-btn-outline" style={{background : 'black', color : 'white'}} onClick={clear}>Clear Filter</button>
-        <button className="search-history csr-btn search-history-download" onClick={downloadCsv}>Download History</button>
+        <button className="search-history csr-btn search-history-download btn" onClick={downloadCsv}>Download History</button>
       </div>
       <h3 className="search-history csr-subtitle">Service Records</h3>
       <div className="search-history csr-table">

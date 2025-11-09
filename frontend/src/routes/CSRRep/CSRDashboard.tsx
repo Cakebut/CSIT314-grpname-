@@ -15,19 +15,26 @@ interface CSRDashboardProps {
 
 type ActiveSection = "Available" | "Shortlist" | "Offers" | "SearchHistory";
 
+function getCSRId() {
+  const role = localStorage.getItem("currentRole");
+  const userId = localStorage.getItem("userId");
+  if (role === "CSR Rep" && userId) return userId;
+  return null;
+}
+
 function CSRDashboard({ onLogout }: CSRDashboardProps) {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<ActiveSection>("Available");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-      { id: 1, title: "New offer received", time: "2h ago", read: false },
-      { id: 2, title: "Password request approved", time: "1d ago", read: true },
-    ]);
+  const [notiLoading, setNotiLoading] = useState(false);
+  const [notiError, setNotiError] = useState("");
+  const [notifications, setNotifications] = useState<any[]>([]);
   const unreadCount = notifications.filter((n) => !n.read).length;  
+  const csrId = getCSRId();
 
 
 
-  //Announcement modal
+  // Announcement modal
   const API_BASE = "http://localhost:3000";
   const [latestAnnouncement, setLatestAnnouncement] = useState<{ message: string; createdAt: string } | null>(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
@@ -53,7 +60,25 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
   };
 
 
- 
+  useEffect(() => {
+      if (!csrId) return;
+      setNotiLoading(true);
+      setNotiError("");
+      fetch(`http://localhost:3000/api/pin/notifications/csr/${csrId}`)
+        .then(res => res.json())
+        .then(data => {
+          // Only show notifications for accepted, rejected, or feedback
+          const filtered = (data.data || []).filter((n: any) =>
+            n.type === 'accepted' || n.type === 'rejected' || n.type === 'feedback'
+          );
+          setNotifications(filtered);
+          setNotiLoading(false);
+        })
+        .catch(() => {
+          setNotiError("Could not load notifications.");
+          setNotiLoading(false);
+        });
+    }, [csrId, notificationsOpen]);
 
   
   // Helper to load the latest platform announcement and update modal state
@@ -79,22 +104,30 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
   // When the popover opens, mark notifications as read (clears badge)
   useEffect(() => {
     if (notificationsOpen && unreadCount > 0) {
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: 1 })));
     }
 
-    // Load latest platform announcement for PIN users
+    // Load latest platform announcement
     fetchLatestAnnouncement();
 
   }, [notificationsOpen, unreadCount]);
+
+  // Ensure the badge is cleared immediately when the popover is opened via the trigger
+  const handleNotificationsOpenChange = (open: boolean) => {
+    setNotificationsOpen(open);
+    if (open && unreadCount > 0) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: 1 })));
+    }
+  };
 
   return (
     <div className="CSR-dashboard-container">
   
         {/* Announcement modal */}
       {latestAnnouncement && showAnnouncementModal && (
-        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200600 }}>
           <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', width: 'min(640px, 92vw)', boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
-            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Announcement</div>
+            <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 15 }}>Announcement</div>
             <div style={{ whiteSpace: 'pre-wrap', color: '#111827' }}>{latestAnnouncement.message}</div>
             <div style={{ color: '#6b7280', fontSize: 12, marginTop: 6 }}>at {new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -172,10 +205,10 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
         {activeSection === "SearchHistory" && <SearchHistory />}
       </div>
 
-      {/* Notification popover */}
+      {/* Notification popover (restored Radix design) */}
       <div className="CSR-notification-popover-wrapper">
-        <Popover.Root open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-            <Popover.Trigger asChild>
+        <Popover.Root open={notificationsOpen} onOpenChange={handleNotificationsOpenChange}>
+          <Popover.Trigger asChild>
             <button
               className="CSR-notification-button"
               aria-haspopup="true"
@@ -198,23 +231,48 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
               </div>
 
               <div className="CSR-notification-popover-body">
-                {notifications.length === 0 ? (
+                {notiLoading ? <div>Loading...</div> : notiError ? <div style={{ color: '#b91c1c' }}>{notiError}</div> : notifications.length === 0 ? (
                   <div className="CSR-notification-empty">
                     <Bell className="CSR-empty-icon" />
                     <div className="CSR-empty-text">No notifications yet</div>
                   </div>
                 ) : (
                   <ul className="CSR-notification-list">
-                    {notifications.map((n) => (
+                    {notifications.map(noti => (
                       <li
-                        key={n.id}
-                        className={`CSR-notification-item ${n.read ? "read" : "unread"}`}
-                        onClick={() =>
-                          setNotifications((prev) => prev.map((p) => (p.id === n.id ? { ...p, read: true } : p)))
-                        }
+                        key={noti.id}
+                        className={`CSR-notification-item ${noti.read ? 'read' : 'unread'}`}
+                        onClick={() => {
+                          // Mark this notification as read locally (do not remove it)
+                          setNotifications(prev => prev.map(p => p.id === noti.id ? { ...p, read: 1 } : p));
+                        }}
+                        title="Mark as read"
                       >
-                        <div className="CSR-notification-title">{n.title}</div>
-                        <div className="CSR-notification-time">{n.time}</div>
+                        <div className="CSR-notification-title" style={{ fontWeight: 700, fontSize: '1.08rem', color: '#2563eb', marginBottom: 2 }}>
+                          {noti.type === 'accepted' ? `✅ Accepted by ${noti.pinUsername || 'PIN'}`
+                            : noti.type === 'rejected' ? `❌ Rejected by ${noti.pinUsername || 'PIN'}`
+                              : noti.type === 'feedback' ? '⭐ Feedback received'
+                                : noti.type}
+                        </div>
+                        <div className="CSR-notification-time" style={{ fontSize: 15, color: '#334155', fontWeight: 500, marginBottom: 2 }}>Request: <span style={{ color: '#0ea5e9' }}>{noti.requestTitle || noti.pin_request_id}</span></div>
+                        <div style={{ fontSize: 13, color: '#64748b' }}>{noti.createdAt?.slice(0, 19).replace('T', ' ')}</div>
+                        <button
+                          type="button"
+                          className="CSR-notification-close"
+                          aria-label="Clear notification"
+                          title="Clear notification"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await fetch(`http://localhost:3000/api/pin/notifications/${noti.id}`, { method: 'DELETE' });
+                              setNotifications(prev => prev.filter(n => n.id !== noti.id));
+                            } catch {
+                              alert('Failed to clear notification');
+                            }
+                          }}
+                        >
+                          ×
+                        </button>
                       </li>
                     ))}
                   </ul>
