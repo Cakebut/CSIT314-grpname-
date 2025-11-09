@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./ViewResetDashboardPage.css";
-import ViewPasswordRequest from "./ViewPasswordRequests";
+import ViewPasswordRequest from "./ViewPasswordRequestsModal";
 import ReviewPasswordRequest from "./ReviewPasswordRequests";
 import { toast } from 'react-toastify';
 
@@ -37,7 +37,7 @@ async function postData(url: string, data: object) {
   return res;
 }
 
-export default function AdminPasswordResetDashboard() {
+export default function ViewResetDashboardPage() {
    
    
   const [requests, setRequests] = useState<PasswordResetRequest[]>([]);
@@ -175,6 +175,7 @@ export default function AdminPasswordResetDashboard() {
               role: selectedRequest.user_role,
               accountStatus: selectedRequest.account_status,
               lastLogin: undefined,
+              new_password: selectedRequest.new_password,
               requestDate: selectedRequest.requested_at,
               reason: selectedRequest.admin_note,
               status: selectedRequest.status,

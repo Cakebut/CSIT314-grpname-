@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import "./ViewPasswordRequests.css";
+import "./ViewPasswordRequestsModal.css";
 
 type PasswordRequest = {
   id: number;
@@ -24,7 +24,7 @@ interface ViewPasswordRequestProps {
   onUpdated?: () => void; // optional callback when approve/reject completes
 }
 
-function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
+function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
   const [adminNotes, setAdminNotes] = useState<string>(request.admin_note ?? "");
   const [localRequest, setLocalRequest] = useState<PasswordRequest>(request);
   const [showPassword, setShowPassword] = useState(false);
@@ -79,7 +79,9 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
   // Determine whether the admin notes field should be editable.
   const notesEditable = (localRequest.status || "").toLowerCase() === "pending" && !showSuccessDialog && !busy;
 
-  const approve = async () => {
+
+  //HANDLE ACCEPT BUTTON 
+  const handleApprove = async () => {
     if (!adminNotes) {
       alert("Please add admin notes before approving.");
       return;
@@ -112,7 +114,8 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
       }
     };
 
-  const reject = async () => {
+  //HANDLE REJECT BUTTON
+  const handleReject = async () => {
     if (!adminNotes) {
       alert("Please add admin notes before rejecting.");
       return;
@@ -208,7 +211,7 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
           </div>
           <div>
             <button
-              onClick={() => reject()}
+              onClick={() => handleReject()}
               className="reject-view-password"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
               style={{ marginLeft: 8 }}
@@ -236,7 +239,7 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
             <p><strong>Request ID:</strong> #{String(request.id).padStart(3, '0')}</p>
             <div className="view-password-actions">
               <button onClick={() => setShowConfirmDialog(false)}>No, Cancel</button>
-              <button onClick={approve}>Yes, Approve</button>
+              <button onClick={handleApprove}>Yes, Approve</button>
             </div>
           </div>
         </div>
@@ -271,4 +274,4 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
   );
 }
 
-export default ViewPasswordRequest;
+export default ViewPasswordRequestsModal;

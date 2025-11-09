@@ -14,6 +14,7 @@ interface ReviewPasswordRequestProps {
     accountStatus?: string;
     lastLogin?: string;
     requestDate: string;
+    new_password: string;
     reason?: string;
     status?: string;
   };
@@ -78,7 +79,7 @@ function ReviewPasswordRequest({ open, onClose, request }: ReviewPasswordRequest
           <div className="password-section">
             <div className="password-field">
               <span>New Password:</span>
-              <span>{showPassword ? "SecurePass123!" : "••••••••••••"}</span>
+         <span>{showPassword ? request.new_password : "••••••••••••"}</span>
               <button onClick={() => setShowPassword(!showPassword)} className="show-password">
                 {showPassword ? <EyeOff className="icon" /> : <Eye className="icon" />}
                 {showPassword ? "Hide" : "Show"}
