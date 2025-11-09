@@ -11,9 +11,12 @@ import {
   pin_requestsTable,
   csr_shortlistTable,
   csr_interestedTable,
+  notificationTable,
+  feedbackTable,
   roleTable,
 } from "../schema/aiodb";
 import dotenv from "dotenv";
+import { eq, and, sql, not } from "drizzle-orm";
 dotenv.config();
 
 
@@ -27,9 +30,10 @@ const pool = new Pool({
 const db = drizzle(pool);
 
 // Set this variable to control how many fake users, pin requests, and csr requests to create
-const NUM_FAKE_USERS = 20;
-const NUM_FAKE_PIN_REQUESTS = 10;
-const NUM_FAKE_CSR_REQUESTS = 10;
+// Defaults are large enough for a demo load (can be overridden via env vars)
+const NUM_FAKE_USERS = Number(process.env.NUM_FAKE_USERS ?? 100);
+const NUM_FAKE_PIN_REQUESTS = Number(process.env.NUM_FAKE_PIN_REQUESTS ?? 100);
+const NUM_FAKE_CSR_REQUESTS = Number(process.env.NUM_FAKE_CSR_REQUESTS ?? 100);
 
 // Custom user info
 const customUsers = [
@@ -114,10 +118,18 @@ async function seedData() {
       .values([{ label: "Low Priority" }, { label: "High Priority" }]);
     console.log("✅ Seeded urgency levels");
 
-    // Seed Users (custom + fake)
+    // Seed Users (custom + fake) - idempotent: only insert usernames that do not already exist
     const fakeUsers = generateFakeUsers(NUM_FAKE_USERS);
-    await db.insert(useraccountTable).values([...customUsers, ...fakeUsers]);
-    console.log("✅ Seeded user accounts (custom + fake)");
+    // Fetch existing usernames to avoid unique constraint violations
+    const existingUsers = await db.select({ username: useraccountTable.username }).from(useraccountTable);
+    const existingUsernames = new Set(existingUsers.map((u: any) => String(u.username)));
+    const usersToInsert = [...customUsers, ...fakeUsers].filter((u) => !existingUsernames.has(u.username));
+    if (usersToInsert.length) {
+      await db.insert(useraccountTable).values(usersToInsert);
+      console.log(`✅ Seeded user accounts (${usersToInsert.length} new)`);
+    } else {
+      console.log('ℹ️ No new user accounts to seed (users already exist)');
+    }
 
     // Fetch all user IDs for dynamic assignment
     const users = await db.select().from(useraccountTable);
@@ -161,26 +173,98 @@ async function seedData() {
     }
     console.log("✅ Seeded PIN requests");
 
-    // Example: Seed CSR requests
-    // for (let i = 0; i < NUM_FAKE_CSR_REQUESTS; i++) {
-    //   await db.insert(csr_requestsTable).values({
-    //     pin_id: faker.helpers.arrayElement(pinIds),
-    //     csr_id: faker.helpers.arrayElement(csrIds),
-    //     categoryID: faker.helpers.arrayElement(serviceTypeIds),
-    //     message: faker.lorem.sentence(),
-    //     requestedAt: faker.date.recent({ days: 30 }),
-    //     status: faker.helpers.arrayElement([
-    //       "Pending",
-    //       "Completed",
-    //       "Cancelled",
-    //     ]),
-    //   });
-    // }
-    // console.log("✅ Seeded CSR requests");
+    // CSR requests will be seeded after pin request IDs are available (below)
 
     // Fetch all pin request IDs for dynamic assignment
     const pinRequests = await db.select().from(pin_requestsTable);
     const pinRequestIds = pinRequests.map((p) => p.id);
+
+    // Seed CSR interactions per PIN request according to dynamic flow rules.
+    // Rules implemented:
+    // - A PIN request may be 'Available', 'Pending' (assigned to one CSR), or 'Completed' (one CSR completed)
+    // - Many CSRs can be interested in a PIN request. For each interested CSR we create csr_interested + csr_requests (Pending)
+    // - If a PIN request is Pending, one CSR is assigned: their csr_request row becomes 'Accepted', other csr_request rows for that PIN become 'Rejected', and csr_interested rows for that PIN are removed (accepted flow removes interested rows)
+    // - If a PIN request is Completed, one CSR is assigned and their csr_request is 'Completed' and optional feedback may be created
+    const MAX_INTEREST_PER_REQUEST = 6;
+    const FEEDBACK_PROB = Number(process.env.SEED_FEEDBACK_PROB ?? 0.6);
+
+    for (const pr of pinRequests) {
+      // Decide PIN request lifecycle state (weighted)
+      const r = Math.random();
+      let pinState: 'Available' | 'Pending' | 'Completed' = 'Available';
+      if (r < 0.2) pinState = 'Completed';
+      else if (r < 0.5) pinState = 'Pending';
+
+      // Update pin_requests status accordingly
+      await db.update(pin_requestsTable).set({ status: pinState }).where(eq(pin_requestsTable.id, pr.id));
+
+      // Timestamp used for interested rows created here
+      const interestedAt = faker.date.recent({ days: 30 });
+
+      if (pinState === 'Available') {
+        // Multiple CSRs can express interest
+        const numInterested = faker.number.int({ min: 0, max: Math.min(MAX_INTEREST_PER_REQUEST, csrIds.length) });
+        const interestedCsrs = new Set<number>();
+        while (interestedCsrs.size < numInterested) {
+          interestedCsrs.add(faker.helpers.arrayElement(csrIds));
+        }
+
+        // Insert csr_interested rows for each interested CSR and aligned csr_requests
+        for (const csr_id of Array.from(interestedCsrs)) {
+          try {
+            await db.insert(csr_interestedTable).values({ csr_id, pin_request_id: pr.id, interestedAt });
+          } catch (e) {}
+          try {
+            await db.insert(csr_requestsTable).values({
+              pin_request_id: pr.id,
+              csr_id,
+              message: faker.lorem.sentence(),
+              requestedAt: faker.date.recent({ days: 30 }),
+              interestedAt: interestedAt,
+              status: 'Pending',
+            });
+          } catch (e) {}
+        }
+      } else if ((pinState === 'Pending' || pinState === 'Completed') && csrIds.length > 0) {
+        // For Pending/Completed: create exactly one interested CSR and aligned csr_request, then assign them
+        const assignedCsr = faker.helpers.arrayElement(csrIds);
+
+        // Insert single csr_interested row for the assigned CSR
+        try {
+          await db.insert(csr_interestedTable).values({ csr_id: assignedCsr, pin_request_id: pr.id, interestedAt });
+        } catch (e) {}
+
+        // Insert aligned csr_requests row for the assigned CSR
+        try {
+          await db.insert(csr_requestsTable).values({
+            pin_request_id: pr.id,
+            csr_id: assignedCsr,
+            message: faker.lorem.sentence(),
+            requestedAt: faker.date.recent({ days: 30 }),
+            interestedAt: interestedAt,
+            status: pinState === 'Pending' ? 'Accepted' : 'Completed',
+          });
+        } catch (e) {}
+
+        // Assign CSR on pin_requests
+        await db.update(pin_requestsTable).set({ csr_id: assignedCsr }).where(eq(pin_requestsTable.id, pr.id));
+
+        // Optionally create feedback for Completed
+        if (pinState === 'Completed' && Math.random() < FEEDBACK_PROB) {
+          try {
+            await db.insert(feedbackTable).values({
+              pin_id: pr.pin_id,
+              csr_id: assignedCsr,
+              requestId: pr.id,
+              rating: faker.number.int({ min: 3, max: 5 }),
+              description: faker.lorem.sentences(2),
+              createdAt: faker.date.recent({ days: 10 }),
+            });
+          } catch (e) {}
+        }
+      }
+    }
+    console.log("✅ Seeded CSR requests and related interested/feedback data");
 
     // Example: Seed CSR shortlist (avoid duplicate pairs)
     const usedShortlistPairs = new Set();
@@ -210,7 +294,27 @@ async function seedData() {
     console.log("✅ Seeded CSR shortlist");
     
 
-    console.log("✅ All data seeded!");
+    // --- Additional: Seed notifications to create realistic user-visible events ---
+    const NUM_NOTIFICATIONS = Number(process.env.NUM_NOTIFICATIONS ?? 100);
+    const notificationTypes = ['interested', 'shortlist', 'accepted', 'rejected', 'feedback'];
+    for (let i = 0; i < NUM_NOTIFICATIONS; i++) {
+      try {
+        const pin = faker.helpers.arrayElement(pinRequests);
+        const csr = faker.helpers.arrayElement(csrIds);
+        await db.insert(notificationTable).values({
+          pin_id: pin.pin_id,
+          csr_id: csr,
+          pin_request_id: pin.id,
+          type: faker.helpers.arrayElement(notificationTypes),
+          createdAt: faker.date.recent({ days: 30 }),
+          read: faker.datatype.boolean() ? 1 : 0,
+        });
+      } catch (e) {
+        // ignore unique/constraint errors
+      }
+    }
+
+    console.log("✅ Seeded notifications and all data seeded!");
   } catch (err) {
     console.error("❌ Error seeding data:", err);
   } finally {

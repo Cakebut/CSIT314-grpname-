@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { service_typeTable , locationTable , urgency_levelTable , useraccountTable, csr_requestsTable, pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable, feedbackTable } from '../schema/aiodb';
+import { service_typeTable , locationTable , urgency_levelTable , useraccountTable, csr_requestsTable, pin_requestsTable, csr_shortlistTable, csr_interestedTable, notificationTable, feedbackTable, adminNotificationsTable } from '../schema/aiodb';
 import { passwordResetRequestsTable } from '../schema/aiodb';
  
 import dotenv from 'dotenv';
@@ -137,6 +137,17 @@ async function deleteNotifications() {
   }
 }
 
+// Delete admin notifications (references users) - must run before deleting users
+async function deleteAdminNotifications() {
+  try {
+    console.log('🗑️ Deleting Admin Notifications...');
+    const result = await db.delete(adminNotificationsTable);
+    console.log('✅ All admin notifications deleted! Result:', result);
+  } catch (err) {
+    console.error('❌ Error deleting admin notifications:', err);
+  }
+}
+
 async function deleteAllData() {
   console.log('--- Starting full database deletion process ---');
   await deleteCSR_Shortlist();
@@ -146,6 +157,8 @@ async function deleteAllData() {
   await deleteFeedback();
   await deletePIN_Req();
   await deleteNotifications();
+  // admin notifications reference users; delete them before deleting users
+  await deleteAdminNotifications();
   await deleteResetPasswordRequests();   // remove dependent password-reset records before deleting users to avoid FK violations
   await deleteAllUsers();
   await deleteServiceTypes();
