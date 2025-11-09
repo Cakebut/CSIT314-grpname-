@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { /* useNavigate */ } from "react-router-dom";
 import { toast } from "react-toastify";
-import "./UserAccounts.css";
+import "./ViewUserAccountPage.css";
 
 type Role = {
   id: number;
@@ -31,7 +31,7 @@ type User = {
   issuspended?: boolean;
 };
 
-const UserAccounts: React.FC = () => {
+const ViewUserAccountPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -387,5 +387,5 @@ const UserAccounts: React.FC = () => {
   );
 };
 
-export default UserAccounts;
+export default ViewUserAccountPage;
  
