@@ -77,5 +77,5 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
     </Router>
   );
 }
-
+ 
 export default App;
