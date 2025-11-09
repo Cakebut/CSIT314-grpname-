@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Download, Filter } from "lucide-react"; // icons
  
 import { toast } from "react-toastify";
-import "./SystemActivityLogs.css";
+import "./ViewUserAdminSystemLogPage.css";
 
 interface AuditLogEntry {
   id: number;
@@ -13,7 +13,7 @@ interface AuditLogEntry {
   details?: string;
 }
 
-const SystemActivityLogs: React.FC = () => {
+const ViewUserAdminSystemLogPage: React.FC = () => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -217,4 +217,4 @@ const SystemActivityLogs: React.FC = () => {
   );
 };
 
-export default SystemActivityLogs;
+export default ViewUserAdminSystemLogPage;
