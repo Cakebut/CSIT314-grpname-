@@ -194,7 +194,7 @@ const UserAccounts: React.FC = () => {
     }
   };
 
-  const handleExportUserDataClick = async () => {
+  const handleExport = async () => {
     try {
       const res = await fetch(`/api/userAdmin/users/export`);
       if (!res.ok) throw new Error(`Export failed: ${res.status}`);
@@ -270,7 +270,7 @@ const UserAccounts: React.FC = () => {
           <span className="create-text">Create Account</span>
         </button>
 
-        <button className="export-user-accounts btn" type="button" onClick={handleExportUserDataClick}>
+        <button className="export-user-accounts btn" type="button" onClick={handleExport}>
           Export CSV
         </button>
       </div>

@@ -24,7 +24,7 @@ interface ViewPasswordRequestProps {
   onUpdated?: () => void; // optional callback when approve/reject completes
 }
 
-export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
+function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
   const [adminNotes, setAdminNotes] = useState<string>(request.admin_note ?? "");
   const [localRequest, setLocalRequest] = useState<PasswordRequest>(request);
   const [showPassword, setShowPassword] = useState(false);
@@ -79,10 +79,7 @@ export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: Vi
   // Determine whether the admin notes field should be editable.
   const notesEditable = (localRequest.status || "").toLowerCase() === "pending" && !showSuccessDialog && !busy;
 
-
-  //ADMIN ACTIONS: approve/reject
-  //APPROVE
-  const handleApprove = async () => {
+  const approve = async () => {
     if (!adminNotes) {
       alert("Please add admin notes before approving.");
       return;
@@ -115,9 +112,7 @@ export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: Vi
     }
   };
 
-
-  //REJECT
-  const handleReject = async () => {
+  const reject = async () => {
     if (!adminNotes) {
       alert("Please add admin notes before rejecting.");
       return;
@@ -152,7 +147,7 @@ export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: Vi
 
   const confirmApprove = () => {
     // user confirmed in dialog
-    handleApprove();
+    approve();
   };
 
   // Removed 'Back to Dashboard' action — success dialog will close the modal instead
@@ -226,7 +221,7 @@ export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: Vi
               <Check className="icon" /> Approve
             </button>
             <button
-              onClick={() => handleReject()}
+              onClick={() => reject()}
               className="reject-view-password"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
               style={{ marginLeft: 8 }}
@@ -282,4 +277,4 @@ export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: Vi
   );
 }
 
-export default ViewResetDashboardPage;
+export default ViewPasswordRequest;
