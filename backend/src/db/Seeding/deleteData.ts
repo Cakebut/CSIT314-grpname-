@@ -137,7 +137,7 @@ async function deleteNotifications() {
   }
 }
 
-// Delete admin notifications (notifications targeted to admins)
+// Delete admin notifications (references users) - must run before deleting users
 async function deleteAdminNotifications() {
   try {
     console.log('🗑️ Deleting Admin Notifications...');
@@ -157,6 +157,7 @@ async function deleteAllData() {
   await deleteFeedback();
   await deletePIN_Req();
   await deleteNotifications();
+  // admin notifications reference users; delete them before deleting users
   await deleteAdminNotifications();
   await deleteResetPasswordRequests();   // remove dependent password-reset records before deleting users to avoid FK violations
   await deleteAllUsers();
