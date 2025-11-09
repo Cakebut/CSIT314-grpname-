@@ -24,7 +24,7 @@ interface ViewPasswordRequestProps {
   onUpdated?: () => void; // optional callback when approve/reject completes
 }
 
-function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
+export function ViewResetDashboardPage({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
   const [adminNotes, setAdminNotes] = useState<string>(request.admin_note ?? "");
   const [localRequest, setLocalRequest] = useState<PasswordRequest>(request);
   const [showPassword, setShowPassword] = useState(false);
@@ -79,7 +79,10 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
   // Determine whether the admin notes field should be editable.
   const notesEditable = (localRequest.status || "").toLowerCase() === "pending" && !showSuccessDialog && !busy;
 
-  const approve = async () => {
+
+  //ADMIN ACTIONS: approve/reject
+  //APPROVE
+  const handleApprove = async () => {
     if (!adminNotes) {
       alert("Please add admin notes before approving.");
       return;
@@ -112,7 +115,9 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
     }
   };
 
-  const reject = async () => {
+
+  //REJECT
+  const handleReject = async () => {
     if (!adminNotes) {
       alert("Please add admin notes before rejecting.");
       return;
@@ -147,7 +152,7 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
 
   const confirmApprove = () => {
     // user confirmed in dialog
-    approve();
+    handleApprove();
   };
 
   // Removed 'Back to Dashboard' action — success dialog will close the modal instead
@@ -221,7 +226,7 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
               <Check className="icon" /> Approve
             </button>
             <button
-              onClick={() => reject()}
+              onClick={() => handleReject()}
               className="reject-view-password"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
               style={{ marginLeft: 8 }}
@@ -277,4 +282,4 @@ function ViewPasswordRequest({ open, onClose, request, onUpdated }: ViewPassword
   );
 }
 
-export default ViewPasswordRequest;
+export default ViewResetDashboardPage;
