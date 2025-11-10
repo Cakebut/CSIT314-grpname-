@@ -256,7 +256,27 @@ router.post('/offers/:requestId/complete', async (req, res) => {
 });
 
 // Submit feedback
-router.post('/feedback', FeedbackController.addFeedback);
+router.post('/feedback', async(req, res) => {
+	try {
+		const { pinId, csrId, requestId, rating, description, createdAt } = req.body;
+		if (!pinId || !csrId || !requestId || !rating || !createdAt) {
+			return res.status(400).json({ success: false, error: 'Missing required fields' });
+		}
+		// Call the service method which returns/throws on error
+		await FeedbackController.addFeedback({ pinId, csr_id: csrId, requestId, rating, description, createdAt });
+		return res.json({ success: true });
+		} catch (err: any) {
+			console.error('Failed to submit feedback route:', err?.message ?? err);
+			return res.status(500).json({ success: false, error: 'Failed to submit feedback' });
+		}
+});
+
+
+
+
+
+
+
 
 // Get notifications for a CSR user
 router.get('/notifications/csr/:csr_id', async (req, res) => {
