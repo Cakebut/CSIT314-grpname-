@@ -16,9 +16,7 @@
 
 
 /* Modal / dialog content (shared) ------------------------------------------------------------------ */
-.view-password-modal-content,
-.view-password-confirm-content,
-.view-password-success-content {
+.view-password-modal-content {
   position: relative;
   width: 96%;
   max-width: 980px; /* two-column modal width  */
@@ -32,6 +30,32 @@
   box-sizing: border-box;
 }
 
+.view-password-success-content {
+  position: relative;
+  width: 30%;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+  box-sizing: border-box; 
+}
+
+.view-password-confirm-content {
+  position: relative;
+  width: 30%;
+  max-width: 980px; /* two-column modal width  */
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+  box-sizing: border-box;
+}
 
 /* Modal body grid: main + sidebar (metadata) ------------------------------------------------------- */
 .modal-body {
@@ -52,7 +76,12 @@
 .icon {
   width: 18px;
   height: 18px;
-  display: inline-block;
+  /* Use inline-flex so the SVG content is centered and participates correctly in flex/inline layouts */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle; /* keeps icon visually aligned with adjacent text */
+  flex: none; /* prevent icon from stretching in flex containers */
 }
 
 
@@ -191,20 +220,6 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: 10px;
-}
-
-.approve-view-password,
-.approve-btn {
-  background: linear-gradient(180deg, #0f1724, #111827);
-  color: #fff;
-  padding: 12px 22px;
-  border-radius: 12px;
-  min-width: 140px;
-  box-shadow: 0 12px 40px rgba(15, 23, 36, 0.18);
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
 }
 
 

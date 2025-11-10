@@ -193,7 +193,7 @@
 .user-admin-notification-popover {
   margin-top: 10px;
   margin-right: 0;
-  width: 280px;
+  width: 1000px;
   max-width: calc(100vw - 32px);
   background: var(--panel);
   border-radius: 10px;
@@ -298,6 +298,43 @@
   gap: 6px;
   border: 1px solid rgba(2, 6, 23, 0.06);
 }
+
+/* allow absolutely-positioned close button inside the notification */
+.user-admin-notification-item {
+  position: relative;
+}
+
+/* Close (delete) button on each notification — show on hover like CSRDashboard */
+.CSR-notification-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+  opacity: 0;
+  pointer-events: none; /* hidden until hover */
+}
+.user-admin-notification-item:hover .CSR-notification-close {
+  opacity: 1;
+  pointer-events: auto;
+  color: #c2410c;
+}
+.CSR-notification-close:hover {
+  background: rgba(239,68,68,0.08);
+  transform: scale(1.02);
+}
+
 
 .user-admin-notification-item.unread {
   background: #f8fafc;

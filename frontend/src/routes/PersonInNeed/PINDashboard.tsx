@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, ClipboardList, Bell } from "lucide-react";
+import { LogOut, ClipboardList } from "lucide-react";
 
 import "./PINDashboard.css";
 import PersonInNeedDashboard from "./PersonInNeedDashboard";

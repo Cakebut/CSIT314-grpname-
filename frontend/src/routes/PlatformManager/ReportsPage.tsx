@@ -33,7 +33,6 @@ export default function ReportsPage() {
   // Removed unused active state
   
   const [quick, setQuick] = useState<QuickStats | null>(null);
-  const [showCustomForm, setShowCustomForm] = useState(false);
   const [dateRange, setDateRange] = useState<string>("");
 
   useEffect(() => {
@@ -175,6 +174,16 @@ export default function ReportsPage() {
   };
 
   return (
+    <div style={{ padding: 40 }}>
+      <div className="pm-announce-header" style={{ marginBottom: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="pm-announce-title">Download Report</div>
+          <div className="pm-announce-sub">Generate your reports and data analytics here</div>
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <button onClick={onDownloadCsv} disabled={loading}>Download CSVs</button>
+        </div>
+      </div>
     <div className="pm-reports">
       <div className="cards" style={{marginBottom:12}}>
         <div className="card">
@@ -193,35 +202,35 @@ export default function ReportsPage() {
           <button onClick={runQuickMonth} disabled={loading}>Generate Monthly Report</button>
         </div>
       </div>
-      {!showCustomForm && (
-        <div className="buttons" style={{marginBottom:12}}>
-          <button onClick={() => setShowCustomForm(true)} disabled={loading}>Generate Custom Report</button>
-        </div>
-      )}
-      <div className="form">
-        {showCustomForm && (
-          <label>
-            Date range
-            <DateRangePicker
-              start={start}
-              end={end}
-              onChange={(s,e) => {
-                syncDateRange(s,e);
-              }}
-            />
-          </label>
-        )}
-        {showCustomForm && (<label>Service type
-          <select value={selectedType} onChange={e=> setSelectedType(e.target.value)}>
-            <option value="">All service types</option>
-            {serviceTypes.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </label>)}
-        <div className="buttons" style={{ display: showCustomForm ? 'flex' : 'none' }}>
-          <button onClick={() => onGenerate()} disabled={loading}>Generate Custom Report</button>
-          <button onClick={onDownloadCsv} disabled={loading}>Download CSVs</button>
+
+      {/* Custom form shown below the quick cards as its own card */}
+      <div style={{ marginBottom: 12 }}>
+        <div className="card">
+          <b>Custom Report</b>
+          <div className="form" style={{ marginTop: 8 }}>
+            <label>
+              Date range
+              <DateRangePicker
+                start={start}
+                end={end}
+                onChange={(s,e) => {
+                  syncDateRange(s,e);
+                }}
+              />
+            </label>
+            <label>Service type
+              <select value={selectedType} onChange={e=> setSelectedType(e.target.value)}>
+                <option value="">All service types</option>
+                {serviceTypes.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </label>
+            <div className="buttons">
+              <button onClick={() => onGenerate()} disabled={loading}>Generate Custom Report</button>
+            </div>
+          </div>
         </div>
       </div>
+      
 
       {error && <div className="error">{error}</div>}
       {summary && summary.totalRequests === 0 && <div className="empty">No data found</div>}
@@ -248,33 +257,32 @@ export default function ReportsPage() {
             <thead><tr><th>Service Type</th><th>Count</th></tr></thead>
             <tbody>{Object.entries(summary.byServiceType).map(([k,v]) => <tr key={k}><td>{k}</td><td>{v}</td></tr>)}</tbody>
           </table>
-
-          <h3>Daily Trend</h3>
-          <TrendChart data={summary.trendDaily} />
-
-          <h3>Visualizations</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-            <div>
-              <b>Requests by Status (Pie)</b>
-              <PieChart
-                data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
-              />
-            </div>
-            <div>
-              <b>Requests by Service Type (Vertical)</b>
-              <BarChartVertical
-                data={Object.entries(summary.byServiceType).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
-              />
-            </div>
-            <div>
-              <b>Requests by Status (Horizontal)</b>
-              <BarChartHorizontal
-                data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
-              />
+          <div style={{ marginTop: 30 }}>
+            <h2 style={{ marginBottom: 20 }}>Visualizations</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+              <div>
+                <b>Requests by Status (Pie)</b>
+                <PieChart
+                  data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
+                />
+              </div>
+              <div>
+                <b>Requests by Service Type (Vertical)</b>
+                <BarChartVertical
+                  data={Object.entries(summary.byServiceType).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
+                />
+              </div>
+              <div>
+                <b>Requests by Status (Horizontal)</b>
+                <BarChartHorizontal
+                  data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
@@ -420,27 +428,27 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
   );
 }
 
-function TrendChart({ data }: { data: TrendRow[] }) {
-  if (!data.length) return <div className="empty">No data</div>;
-  const w = 600, h = 200, pad = 24;
-  const xs = data.map((_, i) => i);
-  const ys = data.map(d => d.total);
-  const maxY = Math.max(...ys) || 1;
-  const points = xs.map((x,i) => {
-    const px = pad + (x/(xs.length-1||1))*(w-2*pad);
-    const py = h - pad - (ys[i]/maxY)*(h-2*pad);
-    return `${px},${py}`;
-  }).join(" ");
-  return (
-    <svg width={w} height={h} className="chart">
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/>
-      {data.map((d,i) => {
-        const px = pad + (i/(data.length-1||1))*(w-2*pad);
-        return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
-      })}
-    </svg>
-  );
-}
+// function TrendChart({ data }: { data: TrendRow[] }) {
+//   if (!data.length) return <div className="empty">No data</div>;
+//   const w = 600, h = 200, pad = 24;
+//   const xs = data.map((_, i) => i);
+//   const ys = data.map(d => d.total);
+//   const maxY = Math.max(...ys) || 1;
+//   const points = xs.map((x,i) => {
+//     const px = pad + (x/(xs.length-1||1))*(w-2*pad);
+//     const py = h - pad - (ys[i]/maxY)*(h-2*pad);
+//     return `${px},${py}`;
+//   }).join(" ");
+//   return (
+//     <svg width={w} height={h} className="chart">
+//       <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/>
+//       {data.map((d,i) => {
+//         const px = pad + (i/(data.length-1||1))*(w-2*pad);
+//         return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
+//       })}
+//     </svg>
+//   );
+// }
 
 type ChartDatum = { label: string; value: number; color?: string };
 const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#dc2626', '#0ea5e9', '#22c55e'];

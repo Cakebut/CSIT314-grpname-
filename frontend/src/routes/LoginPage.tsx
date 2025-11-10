@@ -63,7 +63,7 @@ function Login() {
       <section className="login-main login-section">
         {showSuspendedModal && (
           <div className="modal-overlay" style={{ background: 'rgba(44,62,80,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1000 }}>
-            <div className="modal-content" style={{ background: 'white', borderRadius: '18px', padding: '2rem 2.5rem', boxShadow: '0 8px 32px rgba(44,62,80,0.18)', textAlign: 'center' }}>
+            <div className="modal-content" style={{ width: '30%', background: 'white', borderRadius: '18px', padding: '2rem 2.5rem', boxShadow: '0 8px 32px rgba(44,62,80,0.18)', textAlign: 'center' }}>
               <h3 style={{ color: '#d7263d', fontWeight: 700, marginBottom: '0.5rem' }}>Account Suspended</h3>
               <p style={{ color: '#2d3748', marginBottom: '1.2rem' }}>Your account is currently suspended</p>
               <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn" style={{ background: 'black', color: 'white', borderRadius: '10px', padding: '0.7rem 2.2rem', fontWeight: 600, fontSize: '1rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)' }}>Close</button>

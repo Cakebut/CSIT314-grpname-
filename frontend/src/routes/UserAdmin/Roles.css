@@ -178,28 +178,33 @@
 .disable-roles, .delete-roles {
   border-radius: 5px;
   cursor: pointer;
-  display: inline-block;
+  /* match other action buttons: use inline-flex for centering */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   width: 85px;
   height: 30px;
   font-size: 14px;
+  background: #fff; /* white background */
+  border: 1px solid #000; /* 1px solid black border */
 }
 
+/* When role is active, the button will perform 'Disable' -> show red text */
 .disable-roles.disable {
-  /* background-color: #b41928; */
-  background-color: black;
-  color: white;
+  color: #ef4444; /* red */
 }
 
+/* When role is suspended, the button will perform 'Enable' -> show green text */
 .disable-roles.enable {
-  /* background-color: #155224; */
-  background-color: black;
-  color: white;
+  color: #065f46; /* green */
 }
 
 .delete-roles {
-  background-color: black;
-  color: white;
+  /* keep delete as black with white text to differentiate */
+  background: #000;
+  color: #fff;
+  border: none;
 }
 
 

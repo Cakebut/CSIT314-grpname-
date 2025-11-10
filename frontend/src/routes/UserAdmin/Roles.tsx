@@ -226,8 +226,10 @@ const Roles: React.FC = () => {
                 </td>
                 <td>
                   <button
+                    type="button"
                     onClick={() => handleSuspendRole(role)}
-                    className="disable-roles"
+                    className={`disable-roles ${role.issuspended ? 'enable' : 'disable'}`}
+                    style={{ marginRight: 10 }}
                   >
                     {role.issuspended ? 'Enable' : 'Disable'}
                   </button>

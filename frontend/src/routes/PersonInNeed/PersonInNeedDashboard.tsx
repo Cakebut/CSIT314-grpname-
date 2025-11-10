@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
 import "./PersonInNeedDashboard.css";
-import * as Popover from "@radix-ui/react-popover";import { Bell, MoveLeft } from "lucide-react";
-;
+import * as Popover from "@radix-ui/react-popover";
+import { Bell } from "lucide-react";
 
 // Centralized status color logic
 function getStatusColor(status?: string) {
@@ -74,7 +73,7 @@ const PersonInNeedDashboard: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
   const [filterUrgency, setFilterUrgency] = useState("");
-  const navigate = useNavigate();
+  
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -133,7 +132,7 @@ const PersonInNeedDashboard: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notiLoading, setNotiLoading] = useState(false);
   const [notiError, setNotiError] = useState("");
-  const [notiHasUnread, setNotiHasUnread] = useState(false);
+  //const [notiHasUnread, setNotiHasUnread] = useState(false);
   const notiButtonRef = React.useRef<HTMLButtonElement>(null);
   const notiPopoverRef = React.useRef<HTMLDivElement>(null);
  
@@ -167,7 +166,7 @@ const PersonInNeedDashboard: React.FC = () => {
         const filtered = (data.data || []).filter((n: Notification) => n.type === 'interested' || n.type === 'shortlist');
         setNotifications(filtered);
         setNotiLoading(false);
-        setNotiHasUnread(filtered.some((n: Notification) => n.read === 0));
+        //setNotiHasUnread(filtered.some((n: Notification) => n.read === 0));
       })
       .catch(() => {
         setNotiError("Could not load notifications.");
@@ -480,7 +479,7 @@ const PersonInNeedDashboard: React.FC = () => {
     return true;
   });
   // Helper to get shortlist count either from detailed csr_shortlists array or from shortlist_count
-  const getShortlistCount = (r: Request) => Array.isArray((r as any).csr_shortlists) ? (r as any).csr_shortlists.length : (r.shortlist_count ?? 0);
+  const getShortlistCount = (r: Request) => Array.isArray((r ).csr_shortlists) ? (r ).csr_shortlists.length : (r.shortlist_count ?? 0);
 
   // Apply sorting: primary key controlled by myRequestsPrimarySort
   filteredSortedMyRequests.sort((a, b) => {
@@ -598,7 +597,7 @@ const PersonInNeedDashboard: React.FC = () => {
                                 } else {
                                   toast.error('Failed to clear notification');
                                 }
-                              } catch (err) {
+                              } catch  {
                                 toast.error('Failed to clear notification');
                               }
                             }}
@@ -681,20 +680,21 @@ const PersonInNeedDashboard: React.FC = () => {
             setFilterUrgency("");
           }}>Clear</button>
         
-        <button 
-          type="button" 
-          className="pin-button primary" 
-          onClick={openMyRequests}>
-            My Requests
-          </button>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+            <button 
+              type="button" 
+              className="btn" 
+              onClick={openMyRequests}>
+                My Requests
+              </button>
 
-        <button 
-          type="button" 
-          className="pin-button" 
-          style={{ backgroundColor: '#0ea5e9', color: 'white' }} 
-          onClick={openMyOffers}>
-            My Offers
-        </button>
+            <button 
+              type="button" 
+              className="btn"  
+              onClick={openMyOffers}>
+                My Offers
+            </button>
+          </div>
       </div>
 
       {/* My Offers Modal */}
@@ -715,7 +715,6 @@ const PersonInNeedDashboard: React.FC = () => {
                     <th>Request Title</th>
                     <th>Status</th>
                     <th>Interested CSRs</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -729,57 +728,55 @@ const PersonInNeedDashboard: React.FC = () => {
                         ) : (
                           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {offer.interestedCsrs.map(csr => (
-                              <li key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ fontWeight: 600 }}>{csr.username || `CSR #${csr.csr_id}`}</span>
-                                <span style={{ color: '#64748b', fontSize: 13 }}>({new Date(csr.interestedAt).toLocaleDateString()})</span>
-                                {offer.assignedCsrId === csr.csr_id && offer.status === 'Pending' && (
-                                  <span style={{ color: '#22c55e', fontWeight: 700, marginLeft: 8 }}>Assigned</span>
-                                )}
+                              <li key={csr.csr_id} style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span style={{ fontWeight: 600 }}>{csr.username || `CSR #${csr.csr_id}`}</span>
+                                  <span style={{ color: '#64748b', fontSize: 13 }}>({new Date(csr.interestedAt).toLocaleDateString()})</span>
+                                  {offer.assignedCsrId === csr.csr_id && offer.status === 'Pending' && (
+                                    <span style={{ color: '#22c55e', fontWeight: 700, marginLeft: 8 }}>Assigned</span>
+                                  )}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                  {offer.assignedCsrId !== csr.csr_id && (
+                                    <>
+                                      <button className="pin-button" style={{ backgroundColor: 'white', color: '#1b9c4aff', border: '1px solid black', width: '90px' }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
+                                      <button className="pin-button" style={{ backgroundColor: 'white', color: '#b91616ff', border: '1px solid black', width: '90px' }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Reject</button>
+                                    </>
+                                  )}
+
+                                  {offer.status === 'Pending' && offer.assignedCsrId === csr.csr_id && (
+                                    <button
+                                      className="pin-button"
+                                      style={{ color: '#6b7280', backgroundColor: 'white', border: '1px solid black', width: '200px' }}
+                                      onClick={async () => {
+                                        if (window.confirm('Mark this request as completed?')) {
+                                          const res = await fetch(`${API_BASE}/api/pin/offers/${offer.requestId}/complete`, { method: 'POST' });
+                                          if (res.ok) {
+                                            toast.success('Request marked as completed.');
+                                            openMyOffers();
+                                          } else {
+                                            toast.error('Failed to mark request as completed.');
+                                          }
+                                        }
+                                      }}
+                                    >Mark Completed</button>
+                                  )}
+
+                                  {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
+                                    (!offer.feedback) ? (
+                                      <button
+                                        className="pin-button"
+                                        style={{ backgroundColor: 'white', color: '#1c4cb6ff', border: '1px solid black', width: '200px' }}
+                                        onClick={() => openFeedbackModal(offer.requestId, csr.csr_id, csr.username)}
+                                      >Feedback</button>
+                                    ) : null
+                                  )}
+                                </div>
                               </li>
                             ))}
                           </ul>
                         )}
-                      </td>
-                      <td>
-                        {offer.interestedCsrs.map(csr => (
-                          <div key={csr.csr_id} style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {/* Accept/Cancel buttons for non-assigned CSRs */}
-                                {offer.assignedCsrId !== csr.csr_id && (
-                                  <>
-                                    <button className="pin-button" style={{ backgroundColor: '#22c55e', color: 'white' }} onClick={() => handleAcceptCsr(offer.requestId, csr.csr_id)}>Accept</button>
-                                    <button className="pin-button" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: 4 }} onClick={() => handleCancelCsr(offer.requestId, csr.csr_id)}>Reject</button>
-                                  </>
-                                )}
-                            {/* Mark Completed button for pending requests with assigned CSR */}
-                            {offer.status === 'Pending' && offer.assignedCsrId === csr.csr_id && (
-                              <button
-                                className="pin-button"
-                                style={{ backgroundColor: '#6b7280', color: 'white' }}
-                                onClick={async () => {
-                                  if (window.confirm('Mark this request as completed?')) {
-                                    const res = await fetch(`${API_BASE}/api/pin/offers/${offer.requestId}/complete`, { method: 'POST' });
-                                    if (res.ok) {
-                                      toast.success('Request marked as completed.');
-                                      openMyOffers();
-                                    } else {
-                                      toast.error('Failed to mark request as completed.');
-                                    }
-                                  }
-                                }}
-                              >Mark Completed</button>
-                            )}
-                            {/* Feedback button for completed offers, only for assigned CSR */}
-                            {offer.status === 'Completed' && offer.assignedCsrId === csr.csr_id && (
-                              (!offer.feedback) ? (
-                                <button
-                                  className="pin-button"
-                                  style={{ backgroundColor: '#2563eb', color: 'white' }}
-                                  onClick={() => openFeedbackModal(offer.requestId, csr.csr_id, csr.username)}
-                                >Feedback</button>
-                              ) : null
-                            )}
-                          </div>
-                        ))}
                       </td>
                     </tr>
                   ))}
@@ -926,8 +923,8 @@ const PersonInNeedDashboard: React.FC = () => {
                   borderRadius: 9999,
                   fontWeight: 700,
                   fontSize: '0.85rem',
-                  color: selected.status === 'Pending' ? '#b45309' : selected.status === 'Available' ? '#16a34a' : '#6b7280',
-                  backgroundColor: selected.status === 'Pending' ? 'rgba(245,158,66,0.08)' : selected.status === 'Available' ? 'rgba(34,197,94,0.08)' : 'rgba(107,114,128,0.06)'
+                  color: selected.status === 'Pending' ? '#' : selected.status === 'Available' ? '#16a34a' : '#6b7280',
+                  backgroundColor: selected.status === 'Pending' ? 'rgba(229, 138, 41, 0.08)' : selected.status === 'Available' ? 'rgba(34,197,94,0.08)' : 'rgba(107,114,128,0.06)'
                 }}>
                   {selected.status || '-'}
                 </span>
@@ -967,7 +964,7 @@ const PersonInNeedDashboard: React.FC = () => {
           <div
             className="pin-modal-content"
             onClick={e => e.stopPropagation()}
-            style={{ width: '1200px', maxWidth: '98vw', minHeight: '500px', padding: '40px 50px' }}
+            style={{ width: '1600px', maxWidth: '98vw', minHeight: '500px', padding: '40px 50px' }}
           >
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8 }}>
               <h3 style={{ marginRight: 'auto' }}>My Requests</h3>
@@ -1013,7 +1010,7 @@ const PersonInNeedDashboard: React.FC = () => {
               <button
                 type="button"
                 className="pin-filter-button"
-                style={{ background: myRequestsPrimarySort === 'views' ? '#0f6fd8' : '#1583e9', color: 'white', border: 'none', fontWeight: 600 }}
+                style={{ background: myRequestsPrimarySort === 'views' ? 'white' : 'white', color: 'black', border: '1px solid black', fontWeight: 600, width: '120px' }}
                 onClick={() => {
                   // make views the primary sort key and toggle its direction
                   setMyRequestsPrimarySort('views');
@@ -1025,7 +1022,7 @@ const PersonInNeedDashboard: React.FC = () => {
               <button
                 type="button"
                 className="pin-filter-button"
-                style={{ background: myRequestsPrimarySort === 'shortlists' ? '#0f6fd8' : '#1583e9', color: 'white', border: 'none', fontWeight: 600 }}
+                style={{ background: myRequestsPrimarySort === 'shortlists' ? 'white' : 'white', color: 'black', border: '1px solid black', fontWeight: 600, width: '120px' }}
                 onClick={() => {
                   // make shortlists the primary sort key and toggle its direction
                   setMyRequestsPrimarySort('shortlists');
@@ -1034,7 +1031,7 @@ const PersonInNeedDashboard: React.FC = () => {
               >
                 Shortlists {myRequestsSortShortlists === 'asc' ? '▲' : '▼'}
               </button>
-              <button className="btn" onClick={() => setShowCreate(true)} style={{ marginLeft: 'auto' }}>Create Request</button>
+              <button className="btn" onClick={() => setShowCreate(true)} style={{ marginLeft: 'auto', width: '140px' }}>Create Request</button>
             </div>
             <table className="pin-table" style={{ marginTop: 25 }}>
               <thead>
@@ -1046,7 +1043,7 @@ const PersonInNeedDashboard: React.FC = () => {
                   <th>Date Created</th>
                   <th style={{ textAlign: 'center' }}>Views</th>
                   <th style={{ textAlign: 'center' }}>Shortlists</th>
-                  <th>Actions</th>
+                  <th style={{ textAlign: 'center' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1101,12 +1098,12 @@ const PersonInNeedDashboard: React.FC = () => {
                           <span style={{ fontWeight: 600 }}>{getShortlistCount(r)}</span>
                         </span>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {/* Only show Edit button if not completed */}
                         {r.status !== 'Completed' && (
                           <button 
                             className="pin-button" 
-                            style={{ backgroundColor: '#22c55e', color: 'white', marginRight: 8 }}
+                            style={{ backgroundColor: 'white', color: '#1b9c4aff', border: '1px solid black', marginRight: 8, width: '90px' }}
                             onClick={() => {
                               setEditRequest(r);
                               setEditTitle(r.title);
@@ -1120,7 +1117,7 @@ const PersonInNeedDashboard: React.FC = () => {
                         )}
                         <button 
                           className="pin-button" 
-                          style={{ backgroundColor: '#ef4444', color: 'white' }}
+                          style={{ backgroundColor: 'white', color: '#b91616ff', border: '1px solid black', width: '90px' }}
                           onClick={async () => {
                             if (window.confirm('Are you sure you want to delete this request?')) {
                               const res = await fetch(`${API_BASE}/api/pin/requests/${r.id}`, { method: 'DELETE' });

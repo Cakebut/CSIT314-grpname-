@@ -9,6 +9,7 @@ import SystemActivityLogs from "./ViewUserAdminSystemLogPage";
 import Roles from "./Roles";
 
 import "./AdminDashboard.css";
+import "../CSRRep/CSRDashboard.css";
 
 
 // interface AdminDashboardProps {
@@ -17,7 +18,12 @@ import "./AdminDashboard.css";
 
 type ActiveSection = "userAccounts" | "roles" | "passwordRequests" | "activityLogs";
 
-
+function getAdminId() {
+  const role = localStorage.getItem("currentRole");
+  const userId = localStorage.getItem("userId");
+  if (role === "User Admin" && userId) return userId;
+  return null;
+}
   
 export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [activeSection, setActiveSection] = useState<ActiveSection>("userAccounts");
@@ -29,6 +35,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [adminNotifs, setAdminNotifs] = useState<Array<{ id: number; user_id: number; username: string; message: string; createdAt: string; read: number }>>([]);
   const unreadCount = adminNotifs.filter((n) => n.read === 0).length;
+  const adminId = getAdminId();
 
   // Load platform announcements
   useEffect(() => {
@@ -49,7 +56,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
 
   // Fetch admin notifications when the popover is opened
   useEffect(() => {
-    if (!notificationsOpen) return;
+    if (!adminId) return;
     fetch('/api/userAdmin/admin-notifications')
       .then(r => r.json())
       .then(data => {
@@ -216,6 +223,23 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
                         <div className="user-admin-notification-title">{n.username}</div>
                         <div className="user-admin-notification-message">{n.message}</div>
                         <div className="user-admin-notification-time">{new Date(n.createdAt).toLocaleString()}</div>
+                        <button
+                          type="button"
+                          className="CSR-notification-close"
+                          aria-label="Clear notification"
+                          title="Clear notification"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await fetch('/api/pm/announcements/latest', { method: 'DELETE' });
+                              setAdminNotifs(prev => prev.filter(n => n.id !== n.id));
+                            } catch {
+                              alert('Failed to clear notification');
+                            }
+                          }}
+                        >
+                          ×
+                        </button>
                       </li>
                     ))}
                   </ul>

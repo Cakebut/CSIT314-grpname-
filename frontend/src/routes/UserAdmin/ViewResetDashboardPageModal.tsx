@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import "./ViewPasswordRequestsModal.css";
+import "./ViewResetDashboardPageModal.css";
+import { toast } from 'react-toastify';
 
 type PasswordRequest = {
   id: number;
@@ -24,7 +25,7 @@ interface ViewPasswordRequestProps {
   onUpdated?: () => void; // optional callback when approve/reject completes
 }
 
-function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
+function ViewResetDashboardPageModal({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
   const [adminNotes, setAdminNotes] = useState<string>(request.admin_note ?? "");
   const [localRequest, setLocalRequest] = useState<PasswordRequest>(request);
   const [showPassword, setShowPassword] = useState(false);
@@ -105,6 +106,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
     setLocalRequest({ ...localRequest, status: 'Approved', reviewed_by: adminId, admin_name: adminName, reviewed_at: now, admin_note: adminNotes });
     setActionResult('approved');
     setShowSuccessDialog(true);
+    
     if (onUpdated) onUpdated();
       } catch (err) {
         console.error(err);
@@ -112,6 +114,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
       } finally {
         setBusy(false);
       }
+       toast.success('Password reset request approved');
     };
 
   //HANDLE REJECT BUTTON
@@ -146,6 +149,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
       } finally {
         setBusy(false);
       }
+      toast.error('Password reset request rejected');
     };
 
   // Removed 'Back to Dashboard' action — success dialog will close the modal instead
@@ -198,7 +202,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
             onChange={e => { if (notesEditable) setAdminNotes(e.target.value); }}
             placeholder="Add notes for the audit log"
             rows={4}
-            style={{ width: '100%', padding: 8 }}
+            style={{ fontFamily: 'Montserrat', letterSpacing: '0.5px', width: '100%', padding: 10 }}
             readOnly={!notesEditable}
             aria-readonly={!notesEditable}
           />
@@ -207,12 +211,12 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
         {/* Action Buttons */}
         <div className="view-password-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
           <div style={{ marginRight: 'auto' }}>
-            <button onClick={onClose} className="cancel-view-password">Cancel</button>
+            <button onClick={onClose} className="cancel-view-password btn">Cancel</button>
           </div>
           <div>
             <button
               onClick={() => handleReject()}
-              className="reject-view-password"
+              className="reject-view-password btn"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
               style={{ marginLeft: 8 }}
             >
@@ -220,7 +224,8 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
             </button>
             <button
               onClick={async () => { setShowConfirmDialog(true); }}
-              className="approve-view-password"
+              style={{ marginLeft: 15 }}
+              className="approve-view-password btn"
               disabled={busy || request.status?.toLowerCase() !== 'pending'}
             >
               <Check className="icon" /> Approve
@@ -234,12 +239,12 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
         <div className="view-password-confirm-dialog">
           <div className="view-password-confirm-content">
             <h4>Confirm Action</h4>
-            <p>Are you sure you want to approve this password change request?</p>
+            <p style={{ marginBottom: 15 }}>Are you sure you want to approve this password change request?</p>
             <p><strong>Username:</strong> {request.username}</p>
             <p><strong>Request ID:</strong> #{String(request.id).padStart(3, '0')}</p>
             <div className="view-password-actions">
-              <button onClick={() => setShowConfirmDialog(false)}>No, Cancel</button>
-              <button onClick={handleApprove}>Yes, Approve</button>
+              <button className="btn" onClick={() => setShowConfirmDialog(false)}>Cancel</button>
+              <button className="btn" onClick={handleApprove}>Accept</button>
             </div>
           </div>
         </div>
@@ -264,9 +269,9 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
                 <p>The password change request has been rejected.</p>
               </>
             )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-              <button onClick={() => { setShowSuccessDialog(false); onClose(); }}>Close</button>
-            </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+                <button onClick={() => { setShowSuccessDialog(false); onClose(); }}>Close</button>
+              </div>
           </div>
         </div>
       )}
@@ -274,4 +279,4 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
   );
 }
 
-export default ViewPasswordRequestsModal;
+export default ViewResetDashboardPageModal;

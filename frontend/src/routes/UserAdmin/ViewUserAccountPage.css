@@ -174,7 +174,10 @@
 .edit-user-accounts, .delete-user-accounts, .suspend-user-accounts {
   border-radius: 5px;
   cursor: pointer;
-  display: inline-block;
+  /* use inline-flex so text is vertically centered and buttons share the same sizing */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   width: 85px;
   height: 30px;
@@ -202,6 +205,24 @@
   /* background-color: #b41928; */
   background-color: black;
   color: white;
+}
+
+/* Style for the suspend/activate button: white background, 1px solid black border,
+   text color indicates action: red for suspend, green for activate */
+.suspend-user-accounts {
+  background: #fff;
+  border: 1px solid #000;
+  color: #ef4444; /* default red for the Suspend action */
+}
+
+.suspend-user-accounts.suspend {
+  /* shows when the user is active and the button action will suspend them */
+  color: #ef4444; /* red */
+}
+
+.suspend-user-accounts.activate {
+  /* shows when the user is suspended and the button action will activate them */
+  color: #065f46; /* green */
 }
 
 /* Button CSS ---------------------------------------------------------------------------------------------- */
@@ -268,6 +289,24 @@ button {
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
+}
+/* Toggle-style status button used in Create modal */
+.user-accounts-modal-form .status-toggle-btn {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 6px;
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+  border-radius: 6px;
+  box-sizing: border-box;
+  text-align: left;
+  height: 40px;
+  cursor: pointer;
+}
+
+.user-accounts-modal-form .status-toggle-btn:focus {
+  outline: 2px solid rgba(0,0,0,0.12);
 }
 .user-accounts-modal-actions {
   display: flex;
