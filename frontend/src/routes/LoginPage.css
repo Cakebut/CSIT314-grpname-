@@ -1,5 +1,3 @@
-/* border: 1px solid red; */
-
 .login-main {
   position: relative; 
   width: 100%;
@@ -7,18 +5,39 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
-  text-align: center; 
+  text-align: left; 
 }
 
 .login-main::before {
   z-index: -1;
   content: '';
   position: fixed;
-  background: #F3EBEB;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
+  /* use existing asset in src/assets - relative to this CSS file */
+  background-image: url('../assets/pexels-julia-m-cameron-6994870.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  filter: brightness(0.45) saturate(0.95) contrast(0.98);
+}
+
+/* Additional subtle dark overlay to increase contrast for foreground content */
+.login-main::after{
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure visual column and login box sit above the overlay */
+.login-layout, .login-visual, .login-box {
+  position: relative;
+  z-index: 2;
 }
 
 .login-box {
@@ -26,21 +45,31 @@
   justify-content: center;
   flex-direction: column;
   width: 440px;
-  height: 480px;
+  height: 550px;
   padding: 30px;
   z-index: 888;
+  box-shadow: 0px 5px 10px 4px rgba(0, 0, 0, 0.05);
 }
 
 .login-header {
   text-align: center;
   margin: 20px 0 25px 0;
-  font-family: Motter Corpus Std, sans-serif;
+  font-family: Open Sans, sans-serif;
   letter-spacing: 0.1em;
 }
 
 .login-header header {
   font-size: var(--size-4xl);
-  font-weight: 600;
+  font-weight: bold;
+}
+
+.login-header div {
+  font-size: var(--size-base);
+  font-weight: 200;
+}
+
+.input-box header {
+  margin-bottom: 10px;
 }
 
 .input-field {
@@ -48,9 +77,9 @@
   height: 50px;
   font-size: var(--size-base);
   padding: 0 25px;
-  margin-bottom: 15px;
-  border-radius: 30px;
-  border: none;
+  margin-bottom: 25px;
+  border-radius: 10px;
+  border: 1px solid black;
   box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
   outline: none;
   transition: .3s;
@@ -64,28 +93,33 @@
   transform: scale(1.05, 1);
 }
 
+.input-field header {
+  text-align: left;
+}
+
 .forgot {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
+  width: 100%;
+  /* border: 1px solid red; */
 }
 
-.forgot section {
-  display: flex;
-  align-items: center; 
-
+#loginForm {
+  background-color: white;
+  border-radius: 20px;
 }
 
 #check {
   margin-right: 10px;
-  transform: translateY(1px);
+  cursor: pointer;
+  
 }
 
 .forgot label {
-  line-height: 1; 
   margin: 0;                 
-  font-size: var(--size-m);   
+  font-size: var(--size-m);
 }
 
 .login-section {
@@ -94,12 +128,61 @@
   font-size: var(--size-base);
 }
 
-.login-text {
+/* Layout: left visual column + right login box */
+.login-layout{
+  display:flex;
+  gap:56px; /* larger gap between visual and login box */
+  align-items: stretch;
+  justify-content: flex-start; /* push layout left */
+  width: calc(100% - 120px);
+  max-width: 1200px;
+  margin: 40px 0 40px 80px; /* push the whole block to the left */
+  padding-right: 40px;
+}
+.login-visual{
+  flex: 1 1 520px;
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 36px;
+}
+.visual-inner{
+  max-width: 520px;
+}
+.visual-hero{
+  font-size: 44px;
+  line-height: 1.02;
+  margin: 0 0 20px 0;
+  font-weight: 800;
+  color: #ffffff;
+}
+.visual-sub{
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 50px;
+}
+.visual-features{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+.vf-card{
+  background: rgba(255,255,255,0.08);
+  padding: 5px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+}
+.vf-card h4{ margin:8px 0 6px 0; font-size:14px }
+.vf-card p{ font-size:12px; color: rgba(255,255,255,0.85); line-height:1.3 }
+
+.forgot-text {
   text-decoration: none;
-  position: relative;
+  padding-bottom: 3px;
+  position: relative !important; 
 }
 
-.login-text:before {
+.forgot-text:before {
   content: '';
   position: absolute;
   background-color: black;
@@ -111,16 +194,16 @@
   border-radius: 100px;
 }
 
-.login-text:hover:before {
+.forgot-text:hover:before {
   width: 100%;
 }
 
-.login-text:hover {
+.forgot-text:hover {
   color: white;
   font-weight: 600;
 }
 
-.login-section .login-text {
+.login-section .forgot-text {
   color: black;
 }
 
@@ -145,11 +228,11 @@
   -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   cursor: pointer;
-  color: black;
+  color: white;
 }
 
 .input-submit:hover label {
-  color: white;
+  color: black;
   font-weight: 800;
 }
 
@@ -164,26 +247,11 @@
   padding-bottom: 3px;
 }
 
-.dropdown-box {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.dropdown-label {
-  align-content: center;
-  padding-inline: 15px;
-  font-size: var(--size-m);
-}
-
-#dropdown {
-  padding: 10px;
-  font-size: var(--size-m);
-  width: 70%;
-  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
-  outline: none;
-  border: none;
+.login-status {
+  margin-top: 10px;
+  text-align: center;
+  color: black;
+  font-weight: bold;
 }
 
 /* Button CSS ---------------------------------------------------------------------------------------------- */
@@ -191,8 +259,8 @@
 .btn {
     display: inline-block;
     font-weight: 500;
-    background-color: white;
-    color: black;
+    background-color: black;
+    color: white;
     text-decoration: none;
     padding: 1em 1.2em;
     border-radius: 8px;
@@ -208,6 +276,7 @@ button {
 }
 
 .btn:hover {
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: black;
+  border: 1px solid black;
 }

@@ -1,86 +1,133 @@
-/* Clear Logs Button Styling */
-.clear-logs-btn {
-  background: #dd0b0b;
-  color: #dd0b0b;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1.2rem;
-  font-weight: 600;
-  margin-left: 1rem;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.clear-logs-btn:hover {
-  background: #dc2626;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.18);
-}
 /* Dashboard container */
-.password-reset-dashboard {
-  background: #f6f8fa;
-  min-height: 100vh;
-  padding: 2.5rem 0;
+.password-reset-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 30px;
+  margin-bottom: 20px;
 }
-.password-reset-dashboard h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.2rem;
+.password-reset-header h1 {
+  font-size: 24px;
+  font-weight: bold;
 }
-.password-reset-dashboard p {
-  color: #64748b;
-  margin-bottom: 1.2rem;
+
+.password-reset-header p {
+  color: #555;
 }
+
+/* Filters CSS ---------------------------------------------------------------------------------------------- */
+
 .dashboard-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.2rem;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 1px black;
+  background-color: #F9FAFB;
+  margin-top: 30px;
 }
-.dashboard-controls input,
-.dashboard-controls select {
-  padding: 0.7em 1em;
-  border-radius: 8px;
-  border: 1.2px solid #bfc8d6;
-  font-size: 1rem;
-  background: #f3f6fb;
+
+.search-password-reset {
+  padding: 5px 10px;
+  border-radius: 10px;
+  height: 50px;
+  width: 400px;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
 }
-.dashboard-controls button {
-  padding: 0.7em 1.2em;
-  border-radius: 8px;
+
+.filter-password-reset {
+  padding: 5px 40px; /* left:(top bottom) right:(left right) */
+  border-radius: 10px;
+  height: 50px;
   border: none;
-  background: #e5e7eb;
-  color: #334155;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
+  border: 1px solid black;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+  outline: none;
+  text-align: left;
 }
+
+.reset-password-reset {
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+}
+
+.clear-logs-btn {
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.05);
+}
+
 .pending-count {
   margin-left: auto;
-  color: #facc15;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  height: 50px;
+  min-width: 100px; /* match reset/clear button sizing */
+  border-radius: 10px;
+  background: rgba(250, 204, 21, 0.08); /* faint yellow */
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+  color: #f0c000;
   font-weight: 600;
   font-size: 1.08rem;
 }
 
+
+/* Tables CSS (aligned with Roles.css table styles) ---------------------------------------------------- */
 .requests-table {
   width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 16px rgba(44,62,80,0.10);
+  border-spacing: 0;
+  margin-top: 40px;
+  border: 1px solid black;
   overflow: hidden;
+  table-layout: fixed;
+  border-radius: 5px;
+  background-color: #F9FAFB;
+  background-clip: padding-box;
 }
-.requests-table th, .requests-table td {
-  padding: 1rem 1.2rem;
-  text-align: left;
+
+/* Row / cell spacing and alignment */
+.requests-table th,
+.requests-table td {
+  padding: 20px 15px;
+  text-align: center;
+  border: none;
 }
+
+/* Column widths: ID | Username | Date | Status | Actions */
+.requests-table th:nth-child(1),
+.requests-table td:nth-child(1) { width: 10%; }
+.requests-table th:nth-child(2),
+.requests-table td:nth-child(2) { width: 35%; }
+.requests-table th:nth-child(3),
+.requests-table td:nth-child(3) { width: 20%; }
+.requests-table th:nth-child(4),
+.requests-table td:nth-child(4) { width: 15%; }
+.requests-table th:nth-child(5),
+.requests-table td:nth-child(5) { width: 20%; }
+
+.requests-table tbody tr + tr td {
+  border-top: 1px solid #000;
+}
+
 .requests-table th {
-  background: #f3f6fb;
-  color: #334155;
+  background-color: #F9FAFB;
+  border-bottom: 1px solid black;
   font-weight: 600;
 }
-.requests-table tr:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb;
-}
+
+/* Status badge (kept from previous design) */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -90,18 +137,11 @@
   font-size: 0.98rem;
   font-weight: 600;
 }
-.status-badge.pending {
-  background: #fef9c3;
-  color: #facc15;
-}
-.status-badge.approved {
-  background: #dcfce7;
-  color: #22c55e;
-}
-.status-badge.rejected {
-  background: #fee2e2;
-  color: #ef4444;
-}
+
+.status-badge.pending { background: #fef9c3; color: #facc15; }
+.status-badge.approved { background: #dcfce7; color: #22c55e; }
+.status-badge.rejected { background: #fee2e2; color: #ef4444; }
+
 .requests-table button {
   padding: 0.5em 1em;
   border-radius: 8px;
@@ -193,4 +233,4 @@
 .strong {
   color: #22c55e;
   font-weight: 600;
-}
+} 

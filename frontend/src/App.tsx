@@ -3,42 +3,34 @@ import { useEffect } from 'react';
 import React from 'react';
  
 
+
 // LOGIN PAGE
 import Login from './routes/LoginPage';
-import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
+// FORGOT PASSWORD PAGE
+import ForgotPasswordPage from './routes/ForgotPasswordPage';
 
 // USER ADMIN PAGE
 import AdminDashboard from './routes/UserAdmin/AdminDashboard';
-import ViewUserAccountPage from './routes/UserAdmin/ViewUserAccountPage';
-import ViewUserRolesPage from './routes/UserAdmin/ViewUserRolesPage';
-import CreateNewUserAccountPage from './routes/UserAdmin/CreateNewUserAccountPage';
-import UserAdminSystemLogPage from './routes/UserAdmin/ViewUserAdminSystemLogPage';
-import AdminPasswordResetDashboard from './routes/UserAdmin/ViewResetDashboardPage';
 
+// PERSON IN NEED PAGE
+import PINDashboard from './routes/PersonInNeed/PINDashboard';
 
-//Person In Need
-import PersonInNeedDashboard from './routes/PersonInNeed/PersonInNeedDashboard';
+// CSR PAGE
+import CSRDashboard from './routes/CSRRep/CSRDashboard';
 
-// Platform Manager
-import PlatformManagerHome from './routes/PlatformManager';
-import CategoriesPage from './routes/PlatformManager/CategoriesPage';
-import ReportsPage from './routes/PlatformManager/ReportsPage';
-import AnnouncementsPage from './routes/PlatformManager/AnnouncementsPage';
-
-// CSR Rep
-import CSRRepDashboard from './routes/CSRRep/CSRRepDashboard';
-
-//===========================================================================
+// PLATFORM MANAGER PAGE
+import PMDashboard from './routes/PlatformManager/PMDashboard';
 // CSS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+
 
 function App() {
   useEffect (() => {
     document.title = "Volunteering Service in Singapore"
   })
-
 
   // ProtectedRoute component for all actors
 function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, allowedRole: string }) {
@@ -61,37 +53,30 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
     <Router>
       <div className="app-wrapper">
         <Routes>
+
+          {/* Login */}
           <Route path="/" element={<Login />} />
+
+          {/* Forgot Password */}
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
           {/* User Admin */}
           <Route path="/useradmin" element={<ProtectedRoute allowedRole="User Admin"><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/useradmin/ViewUserList" element={<ProtectedRoute allowedRole="User Admin"><ViewUserAccountPage /></ProtectedRoute>} />
-          <Route path="/useradmin/ViewUserRoles" element={<ProtectedRoute allowedRole="User Admin"><ViewUserRolesPage /></ProtectedRoute>} />
-          <Route path="/useradmin/create" element={<ProtectedRoute allowedRole="User Admin"><CreateNewUserAccountPage /></ProtectedRoute>} />
-          <Route path="/useradmin/SystemLog" element={<ProtectedRoute allowedRole="User Admin"><UserAdminSystemLogPage /></ProtectedRoute>} />
-          <Route path="/useradmin/PasswordResetRequests" element={<ProtectedRoute allowedRole="User Admin"><AdminPasswordResetDashboard /></ProtectedRoute>} />
 
-          
           {/* Person In Need */}
-          <Route path="/PIN" element={<ProtectedRoute allowedRole="Person In Need"><PersonInNeedDashboard /></ProtectedRoute>} />
+          <Route path="/PIN" element={<ProtectedRoute allowedRole="Person In Need"><PINDashboard /></ProtectedRoute>} />
           
           {/* CSR Rep */}
-          <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRRepDashboard /></ProtectedRoute>} />
+          <Route path="/csr/*" element={<ProtectedRoute allowedRole="CSR Rep"><CSRDashboard /></ProtectedRoute>} />
 
+          {/* Platform Manager */}
+          <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PMDashboard /></ProtectedRoute>} />
 
-          {/* Platform Manager (Dashboard + nested pages) */}
-          <Route path="/platformManager" element={<ProtectedRoute allowedRole="Platform Manager"><PlatformManagerHome /></ProtectedRoute>}>
-            <Route index element={<Navigate to="reports" replace />} />
-            <Route path="categories" element={<ProtectedRoute allowedRole="Platform Manager"><CategoriesPage /></ProtectedRoute>} />
-            <Route path="reports" element={<ProtectedRoute allowedRole="Platform Manager"><ReportsPage /></ProtectedRoute>} />
-            <Route path="announcements" element={<ProtectedRoute allowedRole="Platform Manager"><AnnouncementsPage /></ProtectedRoute>} />
-          </Route>
-         
         </Routes>
         <ToastContainer />
       </div>
     </Router>
   );
 }
-
+ 
 export default App;

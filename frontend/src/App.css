@@ -1,77 +1,101 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700);
 
-@font-face {
-    font-family: 'Motter Corpus Std';
-    src: local('Motter Corpus Std'), local('MotterCorpusStd-Regular'),
-      url('./fonts/MotterCorpusStd-Regular.eot?#iefix') format('embedded-opentype'),
-      url('./fonts/MotterCorpusStd-Regular.woff2') format('woff2'),
-      url('./fonts/MotterCorpusStd-Regular.woff') format('woff'),
-      url('./fonts/MotterCorpusStd-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 *,
 ::before,
 ::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 * {
-    margin : 0;
-    padding: 0;
-    line-height: calc(1em + 0.5rem);
+  margin: 0;
+  padding: 0;
+  line-height: calc(1em + 0.5rem);
 }
 
-:root {    
+:root {
+  --size-xxs: 0.5rem;
+  --size-xs: 0.75rem;
+  --size-sm: 0.875rem;
+  --size-m: 1rem;
+  --size-lg: 1.125rem;
+  --size-xl: 1.25rem;
+  --size-2xl: 1.5rem;
+  --size-3xl: 1.875rem;
+  --size-4xl: 2.25rem;
+  --size-5xl: 3rem;
+  --size-6xl: 3.75rem;
+  --size-7xl: 4.5rem;
+  --size-8xl: 6rem;
+  --size-9xl: 8rem;
+  --size-10xl: 10rem;
 
-    --size-xxs: 0.5rem;
-    --size-xs: 0.75rem;
-    --size-sm: 0.875rem;
-    --size-m: 1rem;
-    --size-lg: 1.125rem;
-    --size-xl: 1.25rem;
-    --size-2xl: 1.5rem;
-    --size-3xl: 1.875rem;
-    --size-4xl: 2.25rem;
-    --size-5xl: 3rem;
-    --size-6xl: 3.75rem;
-    --size-7xl: 4.5rem;
-    --size-8xl: 6rem;
-    --size-9xl: 8rem;
-    --size-10xl: 10rem;
-
-
-    --max-width: 1200px;
-
+  --max-width: 1200px;
 }
-
-
 
 /* General CSS ---------------------------------------------------------------------------------------------- */
 
 body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: white;
-    color: black;
-    min-height: 100vh;
-    scroll-behavior: smooth;
+  font-family: "Montserrat", sans-serif;
+  background-color: white;
+  color: black;
+  min-height: 100vh;
+  scroll-behavior: smooth;
 }
 
-body, html {
-    height: 100%;
-    overflow-y: auto;
-    margin: 0;
-    padding: 0;
-    scroll-behavior: smooth;
+body,
+html {
+  height: 100%;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
 }
 
 .app-wrapper {
-    width:  100%;
-    margin-left: auto;
-    margin-right: auto;
-    /* border: 1px solid red;  */
-    /* Just for me to check sizing */
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  /* border: 1px solid red;  */
+  /* Just for me to check sizing */
 }
 
+/* Ensure all modal overlays and modal contents sit above other UI (popovers, badges, etc.) */
+/* We use very large z-index values and !important to avoid stacking-context surprises. */
+/* .modal-overlay,
+.pin-modal,
+.pin-modal-overlay,
+.available-modal-overlay,
+.shortlist-modal-overlay,
+.user-accounts-modal-overlay,
+.roles-modal-overlay,
+.view-password-modal-overlay,
+.view-password-confirm-dialog,
+.view-password-success-dialog,
+.view-password-modal-overlay,
+.modal {
+  z-index: 200000 !important;
+}
+
+.modal-content,
+.pin-modal-content,
+.available-modal-content,
+.shortlist-modal-content,
+.user-accounts-modal-content,
+.roles-modal-content,
+.view-password-modal-content,
+.view-password-confirm-content,
+.view-password-success-content,
+.modal-content {
+  z-index: 210000 !important;
+}
+
+.pin-modal .pin-modal-close,
+.modal-content .modal-close,
+.pin-modal-content .pin-modal-close,
+.view-password-modal-content .modal-close,
+.view-password-confirm-content .modal-close,
+.view-password-success-content .modal-close {
+  z-index: 220000 !important;
+} */

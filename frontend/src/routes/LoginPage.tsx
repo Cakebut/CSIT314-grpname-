@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { HeartHandshake, Users, HandHeart } from "lucide-react";
 import "./LoginPage.css";
 
 function Login() {
@@ -57,77 +58,104 @@ function Login() {
     }
   };
 
-
-
-
-
   return (
-  
-
     <>
-     
 
-      <section className="login-main login-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+      <section className="login-main login-section">
         {showSuspendedModal && (
           <div className="modal-overlay" style={{ background: 'rgba(44,62,80,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1000 }}>
-            <div className="modal-content" style={{ background: 'white', borderRadius: '18px', padding: '2rem 2.5rem', boxShadow: '0 8px 32px rgba(44,62,80,0.18)', textAlign: 'center' }}>
+            <div className="modal-content" style={{ width: '30%', background: 'white', borderRadius: '18px', padding: '2rem 2.5rem', boxShadow: '0 8px 32px rgba(44,62,80,0.18)', textAlign: 'center' }}>
               <h3 style={{ color: '#d7263d', fontWeight: 700, marginBottom: '0.5rem' }}>Account Suspended</h3>
-              <p style={{ color: '#2d3748', marginBottom: '1.2rem' }}>Your account is currently suspended.</p>
-              <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn" style={{ background: '#0077cc', color: 'white', borderRadius: '10px', padding: '0.7rem 2.2rem', fontWeight: 600, fontSize: '1rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)' }}>Close</button>
+              <p style={{ color: '#2d3748', marginBottom: '1.2rem' }}>Your account is currently suspended</p>
+              <button onClick={() => setShowSuspendedModal(false)} className="submit-btn btn" style={{ background: 'black', color: 'white', borderRadius: '10px', padding: '0.7rem 2.2rem', fontWeight: 600, fontSize: '1rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)' }}>Close</button>
             </div>
           </div>
         )}
-        <form id="loginForm" className="login-box" style={{ background: 'white', borderRadius: '24px', boxShadow: '0 12px 32px rgba(44,62,80,0.12)', padding: '2.5rem 2rem', maxWidth: '400px', width: '100%' }}>
+
+        <div className="login-layout">
+          <aside className="login-visual">
+            <div className="visual-inner">
+              <h1 className="visual-hero">Empowering More Kindness, Connecting All Communities</h1>
+              <p className="visual-sub">CareMatch connects CSR representatives with Persons-In-Need (PIN) who seek assistance — building compassion through collaboration.</p>
+
+              <div className="visual-features">
+                <div className="vf-card">
+                  <Users />
+                  <h4>For Volunteers</h4>
+                  <p>Discover meaningful ways to help your community through verified assistance requests.</p>
+                </div>
+                <div className="vf-card">
+                  <HandHeart />
+                  <h4>For Persons-In-Need</h4>
+                  <p>Submit assistance requests and connect with caring volunteers ready to help.</p>
+                </div>
+                <div className="vf-card">
+                  <HeartHandshake />
+                  <h4>CSR Managed</h4>
+                  <p>Activities verified and managed by CSR representatives for safety and trust.</p>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <form id="loginForm" className="login-box" onSubmit={handleLogin}>
           <div className="login-header">
-            <img src="/logo192.png" alt="Logo" style={{ width: '56px', marginBottom: '0.7rem' }} />
-            <header style={{ fontWeight: 700, fontSize: '2rem', color: '#2d3748', letterSpacing: '0.02em' }}>Welcome Back</header>
-            <div style={{ color: '#64748b', fontSize: '1rem', marginTop: '0.2rem', marginBottom: '0.7rem' }}>Sign in to your account</div>
+            <header>Welcome </header>
+            <div>Sign in to your account</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem', marginBottom: '1.1rem' }}>
+
+            <div className="input-box">
+            <header>Username</header>
             <input
               type="text"
               id="username"
               className="input-field"
-              placeholder="Username"
+              placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="off"
               required
-              style={{ padding: '1rem 1.2rem', borderRadius: '16px', border: '1.5px solid #bfc8d6', fontSize: '1.08rem', width: '100%', background: '#f3f6fb', boxSizing: 'border-box', transition: 'border 0.2s', outline: 'none' }}
-              onFocus={e => e.currentTarget.style.border = '1.5px solid #0077cc'}
-              onBlur={e => e.currentTarget.style.border = '1.5px solid #bfc8d6'}
             />
+          </div>
+
+          <div className="input-box">
+            <header>Password</header>
             <input
               type="password"
               id="password"
               className="input-field"
-              placeholder="Password"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="off"
               required
-              style={{ padding: '1rem 1.2rem', borderRadius: '16px', border: '1.5px solid #bfc8d6', fontSize: '1.08rem', width: '100%', background: '#f3f6fb', boxSizing: 'border-box', transition: 'border 0.2s', outline: 'none' }}
-              onFocus={e => e.currentTarget.style.border = '1.5px solid #0077cc'}
-              onBlur={e => e.currentTarget.style.border = '1.5px solid #bfc8d6'}
             />
           </div>
+
           <div className="forgot">
-        
             <section>
-              <a className="login-text"  href="/forgot-password">Forgot Password</a>
+              <label htmlFor="check"></label>
+            </section>
+            <section>
+              <a className="forgot-text" href="/forgot-password">
+                Forgot Password?
+              </a>
             </section>
           </div>
-          <div className="input-submit" style={{ marginBottom: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+          <div className="input-submit">
             <button
               type="submit"
               className="submit-btn btn"
               id="submit"
-              style={{ background: '#0077cc', color: 'white', border: 'none', borderRadius: '16px', padding: '1rem 0', fontWeight: 700, fontSize: '1.3rem', width: '90%', marginTop: '0.2rem', boxShadow: '0 2px 8px rgba(44,62,80,0.10)', cursor: 'pointer', letterSpacing: '0.02em', transition: 'background 0.2s', display: 'block', textAlign: 'center' }}
               onClick={handleLogin}
-            >Sign In</button>
+            ></button>
+            <label htmlFor="submit">SIGN IN</label>
           </div>
-          {status && <div className="login-status" style={{ color: status === 'Login successful!' ? '#22c55e' : '#d7263d', background: '#f8fafc', borderRadius: '8px', padding: '0.7rem', marginTop: '0.5rem', fontWeight: 500, fontSize: '1rem', textAlign: 'center' }}>{status}</div>}
-        </form>
+
+          {status && <div className="login-status">{status}</div>}
+          </form>
+        </div>
       </section>
     </>
   );
