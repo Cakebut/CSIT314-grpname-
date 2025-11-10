@@ -428,27 +428,27 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
   );
 }
 
-function TrendChart({ data }: { data: TrendRow[] }) {
-  if (!data.length) return <div className="empty">No data</div>;
-  const w = 600, h = 200, pad = 24;
-  const xs = data.map((_, i) => i);
-  const ys = data.map(d => d.total);
-  const maxY = Math.max(...ys) || 1;
-  const points = xs.map((x,i) => {
-    const px = pad + (x/(xs.length-1||1))*(w-2*pad);
-    const py = h - pad - (ys[i]/maxY)*(h-2*pad);
-    return `${px},${py}`;
-  }).join(" ");
-  return (
-    <svg width={w} height={h} className="chart">
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/>
-      {data.map((d,i) => {
-        const px = pad + (i/(data.length-1||1))*(w-2*pad);
-        return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
-      })}
-    </svg>
-  );
-}
+// function TrendChart({ data }: { data: TrendRow[] }) {
+//   if (!data.length) return <div className="empty">No data</div>;
+//   const w = 600, h = 200, pad = 24;
+//   const xs = data.map((_, i) => i);
+//   const ys = data.map(d => d.total);
+//   const maxY = Math.max(...ys) || 1;
+//   const points = xs.map((x,i) => {
+//     const px = pad + (x/(xs.length-1||1))*(w-2*pad);
+//     const py = h - pad - (ys[i]/maxY)*(h-2*pad);
+//     return `${px},${py}`;
+//   }).join(" ");
+//   return (
+//     <svg width={w} height={h} className="chart">
+//       <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/>
+//       {data.map((d,i) => {
+//         const px = pad + (i/(data.length-1||1))*(w-2*pad);
+//         return <text key={i} x={px} y={h-4} fontSize="10" textAnchor="middle">{d.date.slice(5)}</text>;
+//       })}
+//     </svg>
+//   );
+// }
 
 type ChartDatum = { label: string; value: number; color?: string };
 const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#dc2626', '#0ea5e9', '#22c55e'];

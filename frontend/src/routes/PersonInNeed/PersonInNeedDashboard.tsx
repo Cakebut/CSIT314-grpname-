@@ -132,7 +132,7 @@ const PersonInNeedDashboard: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notiLoading, setNotiLoading] = useState(false);
   const [notiError, setNotiError] = useState("");
-  const [notiHasUnread, setNotiHasUnread] = useState(false);
+  //const [notiHasUnread, setNotiHasUnread] = useState(false);
   const notiButtonRef = React.useRef<HTMLButtonElement>(null);
   const notiPopoverRef = React.useRef<HTMLDivElement>(null);
  
@@ -166,7 +166,7 @@ const PersonInNeedDashboard: React.FC = () => {
         const filtered = (data.data || []).filter((n: Notification) => n.type === 'interested' || n.type === 'shortlist');
         setNotifications(filtered);
         setNotiLoading(false);
-        setNotiHasUnread(filtered.some((n: Notification) => n.read === 0));
+        //setNotiHasUnread(filtered.some((n: Notification) => n.read === 0));
       })
       .catch(() => {
         setNotiError("Could not load notifications.");
@@ -479,7 +479,7 @@ const PersonInNeedDashboard: React.FC = () => {
     return true;
   });
   // Helper to get shortlist count either from detailed csr_shortlists array or from shortlist_count
-  const getShortlistCount = (r: Request) => Array.isArray((r as any).csr_shortlists) ? (r as any).csr_shortlists.length : (r.shortlist_count ?? 0);
+  const getShortlistCount = (r: Request) => Array.isArray((r ).csr_shortlists) ? (r ).csr_shortlists.length : (r.shortlist_count ?? 0);
 
   // Apply sorting: primary key controlled by myRequestsPrimarySort
   filteredSortedMyRequests.sort((a, b) => {
@@ -597,7 +597,7 @@ const PersonInNeedDashboard: React.FC = () => {
                                 } else {
                                   toast.error('Failed to clear notification');
                                 }
-                              } catch (err) {
+                              } catch  {
                                 toast.error('Failed to clear notification');
                               }
                             }}
