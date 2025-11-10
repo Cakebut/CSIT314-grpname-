@@ -12,6 +12,11 @@ const pool = new Pool({
 });
 const db = drizzle(pool);
 
+function isMissingTableError(err: any) {
+  // Postgres 'relation does not exist' has code '42P01'
+  return err && (err.code === '42P01' || (err.message && String(err.message).includes('relation') && String(err.message).includes('does not exist')));
+}
+
 
 // Delete all password reset requests
 async function deleteResetPasswordRequests() {
@@ -19,8 +24,9 @@ async function deleteResetPasswordRequests() {
     console.log('🗑️ Deleting Password Reset Requests...');
     const result = await db.delete(passwordResetRequestsTable);
     console.log('✅ All password reset requests deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting password reset requests:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ password_reset_requests table not found, skipping.');
+    else console.error('❌ Error deleting password reset requests:', err);
   }
 }
 
@@ -30,8 +36,9 @@ async function deleteAllUsers(count?: number) {
     console.log('🗑️ Deleting Users...');
     const result = await db.delete(useraccountTable);
     console.log(`✅ All users deleted! Result:`, result);
-  } catch (err) {
-    console.error('❌ Error deleting users:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ users table not found, skipping.');
+    else console.error('❌ Error deleting users:', err);
   }
 }
 
@@ -41,8 +48,9 @@ async function deleteServiceTypes() {
     console.log('🗑️ Deleting Service Types...');
     const result = await db.delete(service_typeTable);
     console.log('✅ All service types deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting service types:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ service_type table not found, skipping.');
+    else console.error('❌ Error deleting service types:', err);
   }
 }
 
@@ -53,8 +61,9 @@ async function deleteLocations() {
     console.log('🗑️ Deleting Locations...');
     const result = await db.delete(locationTable);
     console.log('✅ All locations deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting locations:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ location table not found, skipping.');
+    else console.error('❌ Error deleting locations:', err);
   }
 }
 
@@ -65,8 +74,9 @@ async function deleteUrgencyLevels() {
     console.log('🗑️ Deleting Urgency Levels...');
     const result = await db.delete(urgency_levelTable);
     console.log('✅ All urgency levels deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting urgency levels:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ urgency_level table not found, skipping.');
+    else console.error('❌ Error deleting urgency levels:', err);
   }
 }
 
@@ -77,8 +87,9 @@ async function deletePIN_Req() {
     console.log('🗑️ Deleting PIN Requests...');
     const result = await db.delete(pin_requestsTable);
     console.log('✅ All PIN requests deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting PIN requests:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ pin_requests table not found, skipping.');
+    else console.error('❌ Error deleting PIN requests:', err);
   }
 }
 
@@ -88,8 +99,9 @@ async function deleteFeedback() {
     console.log('🗑️ Deleting Feedback...');
     const result = await db.delete(feedbackTable);
     console.log('✅ All feedback deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting feedback:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ feedback table not found, skipping.');
+    else console.error('❌ Error deleting feedback:', err);
   }
 }
 
@@ -99,8 +111,9 @@ async function deleteCSR_Req() {
     console.log('🗑️ Deleting CSR Requests...');
     const result = await db.delete(csr_requestsTable);
     console.log('✅ All CSR requests deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting CSR requests:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ csr_requests table not found, skipping.');
+    else console.error('❌ Error deleting CSR requests:', err);
   }
 }
 
@@ -110,8 +123,9 @@ async function deleteCSR_Shortlist() {
     console.log('🗑️ Deleting CSR Shortlist...');
     const result = await db.delete(csr_shortlistTable);
     console.log('✅ All CSR shortlist deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting CSR shortlist:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ csr_shortlist table not found, skipping.');
+    else console.error('❌ Error deleting CSR shortlist:', err);
   }
 }
 
@@ -121,8 +135,9 @@ async function deleteCSR_Interested() {
     console.log('🗑️ Deleting CSR Interested...');
     const result = await db.delete(csr_interestedTable);
     console.log('✅ All CSR interested deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting CSR interested:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ csr_interested table not found, skipping.');
+    else console.error('❌ Error deleting CSR interested:', err);
   }
 }
 
@@ -133,8 +148,9 @@ async function deleteNotifications() {
     console.log('🗑️ Deleting Notifications...');
     const result = await db.delete(notificationTable);
     console.log(`✅ All notifications deleted! Result:`, result);
-  } catch (err) {
-    console.error('❌ Error deleting notifications:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ notification table not found, skipping.');
+    else console.error('❌ Error deleting notifications:', err);
   }
 }
 
@@ -144,8 +160,9 @@ async function deleteAdminNotifications() {
     console.log('🗑️ Deleting Admin Notifications...');
     const result = await db.delete(adminNotificationsTable);
     console.log('✅ All admin notifications deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting admin notifications:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ admin_notifications table not found, skipping.');
+    else console.error('❌ Error deleting admin notifications:', err);
   }
 }
 
@@ -156,8 +173,9 @@ async function deleteRole() {
     console.log('🗑️ Deleting Roles...');
     const result = await db.delete(roleTable);
     console.log('✅ All roles deleted! Result:', result);
-  } catch (err) {
-    console.error('❌ Error deleting roles:', err);
+  } catch (err: any) {
+    if (isMissingTableError(err)) console.log('ℹ️ roles table not found, skipping.');
+    else console.error('❌ Error deleting roles:', err);
   }
 }
 

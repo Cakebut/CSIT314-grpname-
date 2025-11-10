@@ -108,13 +108,19 @@ async function seedData() {
     return;
   }
   try {
-    // Seed Service Types
-    await db.insert(service_typeTable).values([
-      { name: "Medical", deleted: false },
-      { name: "Transport", deleted: false },
-      { name: "Household Assistance", deleted: false },
-    ]);
-    console.log("✅ Seeded service types");
+    // Seed Service Types - more meaningful demo categories
+    const serviceTypeNames = [
+      'Medical Assistance',
+      'Grocery Pickup',
+      'Transport to Clinic',
+      'Household Chores',
+      'Companionship',
+      'Technology Help',
+      'Mental Health Support',
+      'Pet Care',
+    ];
+    await db.insert(service_typeTable).values(serviceTypeNames.map((n) => ({ name: n, deleted: false })));
+    console.log('✅ Seeded service types');
 
     // Seed Locations
     await db
@@ -165,28 +171,59 @@ async function seedData() {
     const serviceTypes = await db.select().from(service_typeTable);
     const serviceTypeIds = serviceTypes.map((s) => s.id);
 
-    // Example: Seed PIN requests
+    // Helpers to generate neutral, meaningful titles/messages (no 'Urgent:' prefixes)
+    function generateTitle(serviceName: string) {
+      const subjects = [
+        'elderly neighbour',
+        'single parent',
+        'person recovering from surgery',
+        'wheelchair user',
+        'family in need',
+      ];
+      const subject = faker.helpers.arrayElement(subjects);
+      // e.g. "Grocery Pickup for elderly neighbour"
+      return `${serviceName} for ${subject}`;
+    }
+
+    function generateMessage(serviceName: string, locationName: string) {
+      const needs = [
+        'needs help this week',
+        'would appreciate assistance with this task',
+        'needs transport for a medical appointment',
+        'requires help at home for a few hours',
+        'is looking for short-term support',
+      ];
+      const followups = [
+        'Can provide details and contact number on request.',
+        'Available weekdays; mornings preferred.',
+        'Prefers contact via phone.',
+        'Supplies and instructions are ready.',
+      ];
+      const need = faker.helpers.arrayElement(needs);
+      const follow = faker.helpers.arrayElement(followups);
+      return `${serviceName} in ${locationName} — ${need}. ${follow}`;
+    }
+
+    // Example: Seed PIN requests with meaningful titles/messages
     for (let i = 0; i < NUM_FAKE_PIN_REQUESTS; i++) {
+      const service = faker.helpers.arrayElement(serviceTypes);
+      const location = faker.helpers.arrayElement(locations);
       await db.insert(pin_requestsTable).values({
         pin_id: faker.helpers.arrayElement(pinIds),
         csr_id: null,
-        title: faker.lorem.words(3),
-        categoryID: faker.helpers.arrayElement(serviceTypeIds),
-        requestType: faker.helpers.arrayElement([
-          "Medical",
-          "Transport",
-          "Household Assistance",
-        ]),
-        message: faker.lorem.sentence(),
-        locationID: faker.helpers.arrayElement(locationIds),
+        title: generateTitle(service.name),
+        categoryID: service.id,
+        requestType: service.name,
+        message: generateMessage(service.name, location.name),
+        locationID: location.id,
         urgencyLevelID: faker.helpers.arrayElement(urgencyIds),
-  createdAt: randomDateInMonth(),
-        status: "Available",
+        createdAt: randomDateInMonth(),
+        status: 'Available',
         view_count: fakeInt(0, 100),
-        shortlist_count: fakeInt(0, 10),
+        shortlist_count: 0,
       });
     }
-    console.log("✅ Seeded PIN requests");
+    console.log('✅ Seeded PIN requests');
 
     // CSR requests will be seeded after pin request IDs are available (below)
 
@@ -264,15 +301,21 @@ async function seedData() {
         // Assign CSR on pin_requests
         await db.update(pin_requestsTable).set({ csr_id: assignedCsr }).where(eq(pin_requestsTable.id, pr.id));
 
-        // Optionally create feedback for Completed
+        // Optionally create feedback for Completed (use meaningful descriptions)
         if (pinState === 'Completed' && Math.random() < FEEDBACK_PROB) {
           try {
+            const feedbackPhrases = [
+              'Very grateful for the timely help. CSR was friendly and punctual.',
+              'Service provided as requested. Would recommend.',
+              'Good support but communication could be improved.',
+              'Excellent care and clear instructions followed. Thank you.',
+            ];
             await db.insert(feedbackTable).values({
               pin_id: pr.pin_id,
               csr_id: assignedCsr,
               requestId: pr.id,
               rating: faker.number.int({ min: 3, max: 5 }),
-              description: faker.lorem.sentences(2),
+              description: faker.helpers.arrayElement(feedbackPhrases),
               createdAt: randomDateInMonth(),
             });
           } catch (e) {}
@@ -281,7 +324,7 @@ async function seedData() {
     }
     console.log("✅ Seeded CSR requests and related interested/feedback data");
 
-    // Example: Seed CSR shortlist (avoid duplicate pairs)
+    // Example: Seed CSR shortlist (avoid duplicate pairs). This runs after users & pin requests are created.
     const usedShortlistPairs = new Set();
     for (
       let i = 0;
@@ -300,11 +343,20 @@ async function seedData() {
       } while (usedShortlistPairs.has(pair) && attempts < 10);
       if (usedShortlistPairs.has(pair)) continue;
       usedShortlistPairs.add(pair);
-      // await db.insert(csr_shortlistTable).values({
-      //   csr_id,
-      //   pin_request_id,
-  //   shortlistedAt: randomDateInMonth(),
-      // });
+      try {
+        await db.insert(csr_shortlistTable).values({
+          csr_id,
+          pin_request_id,
+          shortlistedAt: randomDateInMonth(),
+        });
+        // increment shortlist_count on the pin request
+        await db
+          .update(pin_requestsTable)
+          .set({ shortlist_count: sql`COALESCE(${pin_requestsTable.shortlist_count}, 0) + 1` })
+          .where(eq(pin_requestsTable.id, pin_request_id));
+      } catch (e) {
+        // ignore unique/constraint errors
+      }
     }
     console.log("✅ Seeded CSR shortlist");
     
