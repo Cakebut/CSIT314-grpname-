@@ -191,17 +191,10 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
 
               <div className="user-admin-notification-popover-body">
                 {adminNotifs.length === 0 ? (
-                  latestAnnouncement ? (
-                    <div>
-                      <div style={{ fontSize: 13, color: '#64748b', marginBottom: 6 }}>{new Date(latestAnnouncement.createdAt).toLocaleString()}</div>
-                      <div style={{ fontSize: 14, color: '#111827', whiteSpace: 'pre-wrap' }}>{latestAnnouncement.message}</div>
-                    </div>
-                  ) : (
-                    <div className="user-admin-notification-empty">
-                      <Bell className="user-admin-empty-icon" />
-                      <div className="user-admin-empty-text">No notifications yet</div>
-                    </div>
-                  )
+                  <div className="user-admin-notification-empty">
+                    <Bell className="user-admin-empty-icon" />
+                    <div className="user-admin-empty-text">No notifications yet</div>
+                  </div>
                 ) : (
                   <ul className="user-admin-notification-list">
                     {adminNotifs.map((n) => (
@@ -232,9 +225,17 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
                           onClick={async (e) => {
                             e.stopPropagation();
                             try {
-                              await fetch('/api/pm/announcements/latest', { method: 'DELETE' });
-                              setAdminNotifs(prev => prev.filter(n => n.id !== n.id));
-                            } catch {
+                          // Delete the specific admin notification on the server
+                              const resp = await fetch(`/api/userAdmin/admin-notifications/${n.id}`, { method: 'DELETE' });
+                              if (resp.ok) {
+                                // Remove the notification from local state using a non-shadowed variable
+                                setAdminNotifs(prev => prev.filter(x => x.id !== n.id));
+                              } else {
+                                console.error('Failed to delete admin notification');
+                                alert('Failed to clear notification');
+                              }
+                            } catch (err) {
+                              console.error('Delete admin notification error', err);
                               alert('Failed to clear notification');
                             }
                           }}
