@@ -12,6 +12,7 @@ type ActiveSection = "PersonInNeedDashboard";
 function PINDashboard() {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<ActiveSection>("PersonInNeedDashboard");
+  const username = localStorage.getItem("username") || "User";
 
   return (
     <div className="PIN-dashboard-container">
@@ -20,7 +21,7 @@ function PINDashboard() {
 
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">Person In Need's Dashboard</h1>
+          <h1 className="sidebar-title">{username}'s Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 

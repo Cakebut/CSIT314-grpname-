@@ -1,4 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import {
+  ResponsiveContainer,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  BarChart as ReBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import "./ReportsPage.css";
 
 type TrendRow = { date: string; total: number; Pending?: number; Completed?: number; Cancelled?: number };
@@ -34,6 +46,7 @@ export default function ReportsPage() {
   
   const [quick, setQuick] = useState<QuickStats | null>(null);
   const [dateRange, setDateRange] = useState<string>("");
+  
 
   useEffect(() => {
     fetch("/api/pm/service-types")
@@ -174,14 +187,14 @@ export default function ReportsPage() {
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <div className="pm-announce-header" style={{ marginBottom: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+    <div style={{ padding: 25 }}>
+      <div className="pm-announce-header" style={{ marginBottom: 30, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="pm-announce-title">Download Report</div>
           <div className="pm-announce-sub">Generate your reports and data analytics here</div>
         </div>
         <div style={{ marginLeft: 'auto' }}>
-          <button onClick={onDownloadCsv} disabled={loading}>Download CSVs</button>
+          <button className="btn" onClick={onDownloadCsv} disabled={loading}>Download CSVs</button>
         </div>
       </div>
     <div className="pm-reports">
@@ -201,31 +214,40 @@ export default function ReportsPage() {
           <span>{quick?.month?.total ?? 0}</span>
           <button onClick={runQuickMonth} disabled={loading}>Generate Monthly Report</button>
         </div>
-      </div>
-
-      {/* Custom form shown below the quick cards as its own card */}
-      <div style={{ marginBottom: 12 }}>
         <div className="card">
           <b>Custom Report</b>
-          <div className="form" style={{ marginTop: 8 }}>
-            <label>
-              Date range
-              <DateRangePicker
-                start={start}
-                end={end}
-                onChange={(s,e) => {
-                  syncDateRange(s,e);
-                }}
-              />
-            </label>
-            <label>Service type
-              <select value={selectedType} onChange={e=> setSelectedType(e.target.value)}>
-                <option value="">All service types</option>
-                {serviceTypes.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </label>
-            <div className="buttons">
-              <button onClick={() => onGenerate()} disabled={loading}>Generate Custom Report</button>
+          <div
+            className="form"
+            style={{
+              marginTop: 8,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              minHeight: 140,
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <label style={{ display: 'block' }}>
+                Date range
+                <div style={{ marginTop: 8 }}>
+                  <DateRangePicker start={start} end={end} onChange={(s, e) => { syncDateRange(s, e); }} />
+                </div>
+              </label>
+              <label style={{ display: 'block' }}>
+                Service type
+                <div style={{ marginTop: 8 }}>
+                  <select value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+                    <option value="">All service types</option>
+                    {serviceTypes.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </label>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <div />
+              <div className="buttons">
+                <button onClick={() => onGenerate()} disabled={loading}>Generate Custom Report</button>
+              </div>
             </div>
           </div>
         </div>
@@ -236,7 +258,7 @@ export default function ReportsPage() {
       {summary && summary.totalRequests === 0 && <div className="empty">No data found</div>}
 
       {summary && summary.totalRequests > 0 && (
-        <div className="results">
+        <div className="results" style={{ marginTop: 50 }}>
           <div className="cards">
             <div className="card highlight"><b>Total Requests</b><span>{summary.totalRequests}</span></div>
             <div className="card"><b>Completed</b><span>{summary.byStatus["Completed"] || 0}</span></div>
@@ -246,8 +268,8 @@ export default function ReportsPage() {
             <div className="card highlight"><b>Active CSRs</b><span>{summary.activeCSRs ?? 0}</span></div>
           </div>
 
-          <h3>By Status</h3>
-          <table className="simple">
+          <h3 style={{ marginTop: 30 }}>By Status</h3>
+          <table className="simple" style={{ marginBottom: 30 }}>
             <thead><tr><th>Status</th><th>Count</th></tr></thead>
             <tbody>{Object.entries(summary.byStatus).map(([k,v]) => <tr key={k}><td>{k}</td><td>{v}</td></tr>)}</tbody>
           </table>
@@ -258,21 +280,21 @@ export default function ReportsPage() {
             <tbody>{Object.entries(summary.byServiceType).map(([k,v]) => <tr key={k}><td>{k}</td><td>{v}</td></tr>)}</tbody>
           </table>
           <div style={{ marginTop: 30 }}>
-            <h2 style={{ marginBottom: 20 }}>Visualizations</h2>
+            <h2 style={{ marginBottom: 30, textAlign: 'center' }}>Visualizations</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <b>Requests by Status (Pie)</b>
                 <PieChart
                   data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
                 />
               </div>
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <b>Requests by Service Type (Vertical)</b>
                 <BarChartVertical
                   data={Object.entries(summary.byServiceType).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
                 />
               </div>
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <b>Requests by Status (Horizontal)</b>
                 <BarChartHorizontal
                   data={Object.entries(summary.byStatus).map(([label, value], i) => ({ label, value: Number(value), color: palette[i % palette.length] }))}
@@ -295,6 +317,7 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
   const [selStart, setSelStart] = useState<Date | null>(() => (start ? new Date(start + 'T00:00:00') : null));
   const [selEnd, setSelEnd] = useState<Date | null>(() => (end ? new Date(end + 'T00:00:00') : null));
   const [hover, setHover] = useState<Date | null>(null);
+  const justClosedRef = useRef<number | null>(null);
 
   function toISO(d: Date) {
     const y = d.getFullYear();
@@ -346,17 +369,21 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
 
   function apply() {
     if (selStart && selEnd) {
-      onChange(toISO(selStart), toISO(selEnd));
+      const s = toISO(selStart);
+      const e = toISO(selEnd);
+      // close first so the UI responds immediately
       setOpen(false);
+      // mark recent close so toggle doesn't immediately re-open
+      justClosedRef.current = Date.now();
+      setTimeout(() => { justClosedRef.current = null; }, 450);
+      // call parent's onChange asynchronously so it can't block the close
+      Promise.resolve().then(() => onChange(s, e)).catch((err: any) => {
+        console.error('DateRangePicker onChange error', err);
+      });
     }
   }
 
-  function cancel() {
-    setSelStart(start ? new Date(start + 'T00:00:00') : null);
-    setSelEnd(end ? new Date(end + 'T00:00:00') : null);
-    setHover(null);
-    setOpen(false);
-  }
+  // canceled selection not used in current UI; keep logic here in case we re-add a Cancel button
 
   function prevMonth() {
     let y = viewYear;
@@ -383,9 +410,12 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <button type="button" onClick={() => setOpen(o=>!o)}>{fmtLabel()}</button>
+      <button type="button" onClick={() => {
+        if (justClosedRef.current && (Date.now() - justClosedRef.current) < 450) { justClosedRef.current = null; return; }
+        setOpen(o=>!o);
+      }}>{fmtLabel()}</button>
       {open && (
-        <div style={{ position: 'absolute', zIndex: 10, background: 'white', border: '1px solid #ccc', padding: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+        <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} style={{ position: 'absolute', zIndex: 10, background: 'white', border: '1px solid #ccc', padding: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <button type="button" onClick={prevMonth}>{'<'}</button>
             <div style={{ fontWeight: 600 }}>{monthLabel}</div>
@@ -419,8 +449,7 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
             })}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-            <button type="button" onClick={cancel}>Cancel</button>
-            <button type="button" onClick={apply} disabled={!selStart || !selEnd}>Apply</button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); apply(); }} disabled={!selStart || !selEnd}>Apply</button>
           </div>
         </div>
       )}
@@ -451,91 +480,80 @@ function DateRangePicker({ start, end, onChange }: { start: string; end: string;
 // }
 
 type ChartDatum = { label: string; value: number; color?: string };
-const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#dc2626', '#0ea5e9', '#22c55e'];
+// neutral, muted palette for charts
+const palette = [
+  '#475569', // slate-600
+  '#64748b', // slate-500
+  '#94a3b8', // slate-400
+  '#cbd5e1', // slate-200
+  '#e6eef8', // very light blue
+  '#9ca3af', // gray-400
+  '#d1d5db', // gray-300
+  '#f1f5f9', // gray-100
+  '#e2e8f0', // gray-200
+  '#c7d2e8', // muted blue
+];
 
 function PieChart({ data }: { data: ChartDatum[] }) {
-  const total = data.reduce((s, d) => s + (isFinite(d.value) ? d.value : 0), 0) || 1;
-  const size = 200, stroke = 18;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  let acc = 0;
+  const sized = Math.max(220, Math.min(380, data.length * 30 + 110));
   return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="chart">
-        <g transform={`translate(${size/2},${size/2})`}>
-          <circle r={r} fill="#f8fafc" />
-          {data.map((d, i) => {
-            const ratio = d.value / total;
-            const len = c * ratio;
-            const dash = `${len} ${c - len}`;
-            const el = (
-              <circle
-                key={i}
-                r={r}
-                fill="transparent"
-                stroke={d.color || palette[i % palette.length]}
-                strokeWidth={stroke}
-                strokeDasharray={dash}
-                strokeDashoffset={-acc}
-                transform="rotate(-90)"
-              />
-            );
-            acc += len;
-            return el;
-          })}
-        </g>
-      </svg>
-      <div>
-        {data.map((d, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, marginBottom: 4 }}>
-            <span style={{ display: 'inline-block', width: 10, height: 10, background: d.color || palette[i % palette.length] }} />
-            <span>{d.label}: {d.value}</span>
-          </div>
-        ))}
-      </div>
+    <div style={{ width: '100%', height: sized }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RePieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="label"
+            cx="50%"
+            cy="50%"
+            innerRadius={30}
+            outerRadius={Math.floor(sized / 3)}
+            labelLine={false}
+            label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((d, i) => (
+              <Cell key={i} fill={d.color || palette[i % palette.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </RePieChart>
+      </ResponsiveContainer>
     </div>
   );
 }
 
 function BarChartVertical({ data }: { data: ChartDatum[] }) {
-  const w = 320, h = 200, pad = 24, barGap = 8;
-  const max = Math.max(...data.map(d => d.value), 1);
-  const bw = (w - 2*pad - (data.length - 1) * barGap) / Math.max(data.length, 1);
   return (
-    <svg width={w} height={h} className="chart">
-      {data.map((d, i) => {
-        const x = pad + i * (bw + barGap);
-        const bh = (d.value / max) * (h - 2*pad);
-        const y = h - pad - bh;
-        return (
-          <g key={i}>
-            <rect x={x} y={y} width={bw} height={bh} fill={d.color || palette[i % palette.length]} />
-            <text x={x + bw/2} y={h - 6} fontSize="10" textAnchor="middle" fill="#334155">{d.label.length > 8 ? d.label.slice(0,8)+'…' : d.label}</text>
-            <text x={x + bw/2} y={y - 4} fontSize="10" textAnchor="middle" fill="#334155">{d.value}</text>
-          </g>
-        );
-      })}
-    </svg>
+    <div style={{ width: '100%', height: 320 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <ReBarChart data={data} layout="horizontal" margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+          <XAxis dataKey="label" type="category" tick={{ fontSize: 11 }} />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="value">
+            {data.map((d, i) => (
+              <Cell key={i} fill={d.color || palette[i % palette.length]} />
+            ))}
+          </Bar>
+        </ReBarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
 function BarChartHorizontal({ data }: { data: ChartDatum[] }) {
-  const w = 320, h = 16 * data.length + 32, pad = 24, barGap = 8, barH = 12;
-  const max = Math.max(...data.map(d => d.value), 1);
+  const height = Math.max(200, data.length * 36 + 80);
   return (
-    <svg width={w} height={h} className="chart">
-      {data.map((d, i) => {
-        const y = 16 + i * (barH + barGap);
-        const bw = (d.value / max) * (w - 2*pad);
-        const x = pad;
-        return (
-          <g key={i}>
-            <text x={4} y={y + barH - 2} fontSize="10" textAnchor="start" fill="#334155">{d.label}</text>
-            <rect x={x} y={y} width={bw} height={barH} fill={d.color || palette[i % palette.length]} />
-            <text x={x + bw + 4} y={y + barH - 2} fontSize="10" textAnchor="start" fill="#334155">{d.value}</text>
-          </g>
-        );
-      })}
-    </svg>
+    <div style={{ width: '100%', height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <ReBarChart data={data} layout="vertical" margin={{ top: 10, right: 10, left: 40, bottom: 10 }}>
+          <XAxis type="number" />
+          <YAxis dataKey="label" type="category" width={120} />
+          <Tooltip />
+          <Bar dataKey="value">{data.map((d, i) => <Cell key={i} fill={d.color || palette[i % palette.length]} />)}</Bar>
+        </ReBarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

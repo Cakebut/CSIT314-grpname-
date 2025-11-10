@@ -31,6 +31,7 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
   const [notifications, setNotifications] = useState<any[]>([]);
   const unreadCount = notifications.filter((n) => !n.read).length;  
   const csrId = getCSRId();
+  const username = localStorage.getItem("username") || "User";
 
 
 
@@ -144,7 +145,7 @@ function CSRDashboard({ onLogout }: CSRDashboardProps) {
 
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">CSR Representative's Dashboard</h1>
+          <h1 className="sidebar-title">{username}'s Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 

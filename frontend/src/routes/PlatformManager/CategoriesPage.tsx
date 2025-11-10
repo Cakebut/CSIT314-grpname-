@@ -119,62 +119,65 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="pm-categories">
+    <div style={{ padding: 30 }}>      
       <h2>Service Categories</h2>
-      <p>Manage and organize your service categories
-      </p>
-      <div className="categories-row">
-        <input placeholder="Search categories" value={q} onChange={e=>setQ(e.target.value)} />
-        <button onClick={load}>Search</button>
-        <label style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
-          <input type="checkbox" checked={showDeleted} onChange={e=>{ setShowDeleted(e.target.checked); }} />
-          Show deleted
-        </label>
+      <p className="pm-announce-sub">Manage and organize your service categories</p>
+
+      <div className="pm-categories" style={{ marginTop: 40 }}>
+        <div className="categories-row">
+          <div className="left">
+            <input placeholder="Search categories" value={q} onChange={e=>setQ(e.target.value)} />
+            <button onClick={load}>Search</button>
+            <label style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
+              <input type="checkbox" checked={showDeleted} onChange={e=>{ setShowDeleted(e.target.checked); }} />
+              Show deleted
+            </label>
+          </div>
+          <div className="right">
+            <input placeholder="New category name" value={name} onChange={e=>setName(e.target.value)} />
+            <button onClick={onCreate} disabled={busy}>Add</button>
+          </div>
+        </div>
+
+        {error && <div className="categories-error">{error}</div>}
+
+        <table className="categories-simple">
+          <thead>
+            <tr><th>Name</th><th style={{width:200}}>Actions</th></tr>
+          </thead>
+          <tbody>
+            {items.map(it => (
+              <tr key={it.id}>
+                <td>
+                  {editing?.id === it.id ? (
+                    <input value={editing.name} onChange={e=>setEditing({ ...editing, name: e.target.value })} />
+                  ) : (
+                    it.name
+                  )}
+                </td>
+                <td>
+                  {editing?.id === it.id ? (
+                    <>
+                      <button onClick={onUpdate} disabled={busy}>Save</button>
+                      <button onClick={()=>setEditing(null)} disabled={busy}>Cancel</button>
+                    </>
+                  ) : it.deleted ? (
+                    <>
+                      <button onClick={()=>onRestore(it.id)} disabled={busy}>Restore</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={()=>setEditing(it)} disabled={busy}>Edit</button>
+                      <button onClick={()=>onDelete(it.id)} disabled={busy}>Delete</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {items.length === 0 && <tr><td colSpan={2}><div className="categories-empty">No categories found</div></td></tr>}
+          </tbody>
+        </table>
       </div>
-
-      <div className="categories-row">
-        <input placeholder="New category name" value={name} onChange={e=>setName(e.target.value)} />
-        <button onClick={onCreate} disabled={busy}>Add</button>
-      </div>
-
-      {error && <div className="categories-error">{error}</div>}
-
-      <table className="categories-simple">
-        <thead>
-          <tr><th>Name</th><th style={{width:200}}>Actions</th></tr>
-        </thead>
-        <tbody>
-          {items.map(it => (
-            <tr key={it.id}>
-              <td>
-                {editing?.id === it.id ? (
-                  <input value={editing.name} onChange={e=>setEditing({ ...editing, name: e.target.value })} />
-                ) : (
-                  it.name
-                )}
-              </td>
-              <td>
-                {editing?.id === it.id ? (
-                  <>
-                    <button onClick={onUpdate} disabled={busy}>Save</button>
-                    <button onClick={()=>setEditing(null)} disabled={busy}>Cancel</button>
-                  </>
-                ) : it.deleted ? (
-                  <>
-                    <button onClick={()=>onRestore(it.id)} disabled={busy}>Restore</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={()=>setEditing(it)} disabled={busy}>Edit</button>
-                    <button onClick={()=>onDelete(it.id)} disabled={busy}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-          {items.length === 0 && <tr><td colSpan={2}><div className="categories-empty">No categories found</div></td></tr>}
-        </tbody>
-      </table>
     </div>
   );
 }

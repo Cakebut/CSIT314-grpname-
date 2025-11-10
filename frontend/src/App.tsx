@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import React from 'react';
  
 
+
 // LOGIN PAGE
 import Login from './routes/LoginPage';
 
@@ -20,7 +21,6 @@ import CSRDashboard from './routes/CSRRep/CSRDashboard';
 
 // PLATFORM MANAGER PAGE
 import PMDashboard from './routes/PlatformManager/PMDashboard';
-
 // CSS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -53,6 +53,7 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
     <Router>
       <div className="app-wrapper">
         <Routes>
+
           {/* Login */}
           <Route path="/" element={<Login />} />
 

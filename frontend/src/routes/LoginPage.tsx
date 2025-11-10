@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { HeartHandshake, Users, HandHeart } from "lucide-react";
 import "./LoginPage.css";
 
 function Login() {
@@ -71,7 +72,33 @@ function Login() {
           </div>
         )}
 
-        <form id="loginForm" className="login-box" onSubmit={handleLogin}>
+        <div className="login-layout">
+          <aside className="login-visual">
+            <div className="visual-inner">
+              <h1 className="visual-hero">Empowering More Kindness, Connecting All Communities</h1>
+              <p className="visual-sub">CareMatch connects CSR representatives with Persons-In-Need (PIN) who seek assistance — building compassion through collaboration.</p>
+
+              <div className="visual-features">
+                <div className="vf-card">
+                  <Users />
+                  <h4>For Volunteers</h4>
+                  <p>Discover meaningful ways to help your community through verified assistance requests.</p>
+                </div>
+                <div className="vf-card">
+                  <HandHeart />
+                  <h4>For Persons-In-Need</h4>
+                  <p>Submit assistance requests and connect with caring volunteers ready to help.</p>
+                </div>
+                <div className="vf-card">
+                  <HeartHandshake />
+                  <h4>CSR Managed</h4>
+                  <p>Activities verified and managed by CSR representatives for safety and trust.</p>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <form id="loginForm" className="login-box" onSubmit={handleLogin}>
           <div className="login-header">
             <header>Welcome </header>
             <div>Sign in to your account</div>
@@ -127,7 +154,8 @@ function Login() {
           </div>
 
           {status && <div className="login-status">{status}</div>}
-        </form>
+          </form>
+        </div>
       </section>
     </>
   );
