@@ -172,8 +172,22 @@ form textarea {
 .pin-table th, .pin-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e6e6e6; font-size: 14px; }
 .pin-table th { color:#333; font-weight:600; }
 
+/* Center the Actions column inside the My Offers modal */
+.pin-modal-content .pin-table th:nth-child(4),
+.pin-modal-content .pin-table td:nth-child(4) {
+  /* horizontally center header and cells */
+  text-align: center;
+  /* vertically center cell content */
+  vertical-align: middle;
+  /* make cell a flex container so multiple buttons inside align centrally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* My requests filter row aliases */
-.pin-my-requests-filter-row { display:flex !important; gap:10px !important; align-items:center !important; flex-wrap:nowrap !important; margin-bottom:12px !important; }
+.pin-my-requests-filter-row { display:flex !important; justify-content: space-between !important; gap: 12px !important; align-items:center !important; flex-wrap:nowrap !important; margin-bottom:12px !important; }
 .pin-my-requests-filter-row .pin-filter-control { height:36px !important; padding:0 10px !important; border-radius:8px !important; border:1px solid #e5e7eb !important; font-size:14px !important; box-sizing:border-box !important; background:#fff !important; display:inline-flex !important; align-items:center !important; }
 .pin-my-requests-filter-row .pin-filter-control[type="text"] { min-width:160px !important; }
 .pin-my-requests-filter-row .pin-filter-title { min-width:160px !important; }
@@ -393,7 +407,7 @@ form textarea {
 .pin-request-location { font-size: 1.02rem; color: #0ea5e9; font-weight: 500; margin: 2px 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 .pin-request-pinname { font-size: 1.05rem; color: #475569; font-weight: 600; margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 .pin-badges { position: absolute; top: 12px; right: 16px; display: flex; gap: 8px; align-items: center; }
-.pin-badge { padding: 0.35em 0.9em; border-radius: 999px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(2,6,23,0.06); }
+.pin-badge { padding: 0.35em 0.9em; border-radius: 999px; font-weight: 700; font-size: 0.95rem; }
 .pin-badge .status { font-weight: 700; }
 .pin-badge.pin-badge-status { background: #e6ffef; color: #006d3f; }
 .pin-badge.pin-badge-priority { background: #6b7280; color: #fff; }

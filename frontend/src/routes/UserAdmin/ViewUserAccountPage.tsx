@@ -377,7 +377,7 @@ const ViewUserAccountPage: React.FC = () => {
                   {loadingId === user.id ? '...' : (user.issuspended ? 'Activate' : 'Suspend')}
                 </button>
                 <button className="edit-user-accounts" onClick={() => openEditModal(user)} disabled={!!loadingId}>Edit</button>
-                <button className="delete-user-accounts" onClick={() => handleDelete(user.id)} disabled={!!loadingId}>{loadingId === user.id ? '...' : 'Delete'}</button>
+                <button className="delete-user-accounts" onClick={() => handleDelete(user.id)} disabled={!!loadingId}>Delete</button>
               </td>
             </tr>
           ))}

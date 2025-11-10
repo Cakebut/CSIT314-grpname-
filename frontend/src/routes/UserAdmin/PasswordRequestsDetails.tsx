@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import "./ReviewPasswordRequests.css";
+import "./PasswordRequetsDetails.css";
 
 // Mock request data for demonstration
 interface ReviewPasswordRequestProps {

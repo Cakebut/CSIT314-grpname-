@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./ViewResetDashboardPage.css";
 import ViewPasswordRequest from "./ViewPasswordRequestsModal";
-import ReviewPasswordRequest from "./ReviewPasswordRequests";
+import ReviewPasswordRequest from "./PasswordRequestsDetails";
 import { toast } from 'react-toastify';
 
 interface PasswordResetRequest {

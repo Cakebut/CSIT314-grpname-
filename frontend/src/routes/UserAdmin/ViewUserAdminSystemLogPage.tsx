@@ -138,7 +138,7 @@ const ViewUserAdminSystemLogPage: React.FC = () => {
             <option value="delete role">Delete Role</option>
           </select>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 10 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Filter />
               <select value={limit} onChange={(e) => setLimit(Number(e.target.value) || undefined)}>
@@ -150,8 +150,10 @@ const ViewUserAdminSystemLogPage: React.FC = () => {
               </select>
             </label>
           </div>
-          
-          <button className="reset-activity-logs btn" onClick={() => { setActionSearch(""); setActionFilter(""); setLimit(20); }}>
+          <button 
+            className="reset-activity-logs btn" 
+            onClick={() => { setActionSearch(""); setActionFilter(""); setLimit(20); }}
+            style={{ marginLeft: 10 }}>
             Reset
           </button>
 
