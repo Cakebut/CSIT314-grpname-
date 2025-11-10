@@ -15,6 +15,7 @@ function PMDashboard() {
   // pmNoti/pmLoading/pmError removed (not used elsewhere) to avoid unused-variable warnings
   const notiBtnRef = useRef<HTMLButtonElement | null>(null);
   const notiPopRef = useRef<HTMLDivElement | null>(null);
+  const username = localStorage.getItem("username") || "User";
 
     // Fetch latest announcement when opening the popover
   async function fetchLatestAnnouncement() {
@@ -71,7 +72,7 @@ function PMDashboard() {
 
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">Platform Manager Dashboard</h1>
+          <h1 className="sidebar-title">{username}'s Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 

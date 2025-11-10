@@ -36,6 +36,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [adminNotifs, setAdminNotifs] = useState<Array<{ id: number; user_id: number; username: string; message: string; createdAt: string; read: number }>>([]);
   const unreadCount = adminNotifs.filter((n) => n.read === 0).length;
   const adminId = getAdminId();
+  const username = localStorage.getItem("username") || "User";
 
   // Load platform announcements
   useEffect(() => {
@@ -103,7 +104,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
       <div className="sidebar">
         {/* Header */}
         <div className="sidebar-header">
-          <h1 className="sidebar-title">User Admin's Dashboard</h1>
+          <h1 className="sidebar-title">{username}'s Dashboard</h1>
           <p className="sidebar-subtitle">Management Panel</p>
         </div>
 

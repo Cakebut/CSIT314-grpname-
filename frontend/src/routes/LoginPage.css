@@ -12,11 +12,32 @@
   z-index: -1;
   content: '';
   position: fixed;
-  background: rgb(245, 245, 245);
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
+  /* use existing asset in src/assets - relative to this CSS file */
+  background-image: url('../assets/pexels-julia-m-cameron-6994870.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  filter: brightness(0.45) saturate(0.95) contrast(0.98);
+}
+
+/* Additional subtle dark overlay to increase contrast for foreground content */
+.login-main::after{
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure visual column and login box sit above the overlay */
+.login-layout, .login-visual, .login-box {
+  position: relative;
+  z-index: 2;
 }
 
 .login-box {
@@ -106,6 +127,54 @@
   align-items: center;
   font-size: var(--size-base);
 }
+
+/* Layout: left visual column + right login box */
+.login-layout{
+  display:flex;
+  gap:56px; /* larger gap between visual and login box */
+  align-items: stretch;
+  justify-content: flex-start; /* push layout left */
+  width: calc(100% - 120px);
+  max-width: 1200px;
+  margin: 40px 0 40px 80px; /* push the whole block to the left */
+  padding-right: 40px;
+}
+.login-visual{
+  flex: 1 1 520px;
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 36px;
+}
+.visual-inner{
+  max-width: 520px;
+}
+.visual-hero{
+  font-size: 44px;
+  line-height: 1.02;
+  margin: 0 0 20px 0;
+  font-weight: 800;
+  color: #ffffff;
+}
+.visual-sub{
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 50px;
+}
+.visual-features{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+.vf-card{
+  background: rgba(255,255,255,0.08);
+  padding: 5px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+}
+.vf-card h4{ margin:8px 0 6px 0; font-size:14px }
+.vf-card p{ font-size:12px; color: rgba(255,255,255,0.85); line-height:1.3 }
 
 .forgot-text {
   text-decoration: none;

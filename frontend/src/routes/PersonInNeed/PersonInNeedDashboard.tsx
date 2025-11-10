@@ -114,7 +114,6 @@ const PersonInNeedDashboard: React.FC = () => {
   const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
 
   const userId = Number(localStorage.getItem("userId"));
-  const username = localStorage.getItem("username") || "User";
 
   // Notification type
   interface Notification {
@@ -620,12 +619,14 @@ const PersonInNeedDashboard: React.FC = () => {
       
       <div className="pin-container">
         <div>
-        <header className="pin-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}></header>
-          <h2>All Person-In-Need Requests</h2>
-          <p>Manage user accounts and permissions</p>
-        </div>
-      
+          <header className="pin-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ margin: 0 }}>All Person-In-Need Requests</h2>
+              <p style={{ margin: 0 }}>Manage user accounts and permissions</p>
+            </div>
+          </header>
 
+        
       <div className="pin-actions">
         {/* Filter Bar - inserted directly after header */}
           
@@ -1332,6 +1333,7 @@ const PersonInNeedDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   </>
   );
