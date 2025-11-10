@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
 import "./PersonInNeedDashboard.css";
-import * as Popover from "@radix-ui/react-popover";import { Bell, MoveLeft } from "lucide-react";
-;
+import * as Popover from "@radix-ui/react-popover";
+import { Bell } from "lucide-react";
 
 // Centralized status color logic
 function getStatusColor(status?: string) {
@@ -74,7 +73,7 @@ const PersonInNeedDashboard: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
   const [filterUrgency, setFilterUrgency] = useState("");
-  const navigate = useNavigate();
+  
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

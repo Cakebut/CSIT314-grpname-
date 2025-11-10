@@ -12,24 +12,19 @@ type ActiveSection = "Reports" | "Announcements" | "Categories";
 function PMDashboard() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("Announcements");
   const [showPmNoti, setShowPmNoti] = useState(false);
-  const [pmNoti, setPmNoti] = useState<{ message?: string; createdAt?: string } | null>(null);
-  const [pmLoading, setPmLoading] = useState(false);
-  const [pmError, setPmError] = useState<string | null>(null);
+  // pmNoti/pmLoading/pmError removed (not used elsewhere) to avoid unused-variable warnings
   const notiBtnRef = useRef<HTMLButtonElement | null>(null);
   const notiPopRef = useRef<HTMLDivElement | null>(null);
 
     // Fetch latest announcement when opening the popover
   async function fetchLatestAnnouncement() {
-    setPmLoading(true);
-    setPmError(null);
+    // fetch and ignore the result (state not stored in this component)
     try {
-      const res = await fetch('/api/pm/announcements/latest');
-      const data = await res.json();
-      setPmNoti(data?.latest ?? null);
+      await fetch('/api/pm/announcements/latest')
+        .then(res => res.json())
+        .catch(() => null);
     } catch {
-      setPmError('Failed to load announcements');
-    } finally {
-      setPmLoading(false);
+      // intentionally ignore errors
     }
   }
 

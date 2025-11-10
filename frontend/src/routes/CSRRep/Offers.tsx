@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./Offers.css";
 
 
@@ -81,7 +81,6 @@ function Offers() {
   }, []);
   // --- Fetch offer counters from csr_requests ---
   // Show all offers, including rejected and duplicates
-  const total = offers.length; // retained for potential UI counts
   // --- Filtering logic ---
   const filtered = useMemo(() => {
     let result = offers;
