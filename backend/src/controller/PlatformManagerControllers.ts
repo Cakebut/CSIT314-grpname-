@@ -60,7 +60,7 @@ export class PlatformManagerController {
 
   async sendAnnouncementToAllUsers({ message }: { message?: string }) {
     if (!message || !message.trim()) throw new Error("Message cannot be empty");
-    const deliveredCount = await this.entity.countActiveUsers();
+    const deliveredCount = await this.entity.sendAnnouncementToAllUsers();
     this.latestAnnouncement = { message: message.trim(), createdAt: new Date().toISOString() };
     return { deliveredCount };
   }

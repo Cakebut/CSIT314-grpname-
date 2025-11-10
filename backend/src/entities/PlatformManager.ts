@@ -352,7 +352,7 @@ export class PlatformManagerEntity {
     };
   }
 
-  async countActiveUsers() {
+  async sendAnnouncementToAllUsers() {
     const [{ n }] = await this.db
       .select({ n: count() })
       .from(useraccountTable)
