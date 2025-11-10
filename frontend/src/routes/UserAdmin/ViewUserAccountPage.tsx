@@ -199,6 +199,8 @@ const ViewUserAccountPage: React.FC = () => {
       const res = await fetch(`/api/userAdmin/users/export`);
       if (!res.ok) throw new Error(`Export failed: ${res.status}`);
       const csv = await res.text();
+      const lines = csv.split("\n");
+      const recordcount = Math.max(0, lines.length - 1);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -208,7 +210,7 @@ const ViewUserAccountPage: React.FC = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      toast.success("Export started");
+      toast.success(`User data succesfully exported. [${recordcount}] records`);
     } catch (err) {
       console.error(err);
       toast.error("Failed to export users");

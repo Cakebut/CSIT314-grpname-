@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./ViewResetDashboardPage.css";
-import ViewPasswordRequest from "./ViewPasswordRequestsModal";
+import ViewPasswordRequest from "./ViewResetDashboardPageModal";
 import ReviewPasswordRequest from "./PasswordRequestsDetails";
 import { toast } from 'react-toastify';
 

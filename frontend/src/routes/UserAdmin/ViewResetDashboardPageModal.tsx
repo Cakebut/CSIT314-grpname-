@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import "./ViewPasswordRequestsModal.css";
+import "./ViewResetDashboardPageModal.css";
+import { toast } from 'react-toastify';
 
 type PasswordRequest = {
   id: number;
@@ -24,7 +25,7 @@ interface ViewPasswordRequestProps {
   onUpdated?: () => void; // optional callback when approve/reject completes
 }
 
-function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
+function ViewResetDashboardPageModal({ open, onClose, request, onUpdated }: ViewPasswordRequestProps) {
   const [adminNotes, setAdminNotes] = useState<string>(request.admin_note ?? "");
   const [localRequest, setLocalRequest] = useState<PasswordRequest>(request);
   const [showPassword, setShowPassword] = useState(false);
@@ -105,6 +106,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
     setLocalRequest({ ...localRequest, status: 'Approved', reviewed_by: adminId, admin_name: adminName, reviewed_at: now, admin_note: adminNotes });
     setActionResult('approved');
     setShowSuccessDialog(true);
+    
     if (onUpdated) onUpdated();
       } catch (err) {
         console.error(err);
@@ -112,6 +114,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
       } finally {
         setBusy(false);
       }
+       toast.success('Password reset request approved');
     };
 
   //HANDLE REJECT BUTTON
@@ -146,6 +149,7 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
       } finally {
         setBusy(false);
       }
+      toast.error('Password reset request rejected');
     };
 
   // Removed 'Back to Dashboard' action — success dialog will close the modal instead
@@ -275,4 +279,4 @@ function ViewPasswordRequestsModal({ open, onClose, request, onUpdated }: ViewPa
   );
 }
 
-export default ViewPasswordRequestsModal;
+export default ViewResetDashboardPageModal;
