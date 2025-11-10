@@ -397,7 +397,7 @@ public async deleteUser(id: number): Promise<boolean> {
   }
 
   // Reject a password reset request
-  async rejectPasswordResetRequest(requestId: number, adminId: number, adminName: string, note: string) {
+  public async rejectPasswordResetRequest(requestId: number, adminId: number, adminName: string, note: string) {
     try {
       await db.update(passwordResetRequestsTable)
         .set({ status: "Rejected", reviewed_at: new Date(), reviewed_by: adminId, admin_note: note, admin_name: adminName })

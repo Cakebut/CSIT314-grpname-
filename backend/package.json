@@ -27,10 +27,12 @@
     "dev": "nodemon",
     "db:migrate:add_deleted": "tsx scripts/add_deleted_to_service_type.ts",
     "db:seed": "ts-node src/db/Seeding/seedData.ts",
+    "db:seed2": "ts-node src/db/Seeding/seedDatav2.ts",
     "db:delete": "ts-node src/db/Seeding/deleteData.ts",
     "db:migrate": "npx drizzle-kit push --config ./drizzle.config.ts",
     "db:migrate:generate": "npx drizzle-kit generate:migration --config ./drizzle.config.ts --name",
     "test": "node scripts/run-jest.js"
+    
   },
   "repository": {
     "type": "git",

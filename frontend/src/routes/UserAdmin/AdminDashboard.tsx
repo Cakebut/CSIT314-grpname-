@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import * as Popover from "@radix-ui/react-popover";
 import { LogOut, Users, Key, FileText, Tags, Bell } from "lucide-react";
 
-import ViewUserAccountPage from "./UserAccounts";
+import ViewUserAccountPage from "./ViewUserAccountPage";
 import ViewResetDashboardPage from "./ViewResetDashboardPage";
-import SystemActivityLogs from "./SystemActivityLogs";
+import SystemActivityLogs from "./ViewUserAdminSystemLogPage";
 import Roles from "./Roles";
 
 import "./AdminDashboard.css";
