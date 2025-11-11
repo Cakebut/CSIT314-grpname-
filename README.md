@@ -31,35 +31,20 @@ A TypeScript + CSS project for CSIT314. This repository contains the source code
 ## Project
 
 Short description:
-- "Crashout" is a web application built with TypeScript and CSS. Replace this with a one- or two-sentence summary of what the app does (game mechanics, goals, audience, and any special features).
-
-Example:
-- Crashout is a 2D browser-based arcade game where players navigate obstacles to reach the finish line. Built during the CSIT314 course as a group project.
-
-Include screenshots, GIFs, or a hosted demo link here once available:
-- Screenshot: `docs/screenshot.png` (replace with actual path)
-- Live demo: https://example.com (replace or remove)
+- "Crashout" is a web application built with TypeScript and CSS. Replace this with a one- or two-sentence summary of what the app does.
 
 ---
 
 ## Features
 
-- Core gameplay / app features (replace with your actual features)
-  - Player movement & controls
-  - Enemy or obstacle AI logic
-  - Scoring, levels, and persistence
-  - Responsive UI and mobile-friendly styling
-- Developer conveniences:
-  - TypeScript for type safety
-  - CSS modules / global styles (adjust to your approach)
-  - Build tooling (Webpack / Vite / other) — update to your actual tool
+ - Still In Progress 
 
 ---
 
 ## Tech stack
 
 - TypeScript
-- CSS (plain CSS / CSS modules / SASS — update as needed)
+- CSS (plain CSS / CSS modules )
 - HTML5
 - (Optional) Frameworks/libraries: React / Vue / Svelte / vanilla — specify what you used
 - Build tools: (Webpack / Vite / Parcel / other) — update accordingly
@@ -182,33 +167,17 @@ Guidelines:
 
 ## License
 
-Add a license file to the repository (for example, MIT). If you already have a license, change this section accordingly.
+MIT FILE
 
-Example (MIT):
-```
-MIT License
-```
-
----
+ 
 
 ## Contact / Maintainers
 
 - Repository: https://github.com/Cakebut/CSIT314Crashout
-- Maintainer: update with your name and contact (for example: Eugenelcc or project team)
+- Maintainer: @eugenelcc 
 
 ---
 
-## Acknowledgements
+ 
 
-- CSIT314 course materials and instructors
-- Any libraries or assets you used (sprites, audio, frameworks)
-
----
-
-If you'd like, I can:
-- Tailor this README to exactly match your repository by inspecting package.json, folder structure, and scripts.
-- Generate badges (build, license, language breakdown) and a demo GIF.
-- Create a CONTRIBUTING.md and ISSUE_TEMPLATE.md to streamline contributions.
-
-Tell me which of the above you'd like me to do next (or paste your package.json and a brief project description and I'll customize the README to be precise).
-```
+ 
