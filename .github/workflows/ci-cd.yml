@@ -105,33 +105,7 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/crashout-backend:${IMAGE_TAG} || true
           docker push ghcr.io/${{ github.repository_owner }}/crashout-frontend:${IMAGE_TAG} || true
 
-  deploy:
-    name: Deploy to server via SSH
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dillonDevelopment'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy using SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
-          script: |
-            set -eux
-            # change to the app directory on the remote host (set REMOTE_APP_DIR secret)
-            cd "${{ secrets.REMOTE_APP_DIR }}"
-            # optional: pull latest images if you push to a registry
-            if [ -f docker-compose.yml ]; then
-              docker compose pull || true
-              docker compose up -d --build
-            else
-              echo "No docker-compose.yml on remote host; adjust deploy commands as needed"
-            fi
+  
 
 # Notes:
 # - This workflow builds frontend and backend and runs tests if the projects expose `build` and `test` npm scripts.
