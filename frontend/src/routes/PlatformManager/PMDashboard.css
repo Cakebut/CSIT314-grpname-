@@ -1,0 +1,204 @@
+/* Container for the entire PM Dashboard */
+.PM-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative; /* To allow positioning of the notification button */
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar header */
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-title {
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.sidebar-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
+/* Sidebar navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: 20px;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #4b5563;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-button:hover {
+  background-color: #f3f4f6;
+}
+
+.nav-button.active {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+/* Sidebar footer (Logout button) */
+.sidebar-footer {
+  padding: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.logout-button {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  gap: 12px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #4b5563;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #f3f4f6;
+}
+
+.logout-button:focus {
+  outline: none;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f3f4f6;
+}
+
+/* Notification Button (Popover) */
+.notification-button-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* Notification Bell Button */
+.notification-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  font-size: 24px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.notification-button:hover {
+  background-color: #0056b3;
+}
+
+/* Badge for unread notifications */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Popover Content */
+.notification-popover {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  font-size: 14px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1001;
+  animation: popover-slide-in 0.3s ease-out;
+}
+
+/* Popover Animation */
+@keyframes popover-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Notification items */
+.notification-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #e0e0e0;
+}
+
+.notification-item.unread {
+  font-weight: bold;
+}
+
+.notification-item.read {
+  color: #888;
+}
+
+/* Styling for the icon */
+.icon {
+  width: 24px;
+  height: 24px;
+}

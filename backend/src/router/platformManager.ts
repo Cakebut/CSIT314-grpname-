@@ -99,29 +99,6 @@ platformRouter.get("/reports/custom", async (req, res) => {
   }
 });
 
-// Server-day full report: returns the same report shape as /reports/custom but for the server's current day
-platformRouter.get("/reports/custom/today", async (_req, res) => {
-  try {
-    const summary = await ctrl.getRequestsReportSummaryForToday();
-    res.json(summary);
-  } catch (e: any) {
-    console.error('[Reports] failed /reports/custom/today', e);
-    res.status(500).json({ error: e.message ?? 'Failed to generate today report' });
-  }
-});
-
-// Debug endpoint: return quick diagnostic counts and sample rows for a single date
-platformRouter.get("/reports/debug", async (req, res) => {
-  try {
-    const { date, types } = req.query as Record<string, string>;
-    const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
-    const dbg = await ctrl.getRequestsReportDebug({ date, typeNames: typeList });
-    res.json(dbg);
-  } catch (e: any) {
-    res.status(400).json({ error: e.message ?? 'Bad request' });
-  }
-});
-
 // CSV download based on daily trend
 platformRouter.get("/reports/custom.csv", async (req, res) => {
   try {
@@ -129,14 +106,13 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
     const typeList = types ? types.split(",").map(s => s.trim()).filter(Boolean) : [];
     const { trendDaily } = await ctrl.getRequestsReportSummary({ start, end, typeNames: typeList });
 
-    const header = ["date", "total", "Pending", "InProgress", "Completed", "Cancelled"];
+    const header = ["date", "total", "Pending", "Completed", "Cancelled"];
     const lines = [header.join(",")];
     for (const d of trendDaily) {
       lines.push([
         d.date,
         d.total,
         d.Pending || 0,
-        d.InProgress || 0,
         d.Completed || 0,
         d.Cancelled || 0,
       ].join(","));
@@ -147,7 +123,7 @@ platformRouter.get("/reports/custom.csv", async (req, res) => {
     res.send(csv);
   } catch (e: any) {
     // Always return a CSV, even on error
-    const header = ["date", "total", "Pending", "InProgress", "Completed", "Cancelled"];
+    const header = ["date", "total", "Pending", "Completed", "Cancelled"];
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", "attachment; filename=custom-report.csv");
     res.send(header.join(",") + "\n");

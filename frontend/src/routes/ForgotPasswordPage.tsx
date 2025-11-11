@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { CircleCheck } from "lucide-react";
 import "./ForgotPasswordPage.css";
 
 export default function ForgotPasswordPage() {
@@ -11,13 +12,12 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validatePassword = (pw: string) => {
-    return (
-      pw.length >= 8 &&
-      /[A-Z]/.test(pw) &&
-      /[0-9]/.test(pw)
-    );
-  };
+  // For any validation checks
+  const hasMinLength = newPassword.length >= 8;
+  const hasUppercase = /[A-Z]/.test(newPassword);
+  const hasNumber = /[0-9]/.test(newPassword);
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
+  const allValid = hasMinLength && hasUppercase && hasNumber && passwordsMatch && username.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
       toast.error("Passwords do not match.");
       return;
     }
-    if (!validatePassword(newPassword)) {
+    if (allValid === false) {
       toast.error("Password does not meet requirements.");
       return;
     }
@@ -62,9 +62,9 @@ export default function ForgotPasswordPage() {
           <h2>Request Submitted</h2>
           <p>Your password reset request has been received</p>
           <ul className="request-status-list">
-            <li>✔ Your password change request has been successfully submitted</li>
-            <li>✔ Request is pending approval from the administrator</li>
-            <li>✔ You will receive confirmation once approved</li>
+            <li><CircleCheck className="circle-check"/> Your password change request has been successfully submitted.</li>
+            <li><CircleCheck className="circle-check"/> Request is pending approval from the administrator.</li>
+            <li><CircleCheck className="circle-check"/> You will receive confirmation once approved.</li>
           </ul>
           <button className="back-login-btn" onClick={() => navigate("/")}>Back to Login</button>
           <div className="request-note">This usually takes 1-2 business days</div>
@@ -74,52 +74,112 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="forgot-password-container">
-      <form className="reset-password-card" onSubmit={handleSubmit}>
-        <h2>Reset Password</h2>
-        <p>Enter your username and create a new secure password</p>
-        <label>Username
+    <section className="forget-main forget-section">
+
+      <form id="loginForm" className="forget-box">
+        <div className="forget-header">
+          <header>Reset Password</header>
+          <div>Create a new secure password</div>
+        </div>
+
+        <div className="input-box">
+          <header>Username</header>
           <input
             type="text"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
+            id="username"
+            className="input-field"
             placeholder="Enter your username"
-            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="off"
+            required
           />
-        </label>
-        <label>New Password
+        </div>
+
+        <div className="input-box">
+          <header>New Password</header>
           <input
             type="password"
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
+            id="password"
+            className="input-field"
             placeholder="Enter new password"
-            autoComplete="new-password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            autoComplete="off"
+            required
           />
-        </label>
-        <label>Confirm Password
+        </div>
+
+        <div className="input-box">
+          <header>Confirm Password</header>
           <input
             type="password"
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
+            id="password"
+            className="input-field"
             placeholder="Confirm new password"
-            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="off"
+            required
           />
-        </label>
+        </div>
+
         <div className="password-requirements">
           <b>Password must contain:</b>
-          <ul>
-            <li className={newPassword.length >= 8 ? "valid" : "invalid"}>At least 8 characters</li>
-            <li className={/[A-Z]/.test(newPassword) ? "valid" : "invalid"}>One uppercase letter</li>
-            <li className={/[0-9]/.test(newPassword) ? "valid" : "invalid"}>One number</li>
-          </ul>
-        </div>
-        <div className="form-actions">
-          <button type="button" onClick={() => navigate("/")}>Cancel</button>
-          <button type="submit" disabled={loading || !username || !newPassword || !confirmPassword || !validatePassword(newPassword)}>
-            {loading ? "Submitting..." : "Reset Password"}
-          </button>
-        </div>
+          <div className="validation-box">
+            <p>Password must contain:</p>
+            <ul>
+              <li className={hasMinLength ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={hasMinLength ? "valid-check" : "invalid-check"}
+                />
+                At least 8 characters
+              </li>
+              <li className={hasUppercase ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={hasUppercase ? "valid-check" : "invalid-check"}
+                />
+                One uppercase letter
+              </li>
+              <li className={hasNumber ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={hasNumber ? "valid-check" : "invalid-check"}
+                />
+                One number
+              </li>
+              <li className={passwordsMatch ? "valid" : "invalid"}>
+                <CircleCheck
+                  className={passwordsMatch ? "valid-check" : "invalid-check"}
+                />
+                Passwords match
+              </li>
+            </ul>
+          </div>
+         </div>
+          <div className="input-wrapper">
+            <div className="input-submit">
+              <button
+                type="button"
+                className="submit-btn btn"
+                id="cancel"
+                onClick={() => navigate("/")}
+              ></button>
+              <label htmlFor="cancel">Cancel</label>
+            </div>
+
+            <div className="input-submit">
+              <button
+                type="submit"
+                className="submit-btn btn"
+                id="submit"
+                onClick={handleSubmit}
+                disabled={!username || !newPassword || !confirmPassword || !allValid}>
+                {loading ? "" : ""}</button>
+              <label htmlFor="submit">Confirm</label>
+            </div>
+          </div>
+
       </form>
-    </div>
+    </section>
   );
 }

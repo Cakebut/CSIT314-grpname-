@@ -83,8 +83,14 @@ export class RoleController {
   }
 
   async deleteRole(id: number, actor: string) {
-   
-    return await this.roleEntity.searchRoles("");
+    // Call entity deleteRole to remove the role from the database
+    try {
+      const result = await this.roleEntity.deleteRole(id);
+      return result;
+    } catch (err) {
+      console.error('RoleController.deleteRole error:', err);
+      return false;
+    }
      
   }
 

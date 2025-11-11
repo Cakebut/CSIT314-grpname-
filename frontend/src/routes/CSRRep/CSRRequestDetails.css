@@ -1,0 +1,224 @@
+.csr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.5);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+
+.csr-modal {
+  width: 720px;
+  max-width: calc(100% - 32px);
+  background: #fff;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(2,6,23,0.35);
+  padding: 70px 50px 40px 50px; /* top right bottom left */
+}
+
+.csr-modal-close {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.csr-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.csr-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.csr-modal-status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.csr-status-left {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Status color variants */
+.csr-status-left.available {
+  background: #ecfdf5; 
+  color: #065f46; 
+}
+.csr-status-left.pending {
+  background: #fffbeb;
+  color: #92400e; 
+}
+.csr-status-left.completed {
+  background: #eff6ff; 
+  color: #1e3a8a; 
+}
+
+.csr-status-right {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.csr-status-right.priority-high {
+  background-color: #b41928;
+}
+.csr-decision-buttons {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.csr-decision-buttons .csr-accept,
+.csr-decision-buttons .csr-reject {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* Match the example approve/reject styles */
+.csr-decision-buttons .csr-accept {
+  background: #0f1724; /* dark/navy like approve-btn */
+  color: #fff;
+  min-width: 120px;
+  box-shadow: 0 6px 18px rgba(15,23,36,0.12);
+}
+
+.csr-decision-buttons .csr-reject {
+  background: #b41928;
+  color: white;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.csr-decision-buttons .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.csr-waiting {
+  padding: 18px 22px;
+  border-radius: 10px;
+  color: #0f1724;
+  font-weight: 700;
+}
+.csr-status-right.priority-low {
+  background-color: #6b7280;
+}
+
+.csr-modal-body {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.csr-field {
+  font-size: 0.98rem;
+  color: #0f172a;
+}
+
+.csr-details {
+  margin-top: 8px;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  border: 1px solid black;
+  height: 250px;
+}
+
+.csr-modal-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.csr-interested {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 5px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.3s ease;  
+  width: 180px;
+  text-align: center;
+}
+
+.csr-interested:hover {
+  box-shadow: 0 8px 20px rgba(2,6,23,0.1);
+  transform: scale(1.02);
+}
+
+.csr-interested.active {
+  /* slightly darker background for a subtle active state */
+  background: #b41928;
+}
+
+/* Default icon sizing */
+.csr-modal .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* When the interested state is active, render the heart as a solid/filled heart in red */
+.csr-interested .icon.filled {
+  /* many lucide icons draw with stroke; remove stroke and apply a fill */
+  stroke: none;
+  fill: currentColor;
+  color: white;
+}
+
+.csr-interested .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.csr-modal .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* container for interested + offer buttons */
+.csr-interest-offer {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.csr-offer-help {
+  background: #000; /* black primary */
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.csr-offer-help:hover {
+  opacity: 0.95;
+}

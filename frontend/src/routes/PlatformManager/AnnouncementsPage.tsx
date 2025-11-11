@@ -65,16 +65,43 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="pm-announce">
-      <h2>Platform Manager — Announcements</h2>
-      <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Type your message..."/>
-      <div className="actions">
-        <button onClick={onSend} disabled={busy}>Send to All Users</button>
+      <div className="pm-announce-header">
+        <div className="pm-announce-title">Platform Announcements</div>
+        <div className="pm-announce-sub">Send important messages to all active users across the platform</div>
       </div>
+
+      <div className="pm-announce-card">
+        <label className="pm-announce-label">Announcement Message</label>
+        <div className="pm-announce-input-wrap">
+          <textarea className="pm-announce-textarea" value={message} onChange={e=>setMessage(e.target.value)} placeholder="Type your announcement message here..." />
+        </div>
+        <div className="pm-announce-foot">
+          <div className="pm-announce-note">This message will be displayed to all PINs, CSRs, and Admins currently using the platform</div>
+          <div className="pm-announce-actions">
+            <button className="pm-send-btn" onClick={onSend} disabled={busy} aria-disabled={busy}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: 8 }}>
+                <path d="M22 2L11 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M22 2L15 22l-4-9-9-4 20-7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Send Announcement
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="pm-announce-info">
+        <div className="pm-info-icon">📣</div>
+        <div>
+          <div className="pm-info-title">How Announcements Work</div>
+          <div className="pm-info-desc">When you send an announcement, all active users will receive a pop-up notification with your message. This is ideal for system updates, maintenance notices, or important policy changes that require immediate attention.</div>
+        </div>
+      </div>
+
       {error && <div className="error">{error}</div>}
       {info && <div className="info">{info}</div>}
       {latest && (
         <div className="latest" style={{ marginTop: 12 }}>
-          <div style={{ fontWeight: 600 }}>Latest announcement</div>
+          <div style={{ fontWeight: 600 }}>Latest Announcement :</div>
           <div style={{ color: '#374151' }}>{latest.message}</div>
           <div style={{ color: '#6b7280', fontSize: 12 }}>at {new Date(latest.createdAt).toLocaleString()}</div>
         </div>

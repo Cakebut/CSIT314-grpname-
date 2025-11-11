@@ -1,0 +1,285 @@
+/* Overlay / dialog container (shared) --------------------------------------------------------------- */
+.view-password-modal-overlay,
+.view-password-confirm-dialog,
+.view-password-success-dialog {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.46);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px; /* for small screens */
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+
+/* Modal / dialog content (shared) ------------------------------------------------------------------ */
+.view-password-modal-content {
+  position: relative;
+  width: 96%;
+  max-width: 980px; /* two-column modal width  */
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+  box-sizing: border-box;
+}
+
+.view-password-success-content {
+  position: relative;
+  width: 30%;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+  box-sizing: border-box; 
+}
+
+.view-password-confirm-content {
+  position: relative;
+  width: 30%;
+  max-width: 980px; /* two-column modal width  */
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+  box-sizing: border-box;
+}
+
+/* Modal body grid: main + sidebar (metadata) ------------------------------------------------------- */
+.modal-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: start;
+}
+
+.modal-column {
+  display: block;
+}
+
+.modal-column.side {
+  width: 100%;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  /* Use inline-flex so the SVG content is centered and participates correctly in flex/inline layouts */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle; /* keeps icon visually aligned with adjacent text */
+  flex: none; /* prevent icon from stretching in flex containers */
+}
+
+
+/* Card-like panels inside modal -------------------------------------------------------------------- */
+.view-passworduser-info,
+.view-password-request-details {
+  background: linear-gradient(180deg, #fbfdff 0%, #f7fbff 100%);
+  border-radius: 12px;
+  padding: 16px 18px;
+  border: 1px solid rgba(2, 6, 23, 0.04);
+  box-sizing: border-box;
+}
+
+.view-passworduser-info h4,
+.view-password-request-details h4 {
+  margin: 0 0 10px 0;
+  color: #1f2937;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.view-password-request-details {
+  margin-top: 12px;
+}
+
+
+/* Status badges ----------------------------------------------------------------------------------- */
+.view-password-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  box-shadow: 0 3px 10px rgba(2, 6, 23, 0.04);
+}
+
+.view-password-badge.pending {
+  background: #fff8ec;
+  color: #92400e;
+  border: 1px solid rgba(146, 64, 14, 0.06);
+}
+
+.view-password-badge.approved {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid rgba(6, 95, 70, 0.06);
+}
+
+.view-password-badge.rejected {
+  background: rgba(153, 27, 27, 0.562);
+  color: #991b1b;
+}
+
+
+/* Password display area --------------------------------------------------------------------------- */
+.view-password-section,
+.password-section {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.view-password-field,
+.password-field {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.password-value {
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid rgba(2, 6, 23, 0.04);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+.show-password {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0f63b8;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(15, 23, 36, 0.12);
+}
+
+
+/* Actions layout ----------------------------------------------------------------------------------- */
+.view-password-actions,
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.view-password-actions-left,
+.actions-left {
+  display: flex;
+  align-items: center;
+}
+
+.view-password-actions-right,
+.actions-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cancel-view-password,
+.cancel-btn {
+  background: transparent;
+  border: 1px solid rgba(15, 23, 36, 0.08);
+  color: #0f1724;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.reject-view-password,
+.reject-btn {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+
+/* Modal close control ------------------------------------------------------------------------------ */
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+}
+
+
+.muted {
+  color: #6b7280;
+}
+
+.section-label {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.view-password-modal-content > .view-passworduser-info,
+.view-password-modal-content > .view-password-request-details,
+.view-password-modal-content > .view-password-actions {
+  margin-top: 16px;
+}
+
+
+/* Responsive adjustments -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .modal-body {
+    grid-template-columns: 1fr;
+  }
+  .modal-column.side {
+    width: 100%;
+    flex: none;
+  }
+  .view-password-modal-content {
+    padding: 18px;
+    border-radius: 12px;
+  }
+}
+
+
+/* Readonly textarea styling ------------------------------------------------------------------------ */
+.view-password-modal-content textarea[readonly],
+.view-password-modal-content textarea[aria-readonly="true"] {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid rgba(2, 6, 23, 0.04);
+  padding: 10px;
+  border-radius: 8px;
+}
