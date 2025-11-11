@@ -1,183 +1,335 @@
-WE ARE CRASHING OUT FOR REALL 25/10/2025
-# CSIT314 Crashout
+```markdown
+# CSIT314 — Crashout (CSR ↔ PIN Matching System)
 
-A TypeScript + CSS project for CSIT314. This repository contains the source code for "Crashout" — a web-based project (game / interactive app) developed as part of the CSIT314 course. This README is a suggested, editable template that documents the repository, how to run it locally, how to contribute, and where to find important resources.
+Crashout is a full‑stack TypeScript project (frontend + backend) built for the CSIT314 course to match Corporate Social Responsibility (CSR) corporate volunteers (CVs) to Persons-In-Need (PIN). This README has been updated to reflect the actual package.json scripts and key developer workflows for both the backend and frontend that you shared.
 
-> NOTE: I inferred the project type from the repository name and the language composition (TypeScript and CSS). Please update the description, screenshots, and any commands below to match your actual project setup and scripts.
+This README covers:
+- Project summary & required features
+- The extra features you requested (admin logs, forgot password, CSV export, real-time notifications, PM announcements and reports)
+- Backend & frontend scripts (from package.json)
+- How to run, build, seed and demo the app
+- Environment variables, DB migration & seeding commands
+- Useful API examples and test data guidance
 
 ---
 
 ## Table of contents
 
 - [Project](#project)
-- [Features](#features)
-- [Tech stack](#tech-stack)
-- [Repository language composition](#repository-language-composition)
+- [Key features](#key-features)
+- [Tech stack & repo composition](#tech-stack--repo-composition)
 - [Getting started](#getting-started)
   - [Requirements](#requirements)
-  - [Install](#install)
-  - [Run (development)](#run-development)
-  - [Build (production)](#build-production)
-  - [Test](#test)
-- [Project structure](#project-structure)
-- [Configuration & environment](#configuration--environment)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact / Maintainers](#contact--maintainers)
-- [Acknowledgements](#acknowledgements)
+  - [Backend setup & scripts](#backend-setup--scripts)
+  - [Frontend setup & scripts](#frontend-setup--scripts)
+  - [Run both for development](#run-both-for-development)
+  - [Build & deploy](#build--deploy)
+  - [Seed/demo data](#seeddemo-data)
+- [Environment variables](#environment-variables)
+- [Database migrations](#database-migrations)
+- [API examples](#api-examples)
+- [Testing](#testing)
+- [Contributing & next steps](#contributing--next-steps)
+- [License & contact](#license--contact)
 
 ---
 
 ## Project
 
-Short description:
-- "Crashout" is a web application built with TypeScript and CSS. Replace this with a one- or two-sentence summary of what the app does.
+Crashout helps match volunteer opportunities (PIN service requests) with CSR representatives and corporate volunteers. It provides searching, shortlisting, historic views, reporting, category management, and real‑time notifications. The system supports distinct roles (user admin, CSR Rep, PIN, Platform Manager).
+
+Required by spec:
+- Support different user types and profiles (user admin, CSR Rep, PIN, Platform Manager)
+- Allow PIN to create/manage requests
+- Allow CSR Rep to search, shortlist and view history
+- Allow PIN to track interest metrics (views, shortlists)
+- Platform Manager manages categories and generates reports (daily/weekly/monthly/custom)
+
+Extra features (you asked to include):
+- Admin system log (view + export CSV)
+- Forgot password (email reset)
+- Export CSV for user list and system log
+- CSR & PIN notifications with real-time view + shortlist from notifications
+- Platform Manager announcements (broadcast to all users)
+- Platform Manager reporting with daily/weekly/monthly/custom ranges
 
 ---
 
-## Features
+## Key features
 
- - Still In Progress 
-
----
-
-## Tech stack
-
-- TypeScript
-- CSS (plain CSS / CSS modules )
-- HTML5
-- (Optional) Frameworks/libraries: React / Vue / Svelte / vanilla — specify what you used
-- Build tools: (Webpack / Vite / Parcel / other) — update accordingly
-- Package manager: npm / yarn / pnpm
+- Role-based authentication & authorization
+- Forgot password / email reset flow
+- Admin dashboard: users, roles, system logs, CSV export
+- Real-time notifications (Socket.IO or WebSocket)
+- Shortlist / favourite workflow for CSR → PIN matching
+- Platform Manager: announcement broadcast & report generator
+- Seed scripts to create large test dataset for live demo (100+ records)
 
 ---
 
-## Repository language composition
+## Tech stack & repo composition
 
-This repository is primarily:
-- TypeScript: 79.2%
-- CSS: 20.2%
-- Other: 0.6%
+- Languages: TypeScript (majority), CSS
+- Frontend: React + Vite (TypeScript), Tailwind-related tooling installed
+- Backend: Express + Drizzle ORM, Postgres (pg), session support (connect-pg-simple), TypeScript
+- Real-time: recommended Socket.IO or WebSocket integration for notifications
+- CSV exports: generated server-side (streams or in-memory as appropriate)
+- Repo language composition (estimated):
+  - TypeScript: 79.2%
+  - CSS: 20.2%
+  - Other: 0.6%
 
 ---
 
 ## Getting started
 
-These are example instructions — adapt them to your repository's actual scripts and tools.
-
 ### Requirements
+- Node.js (>=16 recommended; some packages may require >=18 — check local engine)
+- npm (or yarn/pnpm)
+- Postgres (recommended for full features)
+- SMTP credentials (for forgot-password emails) or a test SMTP like Mailtrap
 
-- Node.js (>= 16 recommended)
-- npm (>= 8) or yarn / pnpm
-- A modern browser for running the app
-
-### Install
-
-Clone the repository and install dependencies:
-
+Clone the repository:
 ```bash
 git clone https://github.com/Cakebut/CSIT314Crashout.git
 cd CSIT314Crashout
+```
+
+### Backend — install & scripts
+
+Path: ./backend
+
+Install:
+```bash
+cd backend
 npm install
-# or
-# yarn
-# pnpm install
 ```
 
-### Run (development)
+Important scripts (taken directly from backend/package.json):
+- `npm run dev` — start the backend in development using nodemon
+- `npm run build` — compile TypeScript (`tsc`) to `dist/`
+- `npm run start` — run the compiled backend: `node dist/index.js`
+- `npm run test` — runs tests via node script `scripts/run-jest.js`
+- DB & seed/migration related scripts:
+  - `npm run db:migrate` — run drizzle-kit push (--config ./drizzle.config.ts)
+  - `npm run db:migrate:generate` — generate a drizzle migration
+  - `npm run db:migrate:add_deleted` — run tx script: `tsx scripts/add_deleted_to_service_type.ts`
+  - `npm run db:seed` — run seed script: `ts-node src/db/Seeding/seedData.ts`
+  - `npm run db:seed2` — alternative seed: `ts-node src/db/Seeding/seedDatav2.ts`
+  - `npm run db:delete` — delete seeded data: `ts-node src/db/Seeding/deleteData.ts`
 
-Start the development server (example scripts; update to match your package.json):
+Notes:
+- The backend uses Drizzle ORM and drizzle-kit for migrations.
+- dev uses `nodemon`; ensure `nodemon` is installed (it is listed in devDependencies).
+- If you prefer tsx or ts-node for running TypeScript directly, those are in devDependencies.
 
+Environment note: backend reads DB and session (connect-pg-simple) config from env vars (see env section below).
+
+### Frontend — install & scripts
+
+Path: ./frontend
+
+Install:
 ```bash
+cd frontend
+npm install
+```
+
+Important scripts (from frontend/package.json):
+- `npm run dev` — start Vite dev server (default port printed, typically 5173)
+- `npm run build` — runs `tsc -b && vite build` (generates `dist`)
+- `npm run preview` — preview built static site locally
+- `npm run lint` — run eslint
+- `npm run deploy` — (uses gh-pages) deploys `dist` to GitHub Pages (homepage is already set)
+  - `npm run predeploy` runs `npm run build` first
+- `homepage` in package.json is set to: https://cakebut.github.io/CSIT314Crashout/
+
+Notes:
+- Frontend is React + Vite (TypeScript). The `deploy` script will publish `dist/` to GitHub Pages using `gh-pages`.
+- For development, run `npm run dev` and point the frontend to the backend API (via proxied URL or environment variable).
+
+### Run both for development
+
+Open two terminals (or use a process manager):
+
+Terminal 1 — backend:
+```bash
+cd backend
 npm run dev
-# or
-npm start
+# backend should print listening port (commonly: 3000 or configured by APP_PORT)
 ```
 
-Open http://localhost:3000 (or the port printed in console) in your browser.
-
-### Build (production)
-
-Create a production build:
-
+Terminal 2 — frontend:
 ```bash
+cd frontend
+npm run dev
+# frontend will start Vite (default port 5173)
+```
+
+Configure frontend environment (e.g., VITE_API_URL) to point to your backend dev URL (http://localhost:3000 or similar).
+
+---
+
+## Build & deploy
+
+Backend production:
+```bash
+cd backend
 npm run build
+# then on the server:
+npm run start
 ```
 
-Output artifacts are typically placed in `dist/` or `build/`. Adjust as necessary.
-
-### Test
-
-If you have tests configured:
-
+Frontend production (build + deploy to GH Pages):
 ```bash
-npm test
-```
-
-If not, consider adding unit tests (Jest / Vitest / Playwright for E2E) to improve reliability.
-
----
-
-## Project structure
-
-A suggested structure — update to match your repo:
-
-- src/             — TypeScript source files
-  - assets/        — images, sprites, fonts
-  - styles/        — CSS
-  - components/    — UI components (if using a framework)
-  - game/          — core game logic
-  - index.tsx      — app entry point
-- public/          — static files
-- tests/           — test suites
-- package.json
-- tsconfig.json
-- README.md
-
----
-
-## Configuration & environment
-
-- Environment variables: list any required .env variables (API keys, analytics, etc.)
-- Example `.env.example`:
-
-```
-# API_URL=https://api.example.com
-# NODE_ENV=development
+cd frontend
+npm run build
+npm run deploy
+# deploy publishes dist/ via gh-pages package (homepage already configured)
 ```
 
 ---
 
-## Contributing
+## Seed/demo data
 
-Contributions are welcome! Steps to contribute:
+The project includes seed scripts to create demo/test data required by the spec (100+ records per datatype). Use these to generate the dataset for the final demo.
 
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feat/my-feature`.
-3. Make your changes, add tests and documentation.
-4. Commit and push: `git push origin feat/my-feature`.
-5. Open a pull request describing your changes.
+Examples:
+```bash
+# run seed (v1)
+cd backend
+npm run db:seed
 
-Guidelines:
-- Follow existing code style and patterns.
-- Keep commits small and focused.
-- Add or update README / documentation for new features.
+# run alternative or extended seed (v2)
+npm run db:seed2
+
+# remove seeded demo data
+npm run db:delete
+```
+
+Make sure:
+- Your database is running and DATABASE_URL is configured
+- Seed scripts create a variety of roles: user admin, CSR Rep, PIN, Platform Manager
+- Seed scripts should create PIN requests, shortlists, matches, notifications, and example announcements so reporting can be demonstrated
 
 ---
 
-## License
+## Environment variables (recommended)
 
-MIT FILE
+Create `.env` files for backend and Vite (frontend) as needed.
+
+Example backend `.env`:
+```
+DATABASE_URL=postgres://user:pass@localhost:5432/csit314_crashout
+APP_PORT=3000
+JWT_SECRET=change-this-secret
+SESSION_SECRET=change-this-session-secret
+SESSION_TABLE=sessions
+SMTP_HOST=smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_pass
+FRONTEND_URL=http://localhost:5173
+```
+
+Example frontend `.env` (Vite uses VITE_ prefix):
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_APP_TITLE=Crashout
+```
+
+---
+
+## Database migrations & Drizzle
+
+- Run migrations:
+  ```bash
+  cd backend
+  npm run db:migrate
+  ```
+
+- Generate migrations:
+  ```bash
+  npm run db:migrate:generate -- name-of-migration
+  ```
+
+- The project includes a helper script `db:migrate:add_deleted` for a particular migration update — run when instructed.
+
+---
+
+## API examples (suggested endpoints)
+
+These are example endpoints that match features described in this README. Update to reflect your actual routes.
+
+- Auth:
+  - POST /api/auth/register
+  - POST /api/auth/login
+  - POST /api/auth/forgot-password
+  - POST /api/auth/reset-password
+- Users & admin:
+  - GET /api/admin/users
+  - GET /api/admin/users?format=csv
+  - GET /api/admin/logs?from=YYYY-MM-DD&to=YYYY-MM-DD
+  - GET /api/admin/logs?format=csv
+- PIN / CSR:
+  - GET /api/pins
+  - POST /api/pins
+  - POST /api/shortlist
+  - GET /api/shortlist
+- Notifications:
+  - GET /api/notifications
+  - WebSocket/Socket.IO namespace: /notifications
+- Reports:
+  - GET /api/reports?period=daily|weekly|monthly|custom&from=...&to=...
+- Announcements:
+  - POST /api/announcements (PM only)
+  - GET /api/announcements
+
+---
+
+## CSV exports & system logs
+
+- System logs:
+  - Log every important action (auth, role changes, seed runs, matches)
+  - Provide admin UI endpoints to list and filter logs
+  - Allow CSV export for logs and user list (server should stream CSV for large exports)
+
+Example server endpoint queries:
+- GET /api/admin/logs?from=2025-01-01&to=2025-01-31&format=csv
+- GET /api/admin/users?role=PIN&format=csv
+
+---
+
+## Real-time notifications & shortlist flow
+
+Recommended approach:
+- Server maintains a notifications table and publishes events via Socket.IO
+- When a CSR shortlists a PIN:
+  - Create shortlist record
+  - Insert notification for the PIN
+  - Broadcast to the PIN if connected
+- Allow PIN or CSR to convert notification into a shortlist or match directly from the notification item
+- Persist announcements so offline users receive them on next login
+
+---
+
+## Testing
+
+- Backend test runner command:
+  - `npm run test` (invokes `node scripts/run-jest.js` per backend package.json)
+- Add unit tests (Jest/ts-jest) and E2E (Playwright/Cypress) to validate:
+  - Authentication flows (register/login/forgot password)
+  - Notifications & real-time updates
+  - CSV export endpoints and generated file format
+  - Report endpoints and aggregation (daily/weekly/monthly/custom)
 
  
 
-## Contact / Maintainers
+## License & contact
 
+- MIT LICENSE file 
 - Repository: https://github.com/Cakebut/CSIT314Crashout
-- Maintainer: @eugenelcc 
+- Maintainer: @Eugenelcc
 
 ---
-
- 
-
- 
+```
