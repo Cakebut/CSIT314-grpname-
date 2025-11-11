@@ -21,6 +21,7 @@ function Shortlist() {
   const [filterLocation, setFilterLocation] = useState<string>("");
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [interestedIds, setInterestedIds] = useState<number[]>([]);
   const csrId = getCSRId();
   const load = async () => {
     if (!csrId) {
@@ -32,8 +33,19 @@ function Shortlist() {
     const json = await res.json();
     setShortlist(json.shortlistedRequests || []);
   };
+  // reload interested helper
+  const reloadInterested = async () => {
+    if (!csrId) return;
+    try {
+      const res = await fetch(`http://localhost:3000/api/csr/${csrId}/interested`);
+      const json = await res.json();
+      setInterestedIds((json.interestedRequests || []).map((r: any) => r.requestId ?? r.pin_request_id));
+    } catch (e) {
+      setInterestedIds([]);
+    }
+  };
   // removal is handled within CSRRequestDetails modal via the provided reloadShortlist
-  useEffect(() => { load(); }, [csrId]);
+  useEffect(() => { load(); reloadInterested(); }, [csrId]);
   // Fetch category and location options from backend
   useEffect(() => {
     fetch('/api/csr/service-types')
@@ -184,9 +196,9 @@ function Shortlist() {
               onClose={() => setSelected(null)}
               csrId={csrId}
               shortlistedIds={shortlist.map(s => s.requestId)}
-              interestedIds={[]}
-              reloadShortlist={load}
-              reloadInterested={async () => {}}
+              interestedIds={interestedIds}
+              reloadShortlist={async () => { await load(); }}
+              reloadInterested={reloadInterested}
             />
           </div>
         </div>
