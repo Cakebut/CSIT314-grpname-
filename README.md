@@ -1,9 +1,9 @@
-```markdown
 # CSIT314 — Crashout (CSR ↔ PIN Matching System)
 
 Crashout is a full‑stack TypeScript project (frontend + backend) built for the CSIT314 course to match Corporate Social Responsibility (CSR) corporate volunteers (CVs) to Persons-In-Need (PIN). This README has been updated to reflect the actual package.json scripts and key developer workflows for both the backend and frontend that you shared.
 
 This README covers:
+
 - Project summary & required features
 - The extra features you requested (admin logs, forgot password, CSV export, real-time notifications, PM announcements and reports)
 - Backend & frontend scripts (from package.json)
@@ -39,6 +39,7 @@ This README covers:
 Crashout helps match volunteer opportunities (PIN service requests) with CSR representatives and corporate volunteers. It provides searching, shortlisting, historic views, reporting, category management, and real‑time notifications. The system supports distinct roles (user admin, CSR Rep, PIN, Platform Manager).
 
 Required by spec:
+
 - Support different user types and profiles (user admin, CSR Rep, PIN, Platform Manager)
 - Allow PIN to create/manage requests
 - Allow CSR Rep to search, shortlist and view history
@@ -46,6 +47,7 @@ Required by spec:
 - Platform Manager manages categories and generates reports (daily/weekly/monthly/custom)
 
 Extra features (you asked to include):
+
 - Admin system log (view + export CSV)
 - Forgot password (email reset)
 - Export CSV for user list and system log
@@ -84,12 +86,14 @@ Extra features (you asked to include):
 ## Getting started
 
 ### Requirements
+
 - Node.js (>=16 recommended; some packages may require >=18 — check local engine)
 - npm (or yarn/pnpm)
 - Postgres (recommended for full features)
 - SMTP credentials (for forgot-password emails) or a test SMTP like Mailtrap
 
 Clone the repository:
+
 ```bash
 git clone https://github.com/Cakebut/CSIT314Crashout.git
 cd CSIT314Crashout
@@ -100,12 +104,14 @@ cd CSIT314Crashout
 Path: ./backend
 
 Install:
+
 ```bash
 cd backend
 npm install
 ```
 
 Important scripts (taken directly from backend/package.json):
+
 - `npm run dev` — start the backend in development using nodemon
 - `npm run build` — compile TypeScript (`tsc`) to `dist/`
 - `npm run start` — run the compiled backend: `node dist/index.js`
@@ -119,6 +125,7 @@ Important scripts (taken directly from backend/package.json):
   - `npm run db:delete` — delete seeded data: `ts-node src/db/Seeding/deleteData.ts`
 
 Notes:
+
 - The backend uses Drizzle ORM and drizzle-kit for migrations.
 - dev uses `nodemon`; ensure `nodemon` is installed (it is listed in devDependencies).
 - If you prefer tsx or ts-node for running TypeScript directly, those are in devDependencies.
@@ -130,12 +137,14 @@ Environment note: backend reads DB and session (connect-pg-simple) config from e
 Path: ./frontend
 
 Install:
+
 ```bash
 cd frontend
 npm install
 ```
 
 Important scripts (from frontend/package.json):
+
 - `npm run dev` — start Vite dev server (default port printed, typically 5173)
 - `npm run build` — runs `tsc -b && vite build` (generates `dist`)
 - `npm run preview` — preview built static site locally
@@ -145,6 +154,7 @@ Important scripts (from frontend/package.json):
 - `homepage` in package.json is set to: https://cakebut.github.io/CSIT314Crashout/
 
 Notes:
+
 - Frontend is React + Vite (TypeScript). The `deploy` script will publish `dist/` to GitHub Pages using `gh-pages`.
 - For development, run `npm run dev` and point the frontend to the backend API (via proxied URL or environment variable).
 
@@ -153,6 +163,7 @@ Notes:
 Open two terminals (or use a process manager):
 
 Terminal 1 — backend:
+
 ```bash
 cd backend
 npm run dev
@@ -160,6 +171,7 @@ npm run dev
 ```
 
 Terminal 2 — frontend:
+
 ```bash
 cd frontend
 npm run dev
@@ -173,6 +185,7 @@ Configure frontend environment (e.g., VITE_API_URL) to point to your backend dev
 ## Build & deploy
 
 Backend production:
+
 ```bash
 cd backend
 npm run build
@@ -181,6 +194,7 @@ npm run start
 ```
 
 Frontend production (build + deploy to GH Pages):
+
 ```bash
 cd frontend
 npm run build
@@ -195,6 +209,7 @@ npm run deploy
 The project includes seed scripts to create demo/test data required by the spec (100+ records per datatype). Use these to generate the dataset for the final demo.
 
 Examples:
+
 ```bash
 # run seed (v1)
 cd backend
@@ -208,6 +223,7 @@ npm run db:delete
 ```
 
 Make sure:
+
 - Your database is running and DATABASE_URL is configured
 - Seed scripts create a variety of roles: user admin, CSR Rep, PIN, Platform Manager
 - Seed scripts should create PIN requests, shortlists, matches, notifications, and example announcements so reporting can be demonstrated
@@ -219,6 +235,7 @@ Make sure:
 Create `.env` files for backend and Vite (frontend) as needed.
 
 Example backend `.env`:
+
 ```
 DATABASE_URL=postgres://user:pass@localhost:5432/csit314_crashout
 APP_PORT=3000
@@ -232,7 +249,8 @@ SMTP_PASS=your_smtp_pass
 FRONTEND_URL=http://localhost:5173
 ```
 
-Example frontend `.env` (Vite uses VITE_ prefix):
+Example frontend `.env` (Vite uses VITE\_ prefix):
+
 ```
 VITE_API_URL=http://localhost:3000/api
 VITE_APP_TITLE=Crashout
@@ -243,12 +261,14 @@ VITE_APP_TITLE=Crashout
 ## Database migrations & Drizzle
 
 - Run migrations:
+
   ```bash
   cd backend
   npm run db:migrate
   ```
 
 - Generate migrations:
+
   ```bash
   npm run db:migrate:generate -- name-of-migration
   ```
@@ -295,6 +315,7 @@ These are example endpoints that match features described in this README. Update
   - Allow CSV export for logs and user list (server should stream CSV for large exports)
 
 Example server endpoint queries:
+
 - GET /api/admin/logs?from=2025-01-01&to=2025-01-31&format=csv
 - GET /api/admin/users?role=PIN&format=csv
 
@@ -303,6 +324,7 @@ Example server endpoint queries:
 ## Real-time notifications & shortlist flow
 
 Recommended approach:
+
 - Server maintains a notifications table and publishes events via Socket.IO
 - When a CSR shortlists a PIN:
   - Create shortlist record
@@ -323,12 +345,8 @@ Recommended approach:
   - CSV export endpoints and generated file format
   - Report endpoints and aggregation (daily/weekly/monthly/custom)
 
- 
-
 ## License & contact
 
-- MIT LICENSE file 
+- MIT LICENSE file
 - Repository: https://github.com/Cakebut/CSIT314Crashout
 - Maintainer: @Eugenelcc
-
-
