@@ -1,3 +1,44 @@
+# 🥴 CSIT314 — Crashout
+
+---
+
+## 👥 Project Team Members
+
+| Role | Name |
+|------|------|
+| 👨‍💻 Project Manager | [Foo Kok Tai Justin](https://github.com/Cakebut) |
+| 👨‍💻 Full Stack | [Eugene Lay Chai Chun](https://github.com/Eugenelcc) |
+| 👩‍💻 Integration & Frontend | [Nur Syafiqah Binte Mustazam](https://github.com/hwatwhy) |
+| 👨‍💻 Backend Dev | [Jiyavudeen Mohamed Haneefa](https://github.com/ladzys) |
+| 👩‍💻 UIUX & Frontend | [Karissa Angeline Ramos Wong]() |
+| 👨‍💻 Backend Dev | [Tan Jun Rong Dillon](https://github.com/dlawnns) |
+| 👨‍💻 Backend Dev | [Sim Zhan Qi](https://github.com/ilovecoding77) |
+
+**💡 Credit Supporter:** [Alexander Neo](https://github.com/AlexanderNeo427)
+
+---
+
+## 🎥 Project Demo
+
+[![Watch the video](https://img.youtube.com/vi/Y4NMnImlmLA/0.jpg)](https://www.youtube.com/watch?v=Y4NMnImlmLA)  
+🎬 [**Click here to watch on YouTube**](https://www.youtube.com/watch?v=Y4NMnImlmLA)
+
+---
+
+## 📚 Documentation
+
+📄 [**Project Report (PDF)**](https://github.com/Cakebut/CSIT314Crashout/blob/main/Crashout%20Final%20Report.pdf)  
+📄 [**Project Specifications (PDF)**](https://github.com/Cakebut/CSIT314Crashout/blob/main/Project%20Specification.pdf)
+
+---
+
+## 🗓️ Project Planning
+
+📅 [**Taiga Backlog & Sprint Board**](https://tree.taiga.io/project/eugenelcc-314-name-project/backlog)
+
+---
+
+
 ```markdown
 # CSIT314 — Crashout (CSR ↔ PIN Matching System)
 
