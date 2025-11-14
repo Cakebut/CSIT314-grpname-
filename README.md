@@ -10,7 +10,7 @@
 | 👨‍💻 Full Stack | [Eugene Lay Chai Chun](https://github.com/Eugenelcc) |
 | 👩‍💻 Integration & Frontend | [Nur Syafiqah Binte Mustazam](https://github.com/hwatwhy) |
 | 👨‍💻 Backend Dev | [Jiyavudeen Mohamed Haneefa](https://github.com/ladzys) |
-| 👩‍💻 UIUX & Frontend | [Karissa Angeline Ramos Wong]() |
+| 👩‍💻 UIUX & Frontend | [Karissa Angeline Ramos Wong](https://github.com/RissaWong) |
 | 👨‍💻 Backend Dev | [Tan Jun Rong Dillon](https://github.com/dlawnns) |
 | 👨‍💻 Backend Dev | [Sim Zhan Qi](https://github.com/ilovecoding77) |
 
